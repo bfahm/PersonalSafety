@@ -26,6 +26,7 @@ namespace PersonalSafety.Models
         public DateTime Birthday { get; set; }
 
         // Should be Unique
+        // This column should be dropped when ASP Identity is set up
         [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ErrorMessage = "Invalid email format")]
         [Required]
         public string Email { get; set; }
