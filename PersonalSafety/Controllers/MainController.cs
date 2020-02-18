@@ -29,14 +29,15 @@ namespace PersonalSafety.Controllers
         public string TestRepository()
         {
             repository.Add(new EmergencyContact { Name = "test", PhoneNumber = "010", UserId = 1 });
-            return repository.GetById(1).Id + "--" + repository.GetById(1).Name;
+            int lastAddedId = repository.GetAll().ToList().Count;
+            return repository.GetById(lastAddedId).Id + "--" + repository.GetById(lastAddedId).Name;
         }
 
         [HttpGet]
         [Route("{Id}")]
         public string TestRepositoryWithId(int Id)
         {
-            return repository.GetById(Id).Name;
+            return repository.GetById(Id).Id + "--" + repository.GetById(Id).Name;
         }
 
         [HttpGet]
