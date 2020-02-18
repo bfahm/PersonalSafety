@@ -26,7 +26,9 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IEmergencyConactRepository, EmergencyContactRepository>();
             services.AddDbContextPool<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
+            //services.AddMvc(options => options.EnableEndpointRouting = false);
             services.AddControllers();
         }
 
@@ -46,6 +48,8 @@ namespace PersonalSafety
             {
                 endpoints.MapControllers();
             });
+
+            //app.UseMvc(routes => routes.MapRoute("default", "api/{controller=Main}/{action=Index}/{id?}"));
         }
     }
 }
