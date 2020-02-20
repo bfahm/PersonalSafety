@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Models
 {
-    public class User
+    public class ApplicationUser : IdentityUser
     {
         // Automatically converted to primary key
-        public int Id { get; set; }
+        //public int Id { get; set; }
         
         // Should be Unique
         [Required]
@@ -20,16 +21,16 @@ namespace PersonalSafety.Models
         public string FullName { get; set; }
         
         // Should be Unique
-        [Required]
-        public string PhoneNumber { get; set; }
+        //[Required]
+        //public string PhoneNumber { get; set; }
 
         public DateTime Birthday { get; set; }
 
         // Should be Unique
         // This column should be dropped when ASP Identity is set up
-        [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ErrorMessage = "Invalid email format")]
-        [Required]
-        public string Email { get; set; }
+        //[RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ErrorMessage = "Invalid email format")]
+        //[Required]
+        //public string Email { get; set; }
 
         public int BloodType { get; set; }
 

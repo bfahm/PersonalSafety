@@ -16,15 +16,22 @@
     <Compile Include="Migrations\20200217224454_InitialMigration.Designer.cs" />
     <Compile Include="Migrations\20200217225750_AddSeedData.cs" />
     <Compile Include="Migrations\20200217225750_AddSeedData.Designer.cs" />
+    <Compile Include="Migrations\20200219222445_AddIdentity.cs" />
+    <Compile Include="Migrations\20200219222445_AddIdentity.Designer.cs" />
+    <Compile Include="Migrations\20200220001051_ExtendIdentityUser.cs" />
+    <Compile Include="Migrations\20200220001051_ExtendIdentityUser.Designer.cs" />
     <Compile Include="Migrations\AppDbContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
   </ItemGroup>
 
   <ItemGroup>
