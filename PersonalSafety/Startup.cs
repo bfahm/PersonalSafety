@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Extensions;
 using PersonalSafety.Models;
-using PersonalSafety.Models.Options;
+using PersonalSafety.Helpers;
 using PersonalSafety.Services;
 
 namespace PersonalSafety
@@ -72,6 +72,8 @@ namespace PersonalSafety
 
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyConactRepository, EmergencyContactRepository>();
+
+            services.AddSwaggerGen(sw => sw.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Personal Safety", Version = "V1" }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,10 +84,17 @@ namespace PersonalSafety
             //    app.UseDeveloperExceptionPage();
             //}
 
+            var swaggerOptions = new SwaggerOptions();
+            Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
+
+            app.UseSwagger();
+            app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));
+
             app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.ConfigureExceptionHandler();
 
+            //Put usestaticfiles here
             app.UseRouting();
 
             app.UseAuthentication();

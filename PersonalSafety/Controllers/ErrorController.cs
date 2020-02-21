@@ -12,6 +12,7 @@ namespace PersonalSafety.Controllers
     public class ErrorController : ControllerBase
     {
         [Route("Error/{statusCode}")]
+        [HttpGet]
         public object HttpStatusCodeHandler(int statusCode)
         {
             APIResponse<string> response = new APIResponse<string>();

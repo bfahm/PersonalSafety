@@ -2,7 +2,6 @@
 using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
-using PersonalSafety.Models.Options;
 using PersonalSafety.Models.ViewModels;
 using System;
 using System.Collections.Generic;
