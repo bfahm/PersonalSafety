@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Helpers
 {
-    public class APIResult<T>
+    public class APIResponse<T>
     {
         public int Status { get; set; }
+        public bool HasErrors { get; set; } = true;
         public T Result { get; set; }
-        public string Message { get; set; }
+        public List<string> Messages { get; set; } = new List<string>();
     }
 }

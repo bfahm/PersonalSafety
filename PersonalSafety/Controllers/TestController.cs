@@ -2,27 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PersonalSafety.Models;
 
 namespace PersonalSafety.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class MainController : ControllerBase
+    public class TestController : ControllerBase
     {
+        //To be removed, using [EmergencyContact] table as a testing one
         private IEmergencyConactRepository repository;
-
-        public MainController(IEmergencyConactRepository repository)
+        public TestController(IEmergencyConactRepository repository)
         {
             this.repository = repository;
-        }
-
-        [HttpGet]
-        public string Index()
-        {
-            return "Server Running";
         }
 
         [HttpGet]

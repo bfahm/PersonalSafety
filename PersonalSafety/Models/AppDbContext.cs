@@ -29,9 +29,6 @@ namespace PersonalSafety.Models
                    .HasIndex(u => u.PhoneNumber)
                    .IsUnique();
 
-            builder.Entity<ApplicationUser>()
-                   .HasIndex(u => u.Email)
-                   .IsUnique();
             //-----------------------------------
             //Seed the database with initial data
             builder.Entity<ApplicationUser>()

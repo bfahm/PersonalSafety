@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Models.ViewModels
 {
-    public class RegisterViewModel
+    public class RegistrationRequestViewModel
     {
-        //TODO: Enable in the future, just trying now with email and password only
-        //[Required]
+        [Required]
         [Display(Name = "Full Name")]
         public string FullName { get; set; }
 
@@ -21,14 +20,12 @@ namespace PersonalSafety.Models.ViewModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        //TODO: Enable in the future, just trying now with email and password only
-        //[RegularExpression(@"^[0-9]{14}$", ErrorMessage = "National ID is invalid")]
-        //[Required]
+        [RegularExpression(@"^[0-9]{14}$", ErrorMessage = "National ID is invalid")]
+        [Required]
         public string NationalId { get; set; }
 
-        //TODO: Enable in the future, just trying now with email and password only
-        //[RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Phone number is invalid")]
-        //[Required]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Phone number is invalid")]
+        [Required]
         public string PhoneNumber { get; set; }
     }
 }

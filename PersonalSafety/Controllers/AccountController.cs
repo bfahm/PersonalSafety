@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PersonalSafety.Helpers;
-using PersonalSafety.Models;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Services;
 
 namespace PersonalSafety.Controllers
 {
@@ -15,43 +13,37 @@ namespace PersonalSafety.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IAccountBusiness _identityService;
 
-        public AccountController(UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+        public AccountController(IAccountBusiness identityService)
         {
-            this.userManager = userManager;
-            this.signInManager = signInManager;
+            _identityService = identityService;
         }
 
-
         [HttpPost]
-        public async Task<object> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegistrationRequestViewModel request)
         {
-            APIResult<string> result = new APIResult<string>();
+            var authResponse = await _identityService.RegisterAsync(request);
 
-            // Copy data from RegisterViewModel to ApplicationUser
-            var user = new ApplicationUser
+            if (authResponse.HasErrors)
             {
-                UserName = model.Email,
-                Email = model.Email
-            };
-
-            // Store user data in AspNetUsers database table
-            var registrationResult = await userManager.CreateAsync(user, model.Password);
-
-            // If there are any errors, add them to the ModelState object
-            // which will be displayed by the validation summary tag helper
-            foreach (var error in registrationResult.Errors)
-            {
-                result.Message += " " + error.Description;
+                return BadRequest(authResponse);
             }
 
-            //TODO: Fix status codes later
-            result.Status = registrationResult.Succeeded == true ? 1 : 0;
+            return Ok(authResponse);
+        }
 
-            return result;
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] LoginRequestViewModel request)
+        {
+            var authResponse = await _identityService.LoginAsync(request);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
         }
     }
 }
