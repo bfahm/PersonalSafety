@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using PersonalSafety.Extensions;
 using PersonalSafety.Models;
 using PersonalSafety.Models.Options;
 using PersonalSafety.Services;
@@ -76,10 +77,14 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
+
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
+            app.ConfigureExceptionHandler();
 
             app.UseRouting();
 
