@@ -24,6 +24,30 @@ namespace PersonalSafety.Services
             _jwtSettings = jwtSettings;
         }
 
+        public async Task<APIResponse<string>> ForgotPasswordAsync(string email)
+        {
+            APIResponse<string> response = new APIResponse<string>
+            {
+                HasErrors = false,
+                Messages = new List<string> { "We got your email, if this email is registered and confirmed you should get a password reset mail." }
+            };
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(email);
+            string resetPasswordToken = "--";
+
+
+            if (user != null)
+            {
+                resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                response.Result = resetPasswordToken;
+                
+            }
+
+            //new EmailHelper(email, resetPasswordToken);
+
+            return response;
+        }
+
         public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
         {
             APIResponse<string> response = new APIResponse<string>();

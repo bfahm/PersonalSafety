@@ -79,17 +79,17 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseDeveloperExceptionPage();
-            //}
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseSwagger();
             app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));
 
-            app.UseStatusCodePagesWithReExecute("/Error/{0}");
+            //app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
-            app.ConfigureExceptionHandler();
+            //app.ConfigureExceptionHandler();
 
             //Put usestaticfiles here
             app.UseRouting();

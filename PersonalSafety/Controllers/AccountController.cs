@@ -45,5 +45,15 @@ namespace PersonalSafety.Controllers
 
             return Ok(authResponse);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
+        {
+            var authResponse = await _identityService.ForgotPasswordAsync(mail);
+
+            return Ok(authResponse);
+        }
+
+
     }
 }
