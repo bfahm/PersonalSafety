@@ -30,6 +30,7 @@ namespace PersonalSafety.Services
         public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
         {
             APIResponse<string> response = new APIResponse<string>();
+            response.Status = 401;
 
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -50,6 +51,7 @@ namespace PersonalSafety.Services
             //TODO: Check if user's email is confirmed first
             response.Result = GenerateAuthenticationResult(user);
             response.HasErrors = false;
+            response.Status = 200;
 
             return response;
         }
