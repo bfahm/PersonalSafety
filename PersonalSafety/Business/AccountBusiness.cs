@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
@@ -17,11 +18,13 @@ namespace PersonalSafety.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtSettings _jwtSettings;
+        private readonly IOptions<AppSettings> _appSettings;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
+            _appSettings = appSettings;
         }
 
         public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
@@ -44,6 +47,7 @@ namespace PersonalSafety.Services
                 return response;
             }
 
+            //TODO: Check if user's email is confirmed first
             response.Result = GenerateAuthenticationResult(user);
             response.HasErrors = false;
 
@@ -94,9 +98,61 @@ namespace PersonalSafety.Services
 
             response.Result = GenerateAuthenticationResult(newUser);
             response.HasErrors = false;
+            response.Messages.Add("Successfully created a new user with email" + request.Email);
 
             return response;
         }
+
+        public async Task<APIResponse<string>> ForgotPasswordAsync(string email)
+        {
+            APIResponse<string> response = new APIResponse<string>
+            {
+                Messages = new List<string> { "We got your email, if this email is registered and confirmed you should get a password reset mail." }
+            };
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(email);
+
+            if (!user.EmailConfirmed)
+            {
+                response.Messages.Add("The email provided was not confirmed, you must confirm your email first.");
+                return response;
+            }
+
+            if (user != null)
+            {
+                string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, _appSettings.Value.AppBaseUrl).SendEmail();
+                response.Messages.AddRange(emailSendingResults);
+            }
+
+            return response;
+        }
+
+        public async Task<APIResponse<string>> ResetPasswordAsync(ResetPasswordViewModel request)
+        {
+            APIResponse<string> response = new APIResponse<string>();
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                response.Messages.Add("User with provided email does not exsist.");
+                return response;
+            }
+
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                response.Messages.Add("New Password and Confirm Password does not match, please try again.");
+                return response;
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+
+            response.HasErrors = !result.Succeeded;
+            response.Messages = result.Errors.Select(e => e.Description).ToList();
+
+            return response;
+        }
+
 
         private string GenerateAuthenticationResult(ApplicationUser user)
         {

@@ -38,7 +38,8 @@ namespace PersonalSafety
 
             // Setup ASP Identity to use the database
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
 
             // Required for API functionality
             services.AddControllers();
@@ -73,23 +74,29 @@ namespace PersonalSafety
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyConactRepository, EmergencyContactRepository>();
 
+            // Setting up swagger generator
             services.AddSwaggerGen(sw => sw.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Personal Safety", Version = "V1" }));
+
+            // Registering APP Settings
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseDeveloperExceptionPage();
-            //}
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
 
             app.UseSwagger();
             app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));
 
-            app.UseStatusCodePagesWithReExecute("/Error/{0}");
+            //app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
-            app.ConfigureExceptionHandler();
+            //app.ConfigureExceptionHandler();
 
             //Put usestaticfiles here
             app.UseRouting();

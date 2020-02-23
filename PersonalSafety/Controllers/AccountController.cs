@@ -45,5 +45,23 @@ namespace PersonalSafety.Controllers
 
             return Ok(authResponse);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
+        {
+            var response = await _identityService.ForgotPasswordAsync(mail);
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel request)
+        {
+            var response = await _identityService.ResetPasswordAsync(request);
+
+            return Ok(response);
+        }
+
+
     }
 }
