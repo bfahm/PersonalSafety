@@ -9,7 +9,7 @@ namespace PersonalSafety.Helpers
     public class APIResponse<T>
     {
         public int Status { get; set; }
-        public bool HasErrors { get; set; } = true;
+        public bool HasErrors { get; set; }
         public T Result { get; set; }
         public List<string> Messages { get; set; } = new List<string>();
 

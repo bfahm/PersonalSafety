@@ -12,9 +12,15 @@ namespace PersonalSafety.Controllers
     public class HomeController : ControllerBase
     {
         [HttpGet]
-        public string Index()
+        public IActionResult Index()
         {
-            return "Server Running";
+            return Ok("Server Running");
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword([FromQuery]string email, [FromQuery]string token)
+        {
+            return Ok(new { Email = email, Token = token});
         }
     }
 }

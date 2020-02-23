@@ -49,9 +49,17 @@ namespace PersonalSafety.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
         {
-            var authResponse = await _identityService.ForgotPasswordAsync(mail);
+            var response = await _identityService.ForgotPasswordAsync(mail);
 
-            return Ok(authResponse);
+            return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel request)
+        {
+            var response = await _identityService.ResetPasswordAsync(request);
+
+            return Ok(response);
         }
 
 

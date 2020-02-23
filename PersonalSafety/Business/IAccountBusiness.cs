@@ -12,5 +12,6 @@ namespace PersonalSafety.Services
         Task<APIResponse<string>> RegisterAsync(RegistrationRequestViewModel request);
         Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request);
         Task<APIResponse<string>> ForgotPasswordAsync(string email);
+        Task<APIResponse<string>> ResetPasswordAsync(ResetPasswordViewModel request);
     }
 }
