@@ -18,6 +18,7 @@ using PersonalSafety.Extensions;
 using PersonalSafety.Models;
 using PersonalSafety.Helpers;
 using PersonalSafety.Services;
+using Microsoft.OpenApi.Models;
 
 namespace PersonalSafety
 {
@@ -75,10 +76,44 @@ namespace PersonalSafety
             services.AddScoped<IEmergencyConactRepository, EmergencyContactRepository>();
 
             // Setting up swagger generator
-            services.AddSwaggerGen(sw => sw.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Personal Safety", Version = "V1" }));
+            services.AddSwaggerGen(sw => 
+            {
+                sw.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Personal Safety", Version = "V1" });
+
+                sw.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
+                {
+                    Description = "JWT Authorization header using bearer scheme",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                sw.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+
+                        },
+                        new List<string>()
+                    }
+                });
+            });
 
             // Registering APP Settings
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            // Needed to display the home page "view"
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -98,7 +133,7 @@ namespace PersonalSafety
 
             //app.ConfigureExceptionHandler();
 
-            //Put usestaticfiles here
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthentication();

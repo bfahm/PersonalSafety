@@ -7,20 +7,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace PersonalSafety.Controllers
 {
-    [Route("api/[controller]/[action]")]
-    [ApiController]
-    public class HomeController : ControllerBase
+    [ApiExplorerSettings(IgnoreApi = true)]
+    public class HomeController : Controller
     {
+        [Route("")]
+        [Route("api")]
+        [Route("api/home")]
+        [Route("api/home/index")]
         [HttpGet]
         public IActionResult Index()
         {
-            return Ok("Server Running");
+            //return Ok("Server Running");
+            return View();
         }
 
+        [Route("api/Home/ForgotPassword")]
         [HttpGet]
         public IActionResult ForgotPassword([FromQuery]string email, [FromQuery]string token)
         {
-            return Ok(new { Email = email, Token = token});
+            return Ok(new { Email = email, Token = token });
         }
     }
 }

@@ -8,6 +8,7 @@ using PersonalSafety.Helpers;
 
 namespace PersonalSafety.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [ApiController]
     public class ErrorController : ControllerBase
     {
