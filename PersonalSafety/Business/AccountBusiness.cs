@@ -155,6 +155,62 @@ namespace PersonalSafety.Services
             return response;
         }
 
+        public async Task<APIResponse<bool>> SendConfirmMailAsync(string email)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, _appSettings.Value.AppBaseUrl).SendEmail();
+                response.Messages = new List<string> { "We got your email, if this email is registered you should get a password reset mail." };
+                response.Messages.AddRange(emailSendingResults);
+                response.Result = true;
+            }
+            else
+            {
+                response.Result = false;
+                response.HasErrors = true;
+                response.Messages = new List<string> { "The email provided was not registered before, please check for typos." };
+            }
+
+            return response;
+        }
+
+        public async Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user != null)
+            {
+                var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+
+                if (result.Succeeded)
+                {
+                    response.Messages = new List<string> { "Success! Email Confirmed." };
+                    response.Result = true;
+                }
+                else
+                {
+                    response.Messages = new List<string> { "An Error occured while trying to confirm this email," };
+                    response.Messages.AddRange(result.Errors.Select(e => e.Description));
+                    response.Result = false;
+                    response.HasErrors = true;
+                }
+            }
+            else
+            {
+                response.Result = false;
+                response.HasErrors = true;
+                response.Messages = new List<string> { "The email provided was not registered before, please check for typos." };
+            }
+
+            return response;
+        }
 
         private string GenerateAuthenticationResult(ApplicationUser user)
         {

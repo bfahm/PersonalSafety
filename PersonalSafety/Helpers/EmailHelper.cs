@@ -63,8 +63,8 @@ namespace PersonalSafety.Helpers
         {
             var body = new StringBuilder();
             body.AppendFormat("Hello, {0}\n", RecepientMail);
-            body.AppendLine(@"It appears that you requested a confirmation request for your PersonalSafety Account ");
-            body.AppendLine("<a href=\" " + ActivationLink + " \">Reset Password</a>");
+            body.AppendLine(@"It appears that you requested a confirmation request for your PersonalSafety Account, ");
+            body.AppendLine("<a href=\" " + ActivationLink + " \">tap here to continue.</a>");
 
             return body.ToString();
         }

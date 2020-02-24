@@ -62,6 +62,20 @@ namespace PersonalSafety.Controllers
             return Ok(response);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SendConfirmationMail([FromQuery] string email)
+        {
+            var response = await _identityService.SendConfirmMailAsync(email);
 
+            return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmMail([FromBody] ConfirmMailViewModel request)
+        {
+            var response = await _identityService.ConfirmMailAsync(request);
+
+            return Ok(response);
+        }
     }
 }
