@@ -113,7 +113,8 @@ namespace PersonalSafety
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             // Needed to display the home page "view"
-            services.AddMvc();
+            services.AddMvc().AddSessionStateTempDataProvider();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

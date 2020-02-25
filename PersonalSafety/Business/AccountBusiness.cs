@@ -181,7 +181,7 @@ namespace PersonalSafety.Services
             return response;
         }
 
-        public async Task<APIResponse<bool>> SendConfirmMailAsync(string email)
+        public async Task<APIResponse<bool>> SendConfirmMailAsync(string email, bool isOTPRequired)
         {
             APIResponse<bool> response = new APIResponse<bool>();
             response.Messages.Add("We got your email, if this email is registered you should get a password reset mail.");
@@ -193,7 +193,7 @@ namespace PersonalSafety.Services
                 return response;
             }
             
-            string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            string mailConfirmationToken = (isOTPRequired==false) ?  await _userManager.GenerateEmailConfirmationTokenAsync(user) : OTPHelper.GenerateOTP(user.Id).ComputeTotp();
             List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, _appSettings.Value.AppBaseUrl).SendEmail();
             
             if(emailSendingResults != null)
@@ -209,7 +209,7 @@ namespace PersonalSafety.Services
             return response;
         }
 
-        public async Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request)
+        public async Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request, bool isOTPRequired)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -223,11 +223,11 @@ namespace PersonalSafety.Services
                 return response;
             }
 
-            var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+            var result = await ConfirmMailHybrid(user, request.Token, isOTPRequired);
 
-            if (!result.Succeeded)
+            if (!result)
             {
-                response.Messages.AddRange(result.Errors.Select(e => e.Description));
+                response.Messages.Add("Invalid Token");
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 return response;
@@ -262,6 +262,29 @@ namespace PersonalSafety.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        private async Task<bool> ConfirmMailHybrid(ApplicationUser user, string token, bool isOTP)
+        {
+            if (isOTP)
+            {
+                var totp = OTPHelper.GenerateOTP(user.Id);
+                long timeFrame;
+                bool isTokenValid = totp.VerifyTotp(token, out timeFrame);
+                if (isTokenValid)
+                {
+                    user.EmailConfirmed = true;
+                    var confirmationResult = await _userManager.UpdateAsync(user);
+                    return confirmationResult.Succeeded;
+                }
+                
+                return false;
+            }
+            else
+            {
+                var result = await _userManager.ConfirmEmailAsync(user, token);
+                return result.Succeeded;
+            }
         }
     }
 }
