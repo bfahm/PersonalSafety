@@ -47,7 +47,7 @@ namespace PersonalSafety.Helpers
                         smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                         smtp.Send(mail);
                     }
-                    return new List<string> { "Successfully sent an email to: " + RecepientMail };
+                    return null;
                 }
             }catch(Exception ex)
             {

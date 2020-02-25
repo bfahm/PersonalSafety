@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
+using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -27,43 +28,16 @@ namespace PersonalSafety.Services
             _appSettings = appSettings;
         }
 
-        public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
-        {
-            APIResponse<string> response = new APIResponse<string>();
-            response.Status = 401;
-
-            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-            {
-                response.Messages.Add("User with provided email does not exsist.");
-                return response;
-            }
-
-
-            bool userHasValidPassowrd = await _userManager.CheckPasswordAsync(user, request.Password);
-
-            if (!userHasValidPassowrd)
-            {
-                response.Messages.Add("User/Password combination is wrong.");
-                return response;
-            }
-
-            //TODO: Check if user's email is confirmed first
-            response.Result = GenerateAuthenticationResult(user);
-            response.HasErrors = false;
-            response.Status = 200;
-
-            return response;
-        }
-
         public async Task<APIResponse<string>> RegisterAsync(RegistrationRequestViewModel request)
         {
             APIResponse<string> response = new APIResponse<string>();
 
             ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(request.Email);
-            if(exsistingUserFoundByEmail != null)
+            if (exsistingUserFoundByEmail != null)
             {
                 response.Messages.Add("User with this email address already exsists.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
                 return response;
             }
 
@@ -71,6 +45,8 @@ namespace PersonalSafety.Services
             if (exsistingUserFoundByNationalId != null)
             {
                 response.Messages.Add("User with this National Id was registered before.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
                 return response;
             }
 
@@ -78,6 +54,8 @@ namespace PersonalSafety.Services
             if (exsistingUserFoundByPhoneNumber != null)
             {
                 response.Messages.Add("User with this Phone Number was registered before.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
                 return response;
             }
 
@@ -95,12 +73,42 @@ namespace PersonalSafety.Services
             if (!creationResult.Succeeded)
             {
                 response.Messages = creationResult.Errors.Select(e => e.Description).ToList();
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.HasErrors = true;
                 return response;
             }
 
             response.Result = GenerateAuthenticationResult(newUser);
+            response.Messages.Add("Successfully created a new user with email " + request.Email);
+
+            return response;
+        }
+
+        public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
+        {
+            APIResponse<string> response = new APIResponse<string>();
+            response.Status = (int)APIResponseCodesEnum.Unauthorized;
+            response.Messages.Add("User/Password combination is wrong.");
+            response.HasErrors = true;
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return response;
+            }
+
+            bool userHasValidPassowrd = await _userManager.CheckPasswordAsync(user, request.Password);
+
+            if (!userHasValidPassowrd)
+            {
+                return response;
+            }
+
+            //TODO: Check if user's email is confirmed first
+            response.Result = GenerateAuthenticationResult(user);
+            response.Status = 0;
             response.HasErrors = false;
-            response.Messages.Add("Successfully created a new user with email" + request.Email);
+            response.Messages = null;
 
             return response;
         }
@@ -109,22 +117,32 @@ namespace PersonalSafety.Services
         {
             APIResponse<string> response = new APIResponse<string>
             {
-                Messages = new List<string> { "We got your email, if this email is registered and confirmed you should get a password reset mail." }
+                Messages = new List<string> { "We got your email, if this email is registered you should get a password reset mail." }
             };
 
             ApplicationUser user = await _userManager.FindByEmailAsync(email);
 
-            if (!user.EmailConfirmed)
+            if(user == null)
             {
-                response.Messages.Add("The email provided was not confirmed, you must confirm your email first.");
+
                 return response;
             }
 
-            if (user != null)
+            if (!user.EmailConfirmed)
             {
-                string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-                List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, _appSettings.Value.AppBaseUrl).SendEmail();
+                response.Messages.Add("The email provided was not confirmed, you must confirm your email first.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                return response;
+            }
+
+            string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, _appSettings.Value.AppBaseUrl).SendEmail();
+            if (emailSendingResults != null)
+            {
                 response.Messages.AddRange(emailSendingResults);
+                response.Status = (int)APIResponseCodesEnum.TechnicalError;
+                response.HasErrors = true;
             }
 
             return response;
@@ -138,19 +156,27 @@ namespace PersonalSafety.Services
             if (user == null)
             {
                 response.Messages.Add("User with provided email does not exsist.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 return response;
             }
 
             if (request.NewPassword != request.ConfirmPassword)
             {
                 response.Messages.Add("New Password and Confirm Password does not match, please try again.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 return response;
             }
 
             var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
 
-            response.HasErrors = !result.Succeeded;
-            response.Messages = result.Errors.Select(e => e.Description).ToList();
+            if (!result.Succeeded)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.Messages = result.Errors.Select(e => e.Description).ToList();
+            }
 
             return response;
         }
@@ -158,23 +184,27 @@ namespace PersonalSafety.Services
         public async Task<APIResponse<bool>> SendConfirmMailAsync(string email)
         {
             APIResponse<bool> response = new APIResponse<bool>();
+            response.Messages.Add("We got your email, if this email is registered you should get a password reset mail.");
 
             ApplicationUser user = await _userManager.FindByEmailAsync(email);
 
-            if (user != null)
+            if(user == null)
             {
-                string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, _appSettings.Value.AppBaseUrl).SendEmail();
-                response.Messages = new List<string> { "We got your email, if this email is registered you should get a password reset mail." };
-                response.Messages.AddRange(emailSendingResults);
-                response.Result = true;
+                return response;
             }
-            else
+            
+            string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, _appSettings.Value.AppBaseUrl).SendEmail();
+            
+            if(emailSendingResults != null)
             {
-                response.Result = false;
                 response.HasErrors = true;
-                response.Messages = new List<string> { "The email provided was not registered before, please check for typos." };
+                response.Status = (int)APIResponseCodesEnum.TechnicalError;
+                response.Messages = new List<string>();
+                response.Messages.AddRange(emailSendingResults);
             }
+
+            response.Result = true;
 
             return response;
         }
@@ -185,29 +215,26 @@ namespace PersonalSafety.Services
 
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
 
-            if (user != null)
+            if(user == null)
             {
-                var result = await _userManager.ConfirmEmailAsync(user, request.Token);
-
-                if (result.Succeeded)
-                {
-                    response.Messages = new List<string> { "Success! Email Confirmed." };
-                    response.Result = true;
-                }
-                else
-                {
-                    response.Messages = new List<string> { "An Error occured while trying to confirm this email," };
-                    response.Messages.AddRange(result.Errors.Select(e => e.Description));
-                    response.Result = false;
-                    response.HasErrors = true;
-                }
-            }
-            else
-            {
-                response.Result = false;
                 response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 response.Messages = new List<string> { "The email provided was not registered before, please check for typos." };
+                return response;
             }
+
+            var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+
+            if (!result.Succeeded)
+            {
+                response.Messages.AddRange(result.Errors.Select(e => e.Description));
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                return response;
+            }
+
+            response.Messages = new List<string> { "Success! Email Confirmed." };
+            response.Result = true;
 
             return response;
         }
