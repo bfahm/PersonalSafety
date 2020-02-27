@@ -15,12 +15,14 @@ namespace PersonalSafety.Helpers
         public string Token { get; set; }
         public string BaseUrl { get; set; }
         public string ActivationLink { get; set; }
+        public string OTP { get; set; }
 
-        public EmailHelper(string recepientMail, string token, string baseUrl)
+        public EmailHelper(string recepientMail, string token, string otp, string baseUrl)
         {
             RecepientMail = recepientMail;
             Token = token;
             BaseUrl = baseUrl;
+            OTP = otp;
             ActivationLink = BaseUrl + "/Home/ForgotPassword?email=" + RecepientMail + "&token=" + Uri.EscapeDataString(Token);
         }
 
@@ -66,6 +68,11 @@ namespace PersonalSafety.Helpers
             body.AppendLine(@"It appears that you requested a confirmation request for your PersonalSafety Account, ");
             body.AppendLine("<a href=\" " + ActivationLink + " \">tap here to continue.</a>");
 
+            if(OTP != null)
+            {
+                body.AppendLine("You can also validate your request using this OTP which is valid for " + OTPHelper.validFor + " seconds.");
+                body.AppendLine("<b>" + OTP + "</b>");
+            }
             return body.ToString();
         }
     }

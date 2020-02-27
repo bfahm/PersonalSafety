@@ -63,17 +63,17 @@ namespace PersonalSafety.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendConfirmationMail([FromQuery] string email, [FromQuery] bool isOTPRequired)
+        public async Task<IActionResult> SendConfirmationMail([FromQuery] string email)
         {
-            var response = await _identityService.SendConfirmMailAsync(email, isOTPRequired);
+            var response = await _identityService.SendConfirmMailAsync(email);
 
             return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ConfirmMail([FromBody] ConfirmMailViewModel request, [FromQuery] bool isOTPRequired)
+        public async Task<IActionResult> ConfirmMail([FromBody] ConfirmMailViewModel request)
         {
-            var response = await _identityService.ConfirmMailAsync(request, isOTPRequired);
+            var response = await _identityService.ConfirmMailAsync(request);
 
             return Ok(response);
         }

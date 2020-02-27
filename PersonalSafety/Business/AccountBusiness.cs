@@ -137,7 +137,7 @@ namespace PersonalSafety.Services
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, _appSettings.Value.AppBaseUrl).SendEmail();
+            List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, null ,_appSettings.Value.AppBaseUrl).SendEmail();
             if (emailSendingResults != null)
             {
                 response.Messages.AddRange(emailSendingResults);
@@ -181,7 +181,7 @@ namespace PersonalSafety.Services
             return response;
         }
 
-        public async Task<APIResponse<bool>> SendConfirmMailAsync(string email, bool isOTPRequired)
+        public async Task<APIResponse<bool>> SendConfirmMailAsync(string email)
         {
             APIResponse<bool> response = new APIResponse<bool>();
             response.Messages.Add("We got your email, if this email is registered you should get a password reset mail.");
@@ -193,8 +193,9 @@ namespace PersonalSafety.Services
                 return response;
             }
             
-            string mailConfirmationToken = (isOTPRequired==false) ?  await _userManager.GenerateEmailConfirmationTokenAsync(user) : OTPHelper.GenerateOTP(user.Id).ComputeTotp();
-            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, _appSettings.Value.AppBaseUrl).SendEmail();
+            string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            string mailConfirmationOTP = OTPHelper.GenerateOTP(user.Id).ComputeTotp();
+            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, mailConfirmationOTP ,_appSettings.Value.AppBaseUrl).SendEmail();
             
             if(emailSendingResults != null)
             {
@@ -209,7 +210,7 @@ namespace PersonalSafety.Services
             return response;
         }
 
-        public async Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request, bool isOTPRequired)
+        public async Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -223,7 +224,7 @@ namespace PersonalSafety.Services
                 return response;
             }
 
-            var result = await ConfirmMailHybrid(user, request.Token, isOTPRequired);
+            var result = await ConfirmMailHybrid(user, request.Token);
 
             if (!result)
             {
@@ -264,9 +265,9 @@ namespace PersonalSafety.Services
             return tokenHandler.WriteToken(token);
         }
 
-        private async Task<bool> ConfirmMailHybrid(ApplicationUser user, string token, bool isOTP)
+        private async Task<bool> ConfirmMailHybrid(ApplicationUser user, string token)
         {
-            if (isOTP)
+            if (token.Length == OTPHelper.otpSize)
             {
                 var totp = OTPHelper.GenerateOTP(user.Id);
                 long timeFrame;
