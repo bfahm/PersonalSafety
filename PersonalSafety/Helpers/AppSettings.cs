@@ -8,5 +8,6 @@ namespace PersonalSafety.Helpers
     public class AppSettings
     {
         public string AppBaseUrl { get; set; }
+        public string AppBaseUrlView { get; set; }
     }
 }

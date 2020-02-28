@@ -17,13 +17,13 @@ namespace PersonalSafety.Helpers
         public string ActivationLink { get; set; }
         public string OTP { get; set; }
 
-        public EmailHelper(string recepientMail, string token, string otp, string baseUrl)
+        public EmailHelper(string recepientMail, string token, string otp, string baseUrl, string endpoint)
         {
             RecepientMail = recepientMail;
             Token = token;
             BaseUrl = baseUrl;
             OTP = otp;
-            ActivationLink = BaseUrl + "/Home/ForgotPassword?email=" + RecepientMail + "&token=" + Uri.EscapeDataString(Token);
+            ActivationLink = BaseUrl + "/" + endpoint + "?email=" + RecepientMail + "&token=" + Uri.EscapeDataString(Token);
         }
 
         public List<string> SendEmail()

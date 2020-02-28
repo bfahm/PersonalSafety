@@ -137,7 +137,7 @@ namespace PersonalSafety.Services
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, null ,_appSettings.Value.AppBaseUrl).SendEmail();
+            List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, null ,_appSettings.Value.AppBaseUrlView, "ForgotPassword").SendEmail();
             if (emailSendingResults != null)
             {
                 response.Messages.AddRange(emailSendingResults);
@@ -184,7 +184,7 @@ namespace PersonalSafety.Services
         public async Task<APIResponse<bool>> SendConfirmMailAsync(string email)
         {
             APIResponse<bool> response = new APIResponse<bool>();
-            response.Messages.Add("We got your email, if this email is registered you should get a password reset mail.");
+            response.Messages.Add("We got your email, if this email is registered you should get an activation link and an OTP shortly.");
 
             ApplicationUser user = await _userManager.FindByEmailAsync(email);
 
@@ -195,7 +195,7 @@ namespace PersonalSafety.Services
             
             string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             string mailConfirmationOTP = OTPHelper.GenerateOTP(user.Id).ComputeTotp();
-            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, mailConfirmationOTP ,_appSettings.Value.AppBaseUrl).SendEmail();
+            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, mailConfirmationOTP ,_appSettings.Value.AppBaseUrlView, "ConfirmMail").SendEmail();
             
             if(emailSendingResults != null)
             {
