@@ -21,7 +21,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegistrationRequestViewModel request)
+        public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
             var authResponse = await _identityService.RegisterAsync(request);
 
@@ -74,6 +74,14 @@ namespace PersonalSafety.Controllers.API
         public async Task<IActionResult> ConfirmMail([FromBody] ConfirmMailViewModel request)
         {
             var response = await _identityService.ConfirmMailAsync(request);
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordViewModel request)
+        {
+            var response = await _identityService.ChangePasswordAsync(request);
 
             return Ok(response);
         }

@@ -12,5 +12,6 @@ namespace PersonalSafety.Models
         T Add(T item);
         T Update(T item);
         void Remove(int Id);
+        void Save();
     }
 }

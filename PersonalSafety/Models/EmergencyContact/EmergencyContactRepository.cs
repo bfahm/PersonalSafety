@@ -14,11 +14,5 @@ namespace PersonalSafety.Models
         {
             this.context = context;
         }
-
-        //public void PrintName(int Id)
-        //{
-        //    string output = context.Employees.Find(Id).Name;
-        //    System.Console.WriteLine(output);
-        //}
     }
 }

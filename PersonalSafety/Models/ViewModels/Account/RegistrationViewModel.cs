@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Models.ViewModels
 {
-    public class RegistrationRequestViewModel
+    public class RegistrationViewModel
     {
         [Required]
         [Display(Name = "Full Name")]

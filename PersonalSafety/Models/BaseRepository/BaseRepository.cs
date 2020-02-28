@@ -46,5 +46,10 @@ namespace PersonalSafety.Models
             context.SaveChangesAsync();
             return item;
         }
+
+        public void Save()
+        {
+            context.SaveChanges();
+        }
     }
 }

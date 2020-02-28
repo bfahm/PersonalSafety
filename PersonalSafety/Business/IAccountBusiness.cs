@@ -9,11 +9,12 @@ namespace PersonalSafety.Business
 {
     public interface IAccountBusiness
     {
-        Task<APIResponse<string>> RegisterAsync(RegistrationRequestViewModel request);
+        Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
         Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request);
-        Task<APIResponse<string>> ForgotPasswordAsync(string email);
-        Task<APIResponse<string>> ResetPasswordAsync(ResetPasswordViewModel request);
+        Task<APIResponse<bool>> ForgotPasswordAsync(string email);
+        Task<APIResponse<bool>> ResetPasswordAsync(ResetPasswordViewModel request);
         Task<APIResponse<bool>> SendConfirmMailAsync(string email);
         Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request);
+        Task<APIResponse<bool>> ChangePasswordAsync(ChangePasswordViewModel request);
     }
 }

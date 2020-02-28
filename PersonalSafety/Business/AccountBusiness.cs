@@ -28,9 +28,9 @@ namespace PersonalSafety.Business
             _appSettings = appSettings;
         }
 
-        public async Task<APIResponse<string>> RegisterAsync(RegistrationRequestViewModel request)
+        public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
         {
-            APIResponse<string> response = new APIResponse<string>();
+            APIResponse<bool> response = new APIResponse<bool>();
 
             ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(request.Email);
             if (exsistingUserFoundByEmail != null)
@@ -83,7 +83,7 @@ namespace PersonalSafety.Business
             response.Messages.Add("Successfully created a new user with email " + request.Email);
             response.Messages.Add("Please check your email for activation links before you continue.");
             response.Messages.AddRange(confirmationMailResult.Messages);
-
+            response.Result = true;
             return response;
         }
 
@@ -125,9 +125,9 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<string>> ForgotPasswordAsync(string email)
+        public async Task<APIResponse<bool>> ForgotPasswordAsync(string email)
         {
-            APIResponse<string> response = new APIResponse<string>
+            APIResponse<bool> response = new APIResponse<bool>
             {
                 Messages = new List<string> { "We got your email, if this email is registered you should get a password reset mail." }
             };
@@ -157,12 +157,13 @@ namespace PersonalSafety.Business
                 response.HasErrors = true;
             }
 
+            response.Result = true;
             return response;
         }
 
-        public async Task<APIResponse<string>> ResetPasswordAsync(ResetPasswordViewModel request)
+        public async Task<APIResponse<bool>> ResetPasswordAsync(ResetPasswordViewModel request)
         {
-            APIResponse<string> response = new APIResponse<string>();
+            APIResponse<bool> response = new APIResponse<bool>();
 
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -190,6 +191,7 @@ namespace PersonalSafety.Business
                 response.Messages = result.Errors.Select(e => e.Description).ToList();
             }
 
+            response.Result = true;
             return response;
         }
 
@@ -250,6 +252,53 @@ namespace PersonalSafety.Business
             response.Result = true;
 
             return response;
+        }
+
+        public async Task<APIResponse<bool>> ChangePasswordAsync(ChangePasswordViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                response.Messages.Add("User with provided email does not exsist.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                return response;
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                response.Messages.Add("Your account is not yet verified, please verify it through your email then proceed.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.NotConfirmed;
+                return response;
+            }
+
+            if(request.OldPassword == request.NewPassword)
+            {
+                response.Messages.Add("Your old password is matching your new one. Please choose another New Password.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                return response;
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.Messages = result.Errors.Select(e => e.Description).ToList();
+            }
+
+            response.Result = true;
+            return response;
+        }
+
+        public Task<APIResponse<bool>> CompleteProfile(CompleteProfileViewModel request)
+        {
+            throw new NotImplementedException();
         }
 
         private string GenerateAuthenticationResult(ApplicationUser user)
