@@ -90,5 +90,17 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(response);
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CompleteProfile([FromBody] CompleteProfileViewModel request)
+        {
+            //? means : If value is not null, retrieve it
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _identityService.CompleteProfileAsync(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
     }
 }

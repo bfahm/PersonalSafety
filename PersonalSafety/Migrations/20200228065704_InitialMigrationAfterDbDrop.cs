@@ -3,13 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PersonalSafety.Migrations
 {
-    public partial class AddIdentity : Migration
+    public partial class InitialMigrationAfterDbDrop : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Users");
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -42,24 +39,10 @@ namespace PersonalSafety.Migrations
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserInfos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccessFailedCount = table.Column<int>(nullable: false),
                     NationalId = table.Column<string>(nullable: false),
                     FullName = table.Column<string>(nullable: false),
-                    PhoneNumber = table.Column<string>(nullable: false),
                     Birthday = table.Column<DateTime>(nullable: false),
-                    Email = table.Column<string>(nullable: false),
                     BloodType = table.Column<int>(nullable: false),
                     MedicalHistoryNotes = table.Column<string>(nullable: true),
                     CurrentAddress = table.Column<string>(nullable: true),
@@ -68,7 +51,7 @@ namespace PersonalSafety.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInfos", x => x.Id);
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -177,10 +160,74 @@ namespace PersonalSafety.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "UserInfos",
-                columns: new[] { "Id", "Birthday", "BloodType", "CurrentAddress", "CurrentInvolvement", "CurrentOngoingEvent", "Email", "FullName", "MedicalHistoryNotes", "NationalId", "PhoneNumber" },
-                values: new object[] { 1, new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "unknown...", 0, 0, "user@user.com", "Test User", "none...", "29700000000", "01010101010" });
+            migrationBuilder.CreateTable(
+                name: "EmergencyContacts",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    PhoneNumber = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmergencyContacts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmergencyContacts_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Events",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Longitude = table.Column<double>(nullable: false),
+                    Latitude = table.Column<double>(nullable: false),
+                    State = table.Column<int>(nullable: false),
+                    IsValidated = table.Column<bool>(nullable: false),
+                    IsOnGoing = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Events_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SOSRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(nullable: true),
+                    State = table.Column<int>(nullable: false),
+                    AuthorityType = table.Column<int>(nullable: false),
+                    Longitude = table.Column<double>(nullable: false),
+                    Latitude = table.Column<double>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SOSRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SOSRequests_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -210,6 +257,12 @@ namespace PersonalSafety.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_NationalId",
+                table: "AspNetUsers",
+                column: "NationalId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
@@ -222,22 +275,26 @@ namespace PersonalSafety.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserInfos_Email",
-                table: "UserInfos",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserInfos_NationalId",
-                table: "UserInfos",
-                column: "NationalId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserInfos_PhoneNumber",
-                table: "UserInfos",
+                name: "IX_AspNetUsers_PhoneNumber",
+                table: "AspNetUsers",
                 column: "PhoneNumber",
-                unique: true);
+                unique: true,
+                filter: "[PhoneNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmergencyContacts_UserId",
+                table: "EmergencyContacts",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_UserId",
+                table: "Events",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SOSRequests_UserId",
+                table: "SOSRequests",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -258,58 +315,19 @@ namespace PersonalSafety.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "UserInfos");
+                name: "EmergencyContacts");
+
+            migrationBuilder.DropTable(
+                name: "Events");
+
+            migrationBuilder.DropTable(
+                name: "SOSRequests");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Birthday = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    BloodType = table.Column<int>(type: "int", nullable: false),
-                    CurrentAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CurrentInvolvement = table.Column<int>(type: "int", nullable: false),
-                    CurrentOngoingEvent = table.Column<int>(type: "int", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MedicalHistoryNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NationalId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Birthday", "BloodType", "CurrentAddress", "CurrentInvolvement", "CurrentOngoingEvent", "Email", "FullName", "MedicalHistoryNotes", "NationalId", "PhoneNumber" },
-                values: new object[] { 1, new DateTime(2020, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "unknown...", 0, 0, "user@user.com", "Test User", "none...", "29700000000", "01010101010" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Email",
-                table: "Users",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_NationalId",
-                table: "Users",
-                column: "NationalId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_PhoneNumber",
-                table: "Users",
-                column: "PhoneNumber",
-                unique: true);
         }
     }
 }

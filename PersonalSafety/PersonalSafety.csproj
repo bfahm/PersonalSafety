@@ -5,24 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\**" />
-    <Content Remove="Migrations\**" />
-    <EmbeddedResource Remove="Migrations\**" />
-    <None Remove="Migrations\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Migrations\20200217224454_InitialMigration.cs" />
-    <Compile Include="Migrations\20200217224454_InitialMigration.Designer.cs" />
-    <Compile Include="Migrations\20200217225750_AddSeedData.cs" />
-    <Compile Include="Migrations\20200217225750_AddSeedData.Designer.cs" />
-    <Compile Include="Migrations\20200219222445_AddIdentity.cs" />
-    <Compile Include="Migrations\20200219222445_AddIdentity.Designer.cs" />
-    <Compile Include="Migrations\20200220001051_ExtendIdentityUser.cs" />
-    <Compile Include="Migrations\20200220001051_ExtendIdentityUser.Designer.cs" />
-    <Compile Include="Migrations\20200221160536_RemoveDuplicateUniqueIndexFromEmailColumn.cs" />
-    <Compile Include="Migrations\20200221160536_RemoveDuplicateUniqueIndexFromEmailColumn.Designer.cs" />
-    <Compile Include="Migrations\AppDbContextModelSnapshot.cs" />
+    <Compile Remove="Migrations\20200228070557_InitialMigrationAfterDbDrop_FixId.cs" />
+    <Compile Remove="Migrations\20200228070557_InitialMigrationAfterDbDrop_FixId.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

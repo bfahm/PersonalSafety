@@ -73,7 +73,7 @@ namespace PersonalSafety
                 });
 
             // Register here any Repositories that will be used:
-            services.AddScoped<IEmergencyConactRepository, EmergencyContactRepository>();
+            services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
 
             // Setting up swagger generator
             services.AddSwaggerGen(sw => 

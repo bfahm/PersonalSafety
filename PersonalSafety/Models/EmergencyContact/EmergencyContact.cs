@@ -8,11 +8,15 @@ namespace PersonalSafety.Models
 {
     public class EmergencyContact
     {
-        public int Id { get; set; }
-        [ForeignKey("User")]
-        public int UserId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
+
+        [ForeignKey("ApplicationUser")]
+        public string UserId { get; set; }
 
         public string Name { get; set; }
         public string PhoneNumber { get; set; }
+
+        public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

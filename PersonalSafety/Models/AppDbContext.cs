@@ -29,26 +29,6 @@ namespace PersonalSafety.Models
             builder.Entity<ApplicationUser>()
                    .HasIndex(u => u.PhoneNumber)
                    .IsUnique();
-
-            //-----------------------------------
-            //Seed the database with initial data
-            builder.Entity<ApplicationUser>()
-                   .HasData(
-                        new ApplicationUser
-                        {
-                            //Id = 1,
-                            FullName = "Test User",
-                            NationalId = "29700000000",
-                            PhoneNumber = "01010101010",
-                            Birthday = Convert.ToDateTime("1/1/2020"),
-                            Email = "user@user.com",
-                            BloodType = (int)BloodTypesEnum.A,
-                            MedicalHistoryNotes = "none...",
-                            CurrentAddress = "unknown...",
-                            CurrentOngoingEvent = 0, // doesn't currently need help
-                            CurrentInvolvement = 0 // isn't currently involved in any events
-                        }
-                    );
         }
 
         public DbSet<ApplicationUser> UserInfos { get; set; }

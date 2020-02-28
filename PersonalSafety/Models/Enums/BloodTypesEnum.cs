@@ -7,9 +7,9 @@ namespace PersonalSafety.Models.Enums
 {
     public enum BloodTypesEnum
     {
-        O,
-        A,
-        B,
-        AB
+        O = 1,
+        A = 2,
+        B = 3,
+        AB = 4
     }
 }

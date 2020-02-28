@@ -15,8 +15,8 @@ namespace PersonalSafety.Controllers.API
     public class TestController : ControllerBase
     {
         //To be removed, using [EmergencyContact] table as a testing one
-        private IEmergencyConactRepository repository;
-        public TestController(IEmergencyConactRepository repository)
+        private IEmergencyContactRepository repository;
+        public TestController(IEmergencyContactRepository repository)
         {
             this.repository = repository;
         }
@@ -24,7 +24,7 @@ namespace PersonalSafety.Controllers.API
         [HttpGet]
         public string TestRepository()
         {
-            repository.Add(new EmergencyContact { Name = "test", PhoneNumber = "010", UserId = 1 });
+            //repository.Add(new EmergencyContact { Name = "test", PhoneNumber = "010", UserId = 1 });
             int lastAddedId = repository.GetAll().ToList().Count;
             return repository.GetById(lastAddedId).Id + "--" + repository.GetById(lastAddedId).Name;
         }

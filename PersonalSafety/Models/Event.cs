@@ -8,9 +8,11 @@ namespace PersonalSafety.Models
 {
     public class Event
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        [ForeignKey("User")]
-        public int UserId { get; set; }
+
+        [ForeignKey("ApplicationUser")]
+        public string UserId { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
@@ -23,6 +25,6 @@ namespace PersonalSafety.Models
         public bool IsValidated { get; set; }
         public bool IsOnGoing { get; set; }
 
-
+        public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

@@ -20,12 +20,14 @@ namespace PersonalSafety.Business
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtSettings _jwtSettings;
         private readonly IOptions<AppSettings> _appSettings;
+        private readonly IEmergencyContactRepository _emergencyContactRepository;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings, IEmergencyContactRepository emergencyContactRepository)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
             _appSettings = appSettings;
+            _emergencyContactRepository = emergencyContactRepository;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -296,9 +298,60 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public Task<APIResponse<bool>> CompleteProfile(CompleteProfileViewModel request)
+        public async Task<APIResponse<bool>> CompleteProfileAsync(string userId, CompleteProfileViewModel request)
         {
-            throw new NotImplementedException();
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                response.Messages.Add("User with provided email does not exsist.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                return response;
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                response.Messages.Add("Your account is not yet verified, please verify it through your email then proceed.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.NotConfirmed;
+                return response;
+            }
+
+            // Check if user provided a value, else keep old value.
+            user.CurrentAddress = request.CurrentAddress ?? user.CurrentAddress;
+            user.BloodType = (request.BloodType!=0)? request.BloodType : user.BloodType;
+            user.MedicalHistoryNotes = request.MedicalHistoryNotes ?? user.MedicalHistoryNotes;
+
+            if (request.EmergencyContacts != null)
+            {
+                foreach (var contact in request.EmergencyContacts)
+                {
+                    _emergencyContactRepository.Add(new EmergencyContact
+                    {
+                        Name = contact.Name,
+                        PhoneNumber = contact.PhoneNumber,
+                        UserId = userId
+                    });
+                }
+            }
+            
+            var result = await _userManager.UpdateAsync(user);
+            
+
+            if (!result.Succeeded)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.Messages = result.Errors.Select(e => e.Description).ToList();
+            }
+
+            int addedContactsCount = request.EmergencyContacts?.Count ?? 0;
+            response.Result = true;
+            response.Messages.Add("Added " + addedContactsCount + " new emergency contatcts to user with email " + user.Email);
+            response.Messages.Add("Current total emergency contacts: " + _emergencyContactRepository.GetByUserId(userId).Count());
+            return response;
         }
 
         private string GenerateAuthenticationResult(ApplicationUser user)
