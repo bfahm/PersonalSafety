@@ -2,73 +2,63 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services;
 
-namespace PersonalSafety.Controllers
+namespace PersonalSafety.Controllers.Views
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class HomeController : Controller
+    public class AccountVisualController : Controller
     {
         private readonly IAccountBusiness _accountBusiness;
 
-        public HomeController(IAccountBusiness accountBusiness)
+        public AccountVisualController(IAccountBusiness accountBusiness)
         {
             _accountBusiness = accountBusiness;
         }
 
+        //--------------------------------------------------------------------
+        //RESSETING PASSWORD
 
-        [Route("")]
-        [Route("home")]
-        [Route("index")]
-        [Route("home/index")]
-        [Route("api")]
-        [Route("api/home")]
-        [Route("api/home/index")]
+        [Route("ResetPassword")]
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult ResetPassword([FromQuery]string email, [FromQuery]string token)
         {
-            return View();
-        }
-
-
-        [Route("ForgotPassword")]
-        [HttpGet]
-        public IActionResult ForgotPassword([FromQuery]string email, [FromQuery]string token)
-        {
-            if(email == null|| token == null)
+            if (email == null || token == null)
             {
-                return RedirectToAction("PasswordResetResult");
+                return RedirectToAction("ResetPasswordResult");
             }
             return View();
         }
 
-        [Route("ForgotPassword")]
+        [Route("ResetPassword")]
         [HttpPost]
-        public async Task<IActionResult> ForgotPassword(ResetPasswordViewModel request)
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
         {
             if (ModelState.IsValid)
             {
                 var result = await _accountBusiness.ResetPasswordAsync(request);
                 bool booleanResult = result.Status == 0 && !result.HasErrors;
-                return RedirectToAction("PasswordResetResult", new { result = booleanResult });
+                return RedirectToAction("ResetPasswordResult", new { result = booleanResult });
             }
             else
             {
                 return View();
             }
-            
+
         }
 
-        [Route("PasswordResetResult")]
+        [Route("ResetPasswordResult")]
         [HttpGet]
-        public IActionResult PasswordResetResult(bool result)
+        public IActionResult ResetPasswordResult(bool result)
         {
             ViewBag.Result = result;
             return View();
         }
+
+        //--------------------------------------------------------------------
+        //RESENDING FORGET PASSWORD MAIL
 
         [Route("ForgotPasswordMail")]
         [HttpGet]
@@ -94,22 +84,8 @@ namespace PersonalSafety.Controllers
             return View();
         }
 
-        [Route("ConfirmMail")]
-        [HttpGet]
-        public async Task<IActionResult> ConfirmMail(ConfirmMailViewModel request)
-        {
-            var result = await _accountBusiness.ConfirmMailAsync(request);
-            bool booleanResult = result.Status == 0 && !result.HasErrors;
-            return RedirectToAction("ConfimMailResult", new { result = booleanResult });
-        }
-
-        [Route("ConfimMailResult")]
-        [HttpGet]
-        public IActionResult ConfimMailResult(bool result)
-        {
-            ViewBag.Result = result;
-            return View();
-        }
+        //--------------------------------------------------------------------
+        //SENDING CONFIRMATION EMAIL
 
         [Route("SendConfirmationMail")]
         [HttpGet]
@@ -130,6 +106,33 @@ namespace PersonalSafety.Controllers
         [Route("SendConfirmationMailResult")]
         [HttpGet]
         public IActionResult SendConfirmationMailResult(bool result)
+        {
+            ViewBag.Result = result;
+            return View();
+        }
+
+        //--------------------------------------------------------------------
+        //CONFIRMING EMAIL
+
+        [Route("ConfirmMail")]
+        [HttpGet]
+        public async Task<IActionResult> ConfirmMail(ConfirmMailViewModel request)
+        {
+            if (ModelState.IsValid) 
+            { 
+                var result = await _accountBusiness.ConfirmMailAsync(request);
+                bool booleanResult = result.Status == 0 && !result.HasErrors;
+                return RedirectToAction("ConfimMailResult", new { result = booleanResult });
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [Route("ConfimMailResult")]
+        [HttpGet]
+        public IActionResult ConfimMailResult(bool result)
         {
             ViewBag.Result = result;
             return View();

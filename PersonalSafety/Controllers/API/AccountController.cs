@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services;
 
-namespace PersonalSafety.Controllers
+namespace PersonalSafety.Controllers.API
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

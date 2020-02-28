@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PersonalSafety.Models;
 
-namespace PersonalSafety.Controllers
+namespace PersonalSafety.Controllers.API
 {
     [Authorize]
     [ApiController]

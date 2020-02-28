@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Helpers;
 
-namespace PersonalSafety.Controllers
+namespace PersonalSafety.Controllers.API
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     [ApiController]

@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "SendConfirmationMailResult";
+    ViewData["Title"] = "Activate Account";
 }
 
     <section class="pb_xl_py_cover pb_gradient_v1" style="padding:0px !important; background-image: url(assets/images/1900x1200_img_5.jpg);">
@@ -10,17 +10,18 @@
 
                     @if (ViewBag.Result)
                     {
-                        <h2 class="heading mb-5 pb_font-40">Email Sent!</h2>
+                        <h2 class="heading mb-5 pb_font-40">Account Activated!</h2>
                         <div class="sub-heading">
-                            <p class="mb-4">We sent you an email containing an activation link. If this email is registered before you should recieve the link shortly. Tap the link and proceed from there.</p>
+                            <p class="mb-4">You successfully activated your account. Login again to make use of our services.</p>
                         </div>
                     }
                     else
                     {
                         <h2 class="heading mb-5 pb_font-40">Hmm.. Something went wrong.</h2>
                         <div class="sub-heading">
-                            <p class="mb-4">It appears that something went wrong while trying to send the email. Please try again later.</p>
+                            <p class="mb-4">Broken link. Please request another one.</p>
                         </div>
+
                         <p class="mb-5"><a class="btn btn-success btn-lg pb_btn-pill smoothscroll" href="SendConfirmationMail"><span class="pb_font-14 text-uppercase pb_letter-spacing-1">Resend Email</span></a></p>
                     }
 
