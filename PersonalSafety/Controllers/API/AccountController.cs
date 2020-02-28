@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -79,9 +80,13 @@ namespace PersonalSafety.Controllers.API
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordViewModel request)
         {
-            var response = await _identityService.ChangePasswordAsync(request);
+            //? means : If value is not null, retrieve it
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _identityService.ChangePasswordAsync(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }

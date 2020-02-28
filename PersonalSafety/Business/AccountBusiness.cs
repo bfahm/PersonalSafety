@@ -254,11 +254,11 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> ChangePasswordAsync(ChangePasswordViewModel request)
+        public async Task<APIResponse<bool>> ChangePasswordAsync(string userId, ChangePasswordViewModel request)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 response.Messages.Add("User with provided email does not exsist.");
