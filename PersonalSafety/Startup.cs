@@ -17,7 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Extensions;
 using PersonalSafety.Models;
 using PersonalSafety.Helpers;
-using PersonalSafety.Services;
+using PersonalSafety.Business;
 using Microsoft.OpenApi.Models;
 
 namespace PersonalSafety

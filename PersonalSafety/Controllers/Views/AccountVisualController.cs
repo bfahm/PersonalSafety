@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Services;
+using PersonalSafety.Business;
 
 namespace PersonalSafety.Controllers.Views
 {

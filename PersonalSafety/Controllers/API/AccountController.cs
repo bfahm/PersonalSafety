@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Services;
+using PersonalSafety.Business;
 
 namespace PersonalSafety.Controllers.API
 {
