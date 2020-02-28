@@ -11,6 +11,7 @@ namespace PersonalSafety.Models.Enums
         InvalidRequest = -1,
         IdentityError = -2,
         TechnicalError = -3,
+        NotConfirmed = -4,
         BadRequest = 400, // Happens when validation error occur 
         Unauthorized = 401,
     }

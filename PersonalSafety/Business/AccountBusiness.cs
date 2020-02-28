@@ -78,8 +78,11 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            response.Result = GenerateAuthenticationResult(newUser);
+            var confirmationMailResult = await SendConfirmMailAsync(request.Email);
+
             response.Messages.Add("Successfully created a new user with email " + request.Email);
+            response.Messages.Add("Please check your email for activation links before you continue.");
+            response.Messages.AddRange(confirmationMailResult.Messages);
 
             return response;
         }
@@ -104,7 +107,16 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            //TODO: Check if user's email is confirmed first
+            bool userHasConfirmedHisEmail = await _userManager.IsEmailConfirmedAsync(user);
+
+            if (!userHasConfirmedHisEmail)
+            {
+                response.Status = (int)APIResponseCodesEnum.NotConfirmed;
+                response.HasErrors = true;
+                response.Messages = new List<string> { "This email was not confirmed, please activate your email first by tapping the link provided in the email we sent you then proceed." };
+                return response;
+            }
+            
             response.Result = GenerateAuthenticationResult(user);
             response.Status = 0;
             response.HasErrors = false;
