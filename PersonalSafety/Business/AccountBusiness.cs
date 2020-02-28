@@ -354,6 +354,35 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public async Task<APIResponse<bool>> ValidateUserAsync(string userId, string email)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                response.Messages.Add("User with provided email does not exsist.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                return response;
+            }
+
+            if(user.Email == email)
+            {
+                response.Result = true;
+                response.Messages.Add(email + " is currently logged in.");
+                return response;
+            }
+            else
+            {
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
+                response.Result = false;
+                response.HasErrors = true;
+                response.Messages.Add("Email and Token did not match.");
+                return response;
+            }
+        }
+
         private string GenerateAuthenticationResult(ApplicationUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -401,5 +430,7 @@ namespace PersonalSafety.Business
                 return result.Succeeded;
             }
         }
+
+        
     }
 }

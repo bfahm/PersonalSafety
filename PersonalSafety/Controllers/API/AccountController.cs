@@ -102,5 +102,16 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(response);
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ValidateToken([FromQuery] string email)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            
+            var response = await _identityService.ValidateUserAsync(currentlyLoggedInUserId, email);
+
+            return Ok(response);
+        }
     }
 }
