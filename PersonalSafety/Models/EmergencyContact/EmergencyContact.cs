@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -18,6 +19,8 @@ namespace PersonalSafety.Models
         public string UserId { get; set; }
 
         public string Name { get; set; }
+
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Phone number is invalid")]
         public string PhoneNumber { get; set; }
 
         [JsonIgnore]

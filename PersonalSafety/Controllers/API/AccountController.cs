@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
 using Microsoft.AspNetCore.Authorization;
+using PersonalSafety.Business.Account;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -14,11 +15,11 @@ namespace PersonalSafety.Controllers.API
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountBusiness _identityService;
+        private readonly IAccountBusiness _accountBusiness;
 
         public AccountController(IAccountBusiness identityService)
         {
-            _identityService = identityService;
+            _accountBusiness = identityService;
         }
 
         /// <summary>
@@ -48,7 +49,7 @@ namespace PersonalSafety.Controllers.API
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
-            var authResponse = await _identityService.RegisterAsync(request);
+            var authResponse = await _accountBusiness.RegisterAsync(request);
 
             if (authResponse.HasErrors)
             {
@@ -85,7 +86,7 @@ namespace PersonalSafety.Controllers.API
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginRequestViewModel request)
         {
-            var authResponse = await _identityService.LoginAsync(request);
+            var authResponse = await _accountBusiness.LoginAsync(request);
 
             if (authResponse.HasErrors)
             {
@@ -121,7 +122,7 @@ namespace PersonalSafety.Controllers.API
         [HttpGet]
         public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
         {
-            var response = await _identityService.ForgotPasswordAsync(mail);
+            var response = await _accountBusiness.ForgotPasswordAsync(mail);
 
             return Ok(response);
         }
@@ -149,7 +150,7 @@ namespace PersonalSafety.Controllers.API
         [HttpPost]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel request)
         {
-            var response = await _identityService.ResetPasswordAsync(request);
+            var response = await _accountBusiness.ResetPasswordAsync(request);
 
             return Ok(response);
         }
@@ -181,7 +182,7 @@ namespace PersonalSafety.Controllers.API
         [HttpGet]
         public async Task<IActionResult> SendConfirmationMail([FromQuery] string email)
         {
-            var response = await _identityService.SendConfirmMailAsync(email);
+            var response = await _accountBusiness.SendConfirmMailAsync(email);
 
             return Ok(response);
         }
@@ -218,7 +219,7 @@ namespace PersonalSafety.Controllers.API
         [HttpPost]
         public async Task<IActionResult> ConfirmMail([FromBody] ConfirmMailViewModel request)
         {
-            var response = await _identityService.ConfirmMailAsync(request);
+            var response = await _accountBusiness.ConfirmMailAsync(request);
 
             return Ok(response);
         }
@@ -248,7 +249,7 @@ namespace PersonalSafety.Controllers.API
             //? means : If value is not null, retrieve it
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _identityService.ChangePasswordAsync(currentlyLoggedInUserId, request);
+            var response = await _accountBusiness.ChangePasswordAsync(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }
@@ -275,7 +276,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
             
-            var response = await _identityService.ValidateUserAsync(currentlyLoggedInUserId, email);
+            var response = await _accountBusiness.ValidateUserAsync(currentlyLoggedInUserId, email);
 
             return Ok(response);
         }

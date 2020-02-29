@@ -12,6 +12,7 @@ namespace PersonalSafety.Controllers.API
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserBusiness _userBusiness;
@@ -21,6 +22,18 @@ namespace PersonalSafety.Controllers.API
             _userBusiness = userBusiness;
         }
 
+
+        /// <summary>
+        /// This method returns a list of the current user emergency contacts
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Main Functionality
+        /// This method should be called before `Api/User/CompleteProfile` or any other calls that shows the list to the user before being able to modify them.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
+        /// </remarks>
         [HttpGet]
         public IActionResult GetEmergencyContacts()
         {
@@ -60,7 +73,6 @@ namespace PersonalSafety.Controllers.API
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
         [HttpPut]
-        [Authorize]
         public async Task<IActionResult> CompleteProfile([FromBody] CompleteProfileViewModel request)
         {
             //? means : If value is not null, retrieve it
