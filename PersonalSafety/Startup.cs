@@ -21,6 +21,7 @@ using PersonalSafety.Business;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
+using PersonalSafety.Business.User;
 
 namespace PersonalSafety
 {
@@ -52,7 +53,9 @@ namespace PersonalSafety
             Configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
 
+            // Register Services
             services.AddScoped<IAccountBusiness, AccountBusiness>();
+            services.AddScoped<IUserBusiness, UserBusiness>();
 
             // Add authentication middleware and set its parameters
             services.AddAuthentication(auth =>
