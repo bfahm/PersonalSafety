@@ -19,6 +19,8 @@ using PersonalSafety.Models;
 using PersonalSafety.Helpers;
 using PersonalSafety.Business;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
 
 namespace PersonalSafety
 {
@@ -107,6 +109,12 @@ namespace PersonalSafety
                         new List<string>()
                     }
                 });
+
+                // Activate swagger to sense XML comments
+                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                sw.IncludeXmlComments(xmlPath);
+
             });
 
             // Registering APP Settings

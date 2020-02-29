@@ -138,7 +138,6 @@ namespace PersonalSafety.Business
 
             if(user == null)
             {
-
                 return response;
             }
 
@@ -146,7 +145,7 @@ namespace PersonalSafety.Business
             {
                 response.Messages.Add("The email provided was not confirmed, you must confirm your email first.");
                 response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.Status = (int)APIResponseCodesEnum.NotConfirmed;
                 return response;
             }
 
@@ -263,9 +262,9 @@ namespace PersonalSafety.Business
             ApplicationUser user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                response.Messages.Add("User with provided email does not exsist.");
+                response.Messages.Add("Could not authenticate user.");
                 response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
                 return response;
             }
 
@@ -305,9 +304,9 @@ namespace PersonalSafety.Business
             ApplicationUser user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                response.Messages.Add("User with provided email does not exsist.");
+                response.Messages.Add("User not authorized.");
                 response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
                 return response;
             }
 
@@ -323,9 +322,10 @@ namespace PersonalSafety.Business
             user.CurrentAddress = request.CurrentAddress ?? user.CurrentAddress;
             user.BloodType = (request.BloodType!=0)? request.BloodType : user.BloodType;
             user.MedicalHistoryNotes = request.MedicalHistoryNotes ?? user.MedicalHistoryNotes;
-
+            
             if (request.EmergencyContacts != null)
             {
+                _emergencyContactRepository.DeleteForUser(userId);
                 foreach (var contact in request.EmergencyContacts)
                 {
                     _emergencyContactRepository.Add(new EmergencyContact
@@ -335,6 +335,7 @@ namespace PersonalSafety.Business
                         UserId = userId
                     });
                 }
+                _emergencyContactRepository.Save();
             }
             
             var result = await _userManager.UpdateAsync(user);
@@ -361,9 +362,9 @@ namespace PersonalSafety.Business
             ApplicationUser user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                response.Messages.Add("User with provided email does not exsist.");
+                response.Messages.Add("User not authorized.");
                 response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
                 return response;
             }
 

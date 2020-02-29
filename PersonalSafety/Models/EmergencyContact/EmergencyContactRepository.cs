@@ -19,5 +19,12 @@ namespace PersonalSafety.Models
         {
             return context.EmergencyContacts.Where(u => u.UserId== userId);
         }
+
+        public void DeleteForUser(string userId)
+        {
+            IEnumerable<EmergencyContact> emergencyContactsForUser = GetByUserId(userId);
+            context.RemoveRange(emergencyContactsForUser);
+            context.SaveChanges();
+        }
     }
 }
