@@ -268,13 +268,7 @@ namespace PersonalSafety.Business.Account
                 return response;
             }
 
-            if (!user.EmailConfirmed)
-            {
-                response.Messages.Add("Your account is not yet verified, please verify it through your email then proceed.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.NotConfirmed;
-                return response;
-            }
+            // Removed check for confirmed email here, user wont gain a token>userId if he's not confirmed.
 
             if(request.OldPassword == request.NewPassword)
             {

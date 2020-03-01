@@ -62,14 +62,6 @@ namespace PersonalSafety.Business.User
                 return response;
             }
 
-            if (!user.EmailConfirmed)
-            {
-                response.Messages.Add("Your account is not yet verified, please verify it through your email then proceed.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.NotConfirmed;
-                return response;
-            }
-
             // Check if user provided a value, else keep old value.
             user.CurrentAddress = request.CurrentAddress ?? user.CurrentAddress;
             user.BloodType = (request.BloodType != 0) ? request.BloodType : user.BloodType;
