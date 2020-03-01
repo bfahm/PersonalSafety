@@ -22,10 +22,29 @@ namespace PersonalSafety.Business.User
             _emergencyContactRepository = emergencyContactRepository;
         }
 
-        public APIResponse<IEnumerable<EmergencyContact>> GetEmergencyContacts(string userId)
+        public async Task<APIResponse<CompleteProfileViewModel>> GetEmergencyInfo(string userId)
         {
-            APIResponse<IEnumerable<EmergencyContact>> response = new APIResponse<IEnumerable<EmergencyContact>>();
-            response.Result = _emergencyContactRepository.GetByUserId(userId);
+            APIResponse<CompleteProfileViewModel> response = new APIResponse<CompleteProfileViewModel>();
+
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                response.Messages.Add("User not authorized.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
+                return response;
+            }
+
+            CompleteProfileViewModel viewModel = new CompleteProfileViewModel
+            {
+                BloodType = user.BloodType,
+                CurrentAddress = user.CurrentAddress,
+                MedicalHistoryNotes = user.MedicalHistoryNotes
+            };
+
+            viewModel.EmergencyContacts = _emergencyContactRepository.GetByUserId(userId).ToList();
+
+            response.Result = viewModel;
 
             return response;
         }

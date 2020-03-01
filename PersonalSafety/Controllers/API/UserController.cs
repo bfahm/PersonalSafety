@@ -35,11 +35,11 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
-        public IActionResult GetEmergencyContacts()
+        public async Task<IActionResult> GetEmergencyInfo()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = _userBusiness.GetEmergencyContacts(currentlyLoggedInUserId);
+            var response = await _userBusiness.GetEmergencyInfo(currentlyLoggedInUserId);
 
             return Ok(response);
         }
