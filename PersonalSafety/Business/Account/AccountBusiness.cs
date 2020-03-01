@@ -335,7 +335,7 @@ namespace PersonalSafety.Business.Account
                     new Claim("id", user.Id)
                 }),
                 // Token will expire 2 hours from which it was created
-                Expires = DateTime.UtcNow.AddHours(2),
+                Expires = DateTime.UtcNow.AddHours(_jwtSettings.JwtExpireInHours),
                 //
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

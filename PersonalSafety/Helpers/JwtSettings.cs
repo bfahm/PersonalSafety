@@ -8,5 +8,6 @@ namespace PersonalSafety.Helpers
     public class JwtSettings
     {
         public string Secret { get; set; }
+        public int JwtExpireInHours { get; set; }
     }
 }
