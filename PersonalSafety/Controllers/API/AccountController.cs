@@ -8,6 +8,8 @@ using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
 using Microsoft.AspNetCore.Authorization;
 using PersonalSafety.Business.Account;
+using PersonalSafety.Helpers;
+using PersonalSafety.Models.Enums;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -122,9 +124,23 @@ namespace PersonalSafety.Controllers.API
         [HttpGet]
         public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
         {
-            var response = await _accountBusiness.ForgotPasswordAsync(mail);
+            if (mail!=null)
+            {
+                var response = await _accountBusiness.ForgotPasswordAsync(mail);
 
-            return Ok(response);
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(new APIResponse<bool>
+                {
+                    Status = (int)APIResponseCodesEnum.BadRequest,
+                    HasErrors = true,
+                    Result = false,
+                    Messages = new List<string> { "Email field cannot be empty." }
+                });
+            }
+            
         }
 
         /// <summary>
@@ -182,9 +198,22 @@ namespace PersonalSafety.Controllers.API
         [HttpGet]
         public async Task<IActionResult> SendConfirmationMail([FromQuery] string email)
         {
-            var response = await _accountBusiness.SendConfirmMailAsync(email);
+            if (email != null)
+            {
+                var response = await _accountBusiness.SendConfirmMailAsync(email);
 
-            return Ok(response);
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(new APIResponse<bool>
+                {
+                    Status = (int)APIResponseCodesEnum.BadRequest,
+                    HasErrors = true,
+                    Result = false,
+                    Messages = new List<string> { "Email field cannot be empty." }
+                });
+            }
         }
 
         /// <summary>
@@ -274,11 +303,25 @@ namespace PersonalSafety.Controllers.API
         [Authorize]
         public async Task<IActionResult> ValidateToken([FromQuery] string email)
         {
-            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
-            
-            var response = await _accountBusiness.ValidateUserAsync(currentlyLoggedInUserId, email);
 
-            return Ok(response);
+            if (email != null)
+            {
+                string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+                var response = await _accountBusiness.ValidateUserAsync(currentlyLoggedInUserId, email);
+
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(new APIResponse<bool>
+                {
+                    Status = (int)APIResponseCodesEnum.BadRequest,
+                    HasErrors = true,
+                    Result = false,
+                    Messages = new List<string> { "Email field cannot be empty." }
+                });
+            }
         }
     }
 }
