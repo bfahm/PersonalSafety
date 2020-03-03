@@ -23,6 +23,7 @@ using System.Reflection;
 using System.IO;
 using PersonalSafety.Business.User;
 using PersonalSafety.Business.Account;
+using PersonalSafety.Sockets;
 
 namespace PersonalSafety
 {
@@ -31,6 +32,7 @@ namespace PersonalSafety
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            SocketHandler.Start(4466); //Start socket service on port 4466
         }
 
         public IConfiguration Configuration { get; }
