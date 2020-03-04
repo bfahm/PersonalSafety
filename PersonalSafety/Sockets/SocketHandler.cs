@@ -19,21 +19,22 @@ namespace PersonalSafety.Sockets
 
         static FunctionLauncher fl = new FunctionLauncher();
 
-        public static void Start(int port)
+        public static void Start(object obj)
         {
 
+            int port = (int)obj;
             IPAddress localAddr = IPAddress.Parse("0.0.0.0");
             server = new TcpListener(localAddr, port);
             server.Start();
-
+            GlobalVar.Set("networkstreams", new List<NetworkStream>());
             try
             {
                 while (true)
                 {
-                    Console.WriteLine("Waiting for a connection...");
+                    Console.WriteLine("Waiting for a new client connection...");
                     TcpClient client = server.AcceptTcpClient();
                     Console.WriteLine("Connected!");
-                    Thread t = new Thread(new ParameterizedThreadStart(HandleDeivce));
+                    Thread t = new Thread(new ParameterizedThreadStart(HandleDevice));
                     t.Start(client);
                 }
             }
@@ -43,10 +44,12 @@ namespace PersonalSafety.Sockets
                 server.Stop();
             }
         }
-        public static void HandleDeivce(object obj)
+
+        public static void HandleDevice(object obj)
         {
             TcpClient client = (TcpClient)obj;
             var stream = client.GetStream();
+            GlobalVar.Get<List<NetworkStream>>("networkstreams", new List<NetworkStream>()).Add(stream); //Add to list of connected clients
             string imei = string.Empty;
             string data = null;
             byte[] bytes = new byte[1024];
@@ -67,9 +70,10 @@ namespace PersonalSafety.Sockets
 
                     fl.LaunchFunctionByName(message.type, message.parameters);
 
-                    //byte[] reply = Encoding.ASCII.GetBytes(str);
-                    //stream.Write(reply, 0, reply.Length);
-                    //Console.WriteLine("{1}: Sent: {0}", str, Thread.CurrentThread.ManagedThreadId);
+                    Console.WriteLine("Replying back to all clients..");
+
+                    BroadcastMessageToAllConnectedClients(data);
+
                 }
             }
             catch (Exception e)
@@ -77,6 +81,36 @@ namespace PersonalSafety.Sockets
                 Console.WriteLine("Exception: {0}", e.ToString());
                 client.Close();
             }
+        }
+
+        public static void BroadcastMessageToAllConnectedClients(string message)
+        {
+
+            byte[] encodedMessage = Encoding.ASCII.GetBytes(message);
+
+            List<NetworkStream> clientStreams = GlobalVar.Get<List<NetworkStream>>("networkstreams");
+
+            int iter = 0;
+
+            foreach(NetworkStream ns in clientStreams)
+            {
+
+                try
+                {
+
+                    ns.Write(encodedMessage, 0, encodedMessage.Length);
+                    iter++;
+                    
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Couldn't send message to client. Exception: " + ex.ToString());
+                }
+
+            }
+
+            Console.WriteLine("Sent to " + iter + " clients.");
+
         }
     }
 
@@ -101,7 +135,7 @@ namespace PersonalSafety.Sockets
 
         }
 
-        public void REGISTER(Dictionary<string, string> TESTPARAM)
+        public void SHARELOCATION(Dictionary<string, string> TESTPARAM)
         {
 
             foreach (KeyValuePair<string, string> kvp in TESTPARAM)
