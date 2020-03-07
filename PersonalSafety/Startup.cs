@@ -23,18 +23,19 @@ using System.Reflection;
 using System.IO;
 using PersonalSafety.Business.User;
 using PersonalSafety.Business.Account;
-using PersonalSafety.Sockets;
 using System.Threading;
+using SignalRChatServer;
 
 namespace PersonalSafety
 {
     public class Startup
     {
+
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            Thread t = new Thread(new ParameterizedThreadStart(SocketHandler.Start));
-            t.Start(4466);
         }
 
         public IConfiguration Configuration { get; }
@@ -42,6 +43,34 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(MyAllowSpecificOrigins,
+                builder =>
+                {
+                    builder.WithOrigins("http://127.0.0.1:5500")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                //.AllowAnyOrigin();
+                                .AllowCredentials();
+                    builder.WithOrigins("")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                //.AllowAnyOrigin();
+                                .AllowCredentials();
+                });
+            });
+
+            // Required for API functionality
+            services.AddControllers();
+
+            // Needed to display the home page "view"
+            services.AddMvc().AddSessionStateTempDataProvider();
+            services.AddSession();
+
+            services.AddSignalR();
+
             // Setup the connextion string to be used by AppDbContext
             services.AddDbContextPool<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
 
@@ -50,8 +79,7 @@ namespace PersonalSafety
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Required for API functionality
-            services.AddControllers();
+            
 
             // Setting up basic JWT settings
             JwtSettings jwtSettings = new JwtSettings();
@@ -128,9 +156,7 @@ namespace PersonalSafety
             // Registering APP Settings
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
-            // Needed to display the home page "view"
-            services.AddMvc().AddSessionStateTempDataProvider();
-            services.AddSession();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -141,6 +167,12 @@ namespace PersonalSafety
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseRouting();
+
+            app.UseCors(MyAllowSpecificOrigins);
+
+            app.UseStaticFiles();
+
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
 
             app.UseSwagger();
@@ -150,16 +182,16 @@ namespace PersonalSafety
 
             //app.ConfigureExceptionHandler();
 
-            app.UseStaticFiles();
-            app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<RealtimeHub>("/Realtime");
             });
+
+            //app.UseMvc();
         }
     }
 }
