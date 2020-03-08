@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Business.User
+namespace PersonalSafety.Business
 {
     public interface IClientBusiness
     {

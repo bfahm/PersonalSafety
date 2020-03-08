@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using PersonalSafety.Business.Account;
-using PersonalSafety.Business.User;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Models.Enums;
@@ -11,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Business.User
+namespace PersonalSafety.Business
 {
     public class ClientBusiness : IClientBusiness
     {
@@ -50,7 +49,7 @@ namespace PersonalSafety.Business.User
                 return response;
             }
 
-            Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
+            Models.Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
             if (exsistingUserFoundByNationalId != null)
             {
                 response.Messages.Add("User with this National Id was registered before.");
@@ -68,7 +67,7 @@ namespace PersonalSafety.Business.User
             };
 
             //If the user currently registering is a client, Add the additional data to his table
-            Client client = new Client
+            Models.Client client = new Models.Client
             {
                 ClientId = newUser.Id,
                 NationalId = request.NationalId
@@ -101,7 +100,7 @@ namespace PersonalSafety.Business.User
         {
             APIResponse<CompleteProfileViewModel> response = new APIResponse<CompleteProfileViewModel>();
 
-            Client user =  _clientRepository.GetById(userId);
+            Models.Client user = _clientRepository.GetById(userId);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");
@@ -128,7 +127,7 @@ namespace PersonalSafety.Business.User
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            Client user = _clientRepository.GetById(userId);
+            Models.Client user = _clientRepository.GetById(userId);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");

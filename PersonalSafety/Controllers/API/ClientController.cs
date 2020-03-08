@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PersonalSafety.Business;
 using PersonalSafety.Business.Account;
-using PersonalSafety.Business.User;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 
@@ -37,6 +37,7 @@ namespace PersonalSafety.Controllers.API
         /// - **Password** : must be complex, contain number, symbols, Capital and Small letters
         /// - **NationalId** : must be exactly of 14 digits
         /// - **PhoneNumber** : must be exactly of 11 digits
+        /// - **FullName** : Must be non null
         /// 
         /// After a valid attempt, this function also **automatically** sends a verification email to be used in `/api/Account/ConfirmMail` directly.
         /// **IMPORTANT:** User does not have access to any of the system's functionality till he actually verify his email.

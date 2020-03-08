@@ -21,7 +21,6 @@ using PersonalSafety.Business;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
-using PersonalSafety.Business.User;
 using PersonalSafety.Business.Account;
 using System.Threading;
 using SignalRChatServer;
@@ -109,10 +108,12 @@ namespace PersonalSafety
             // Register Businesses
             services.AddScoped<IAccountBusiness, AccountBusiness>();
             services.AddScoped<IClientBusiness, ClientBusiness>();
+            services.AddScoped<IAdminBusiness, AdminBusiness>();
 
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();
+            services.AddScoped<IPersonnelRepository, PersonnelRepository>();
 
             // Setting up swagger generator
             services.AddSwaggerGen(sw => 
