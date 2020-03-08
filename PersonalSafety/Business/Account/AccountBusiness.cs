@@ -32,80 +32,10 @@ namespace PersonalSafety.Business.Account
             _emergencyContactRepository = emergencyContactRepository;
         }
 
-        public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request, int userType)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings)
         {
-            APIResponse<bool> response = new APIResponse<bool>();
-            Client client = null;
-
-            ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(request.Email);
-            if (exsistingUserFoundByEmail != null)
-            {
-                response.Messages.Add("User with this email address already exsists.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
-            }
-
-            ApplicationUser exsistingUserFoundByPhoneNumber = _userManager.Users.Where(u => u.PhoneNumber == request.PhoneNumber).FirstOrDefault();
-            if (exsistingUserFoundByPhoneNumber != null)
-            {
-                response.Messages.Add("User with this Phone Number was registered before.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
-            }
-
-            //If the user currently registering is a client, check for his NationalId
-            if(userType == (int)UserTypesEnum.Client)
-            {
-                Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
-                if (exsistingUserFoundByNationalId != null)
-                {
-                    response.Messages.Add("User with this National Id was registered before.");
-                    response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                    response.HasErrors = true;
-                    return response;
-                }
-            }
-
-            ApplicationUser newUser = new ApplicationUser
-            {
-                Email = request.Email,
-                UserName = request.Email,
-                FullName = request.FullName,
-                PhoneNumber = request.PhoneNumber
-            };
-
-            //If the user currently registering is a client, Add the additional data to his table
-            if(userType == (int)UserTypesEnum.Client)
-            {
-                client = new Client
-                {
-                    ClientId = newUser.Id,
-                    NationalId = request.NationalId
-                };
-
-                _clientRepository.Add(client);
-            }
-
-            //_clientRepository.Add(client) still needs saving, but will be done automatically in the below line.
-            var creationResultForAccount = await _userManager.CreateAsync(newUser, request.Password);
-
-            if (!creationResultForAccount.Succeeded)
-            {
-                response.Messages = creationResultForAccount.Errors.Select(e => e.Description).ToList();
-                response.Status = (int)APIResponseCodesEnum.IdentityError;
-                response.HasErrors = true;
-                return response;
-            }
-
-            var confirmationMailResult = await SendConfirmMailAsync(request.Email);
-
-            response.Messages.Add("Successfully created a new user with email " + request.Email);
-            response.Messages.Add("Please check your email for activation links before you continue.");
-            response.Messages.AddRange(confirmationMailResult.Messages);
-            response.Result = true;
-            return response;
+            _userManager = userManager;
+            _appSettings = appSettings;
         }
 
         public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)

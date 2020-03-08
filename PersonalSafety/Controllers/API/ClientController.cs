@@ -54,7 +54,7 @@ namespace PersonalSafety.Controllers.API
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
-            var authResponse = await _accountBusiness.RegisterAsync(request, (int)UserTypesEnum.Client);
+            var authResponse = await _clientBusiness.RegisterAsync(request);
 
             if (authResponse.HasErrors)
             {

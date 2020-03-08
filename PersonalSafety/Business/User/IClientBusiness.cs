@@ -10,6 +10,7 @@ namespace PersonalSafety.Business.User
 {
     public interface IClientBusiness
     {
+        Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
         APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId);
         APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request);
     }

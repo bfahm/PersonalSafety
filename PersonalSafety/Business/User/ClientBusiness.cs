@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using PersonalSafety.Business.Account;
 using PersonalSafety.Business.User;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
@@ -16,12 +18,83 @@ namespace PersonalSafety.Business.User
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IClientRepository _clientRepository;
         private readonly IEmergencyContactRepository _emergencyContactRepository;
+        private readonly IOptions<AppSettings> _appSettings;
 
-        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository)
+        public ClientBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository)
         {
             _userManager = userManager;
+            _appSettings = appSettings;
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
+        }
+
+        public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(request.Email);
+            if (exsistingUserFoundByEmail != null)
+            {
+                response.Messages.Add("User with this email address already exsists.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            ApplicationUser exsistingUserFoundByPhoneNumber = _userManager.Users.Where(u => u.PhoneNumber == request.PhoneNumber).FirstOrDefault();
+            if (exsistingUserFoundByPhoneNumber != null)
+            {
+                response.Messages.Add("User with this Phone Number was registered before.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
+            if (exsistingUserFoundByNationalId != null)
+            {
+                response.Messages.Add("User with this National Id was registered before.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            ApplicationUser newUser = new ApplicationUser
+            {
+                Email = request.Email,
+                UserName = request.Email,
+                FullName = request.FullName,
+                PhoneNumber = request.PhoneNumber
+            };
+
+            //If the user currently registering is a client, Add the additional data to his table
+            Client client = new Client
+            {
+                ClientId = newUser.Id,
+                NationalId = request.NationalId
+            };
+
+            _clientRepository.Add(client);
+
+            //_clientRepository.Add(client) still needs saving, but will be done automatically in the below line.
+            var creationResultForAccount = await _userManager.CreateAsync(newUser, request.Password);
+
+            if (!creationResultForAccount.Succeeded)
+            {
+                response.Messages = creationResultForAccount.Errors.Select(e => e.Description).ToList();
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.HasErrors = true;
+                return response;
+            }
+
+            AccountBusiness accountBusiness = new AccountBusiness(_userManager, _appSettings);
+            var confirmationMailResult = await accountBusiness.SendConfirmMailAsync(request.Email);
+
+            response.Messages.Add("Successfully created a new user with email " + request.Email);
+            response.Messages.Add("Please check your email for activation links before you continue.");
+            response.Messages.AddRange(confirmationMailResult.Messages);
+            response.Result = true;
+            return response;
         }
 
         public APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId)
