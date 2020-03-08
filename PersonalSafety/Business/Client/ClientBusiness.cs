@@ -49,7 +49,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            Models.Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
+            Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
             if (exsistingUserFoundByNationalId != null)
             {
                 response.Messages.Add("User with this National Id was registered before.");
@@ -67,7 +67,7 @@ namespace PersonalSafety.Business
             };
 
             //If the user currently registering is a client, Add the additional data to his table
-            Models.Client client = new Models.Client
+            Client client = new Client
             {
                 ClientId = newUser.Id,
                 NationalId = request.NationalId
@@ -100,7 +100,7 @@ namespace PersonalSafety.Business
         {
             APIResponse<CompleteProfileViewModel> response = new APIResponse<CompleteProfileViewModel>();
 
-            Models.Client user = _clientRepository.GetById(userId);
+            Client user = _clientRepository.GetById(userId);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");
@@ -127,7 +127,7 @@ namespace PersonalSafety.Business
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            Models.Client user = _clientRepository.GetById(userId);
+            Client user = _clientRepository.GetById(userId);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");
@@ -137,9 +137,9 @@ namespace PersonalSafety.Business
             }
 
             // Check if user provided a value, else keep old value.
-            user.CurrentAddress = request.CurrentAddress ?? user.CurrentAddress;
+            user.CurrentAddress = string.IsNullOrEmpty(request.CurrentAddress) ? user.CurrentAddress : request.CurrentAddress;
+            user.MedicalHistoryNotes = string.IsNullOrEmpty(request.MedicalHistoryNotes) ? user.MedicalHistoryNotes : request.MedicalHistoryNotes;
             user.BloodType = (request.BloodType != 0) ? request.BloodType : user.BloodType;
-            user.MedicalHistoryNotes = request.MedicalHistoryNotes ?? user.MedicalHistoryNotes;
             //_clientRepository.Save() is NOT needed since EF already updates the values inline
 
             

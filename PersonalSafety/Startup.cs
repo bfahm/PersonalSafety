@@ -54,11 +54,6 @@ namespace PersonalSafety
                                 .AllowAnyMethod()
                                 //.AllowAnyOrigin();
                                 .AllowCredentials();
-                    //builder.WithOrigins("")
-                    //            .AllowAnyHeader()
-                    //            .AllowAnyMethod()
-                    //            //.AllowAnyOrigin();
-                    //            .AllowCredentials();
                 });
             });
 
