@@ -10,7 +10,7 @@ namespace PersonalSafety.Business.Account
 {
     public interface IAccountBusiness
     {
-        Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
+        Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request, int userType);
         Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request);
         Task<APIResponse<bool>> ForgotPasswordAsync(string email);
         Task<APIResponse<bool>> ResetPasswordAsync(ResetPasswordViewModel request);

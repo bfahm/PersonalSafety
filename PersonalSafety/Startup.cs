@@ -86,10 +86,6 @@ namespace PersonalSafety
             Configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
 
-            // Register Services
-            services.AddScoped<IAccountBusiness, AccountBusiness>();
-            services.AddScoped<IUserBusiness, UserBusiness>();
-
             // Add authentication middleware and set its parameters
             services.AddAuthentication(auth =>
             {
@@ -110,8 +106,13 @@ namespace PersonalSafety
                     };
                 });
 
+            // Register Businesses
+            services.AddScoped<IAccountBusiness, AccountBusiness>();
+            services.AddScoped<IClientBusiness, ClientBusiness>();
+
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
+            services.AddScoped<IClientRepository, ClientRepository>();
 
             // Setting up swagger generator
             services.AddSwaggerGen(sw => 

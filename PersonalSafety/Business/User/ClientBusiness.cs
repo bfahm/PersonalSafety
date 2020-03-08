@@ -11,22 +11,24 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Business.User
 {
-    public class UserBusiness : IUserBusiness
+    public class ClientBusiness : IClientBusiness
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IClientRepository _clientRepository;
         private readonly IEmergencyContactRepository _emergencyContactRepository;
 
-        public UserBusiness(UserManager<ApplicationUser> userManager, IEmergencyContactRepository emergencyContactRepository)
+        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository)
         {
             _userManager = userManager;
+            _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
         }
 
-        public async Task<APIResponse<CompleteProfileViewModel>> GetEmergencyInfo(string userId)
+        public APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId)
         {
             APIResponse<CompleteProfileViewModel> response = new APIResponse<CompleteProfileViewModel>();
 
-            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            Client user =  _clientRepository.GetById(userId);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");
@@ -49,11 +51,11 @@ namespace PersonalSafety.Business.User
             return response;
         }
 
-        public async Task<APIResponse<bool>> CompleteProfileAsync(string userId, CompleteProfileViewModel request)
+        public APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            Client user = _clientRepository.GetById(userId);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");
@@ -66,10 +68,14 @@ namespace PersonalSafety.Business.User
             user.CurrentAddress = request.CurrentAddress ?? user.CurrentAddress;
             user.BloodType = (request.BloodType != 0) ? request.BloodType : user.BloodType;
             user.MedicalHistoryNotes = request.MedicalHistoryNotes ?? user.MedicalHistoryNotes;
+            //_clientRepository.Save() is NOT needed since EF already updates the values inline
 
+            
+            // Delete functionality implemented in the same hybrid function by simply not providing values
+            // Updaet functionality implemented in the same hybrid function by simply providing new values after deleting old ones
+            _emergencyContactRepository.DeleteForUser(userId);
             if (request.EmergencyContacts != null)
             {
-                _emergencyContactRepository.DeleteForUser(userId);
                 foreach (var contact in request.EmergencyContacts)
                 {
                     _emergencyContactRepository.Add(new EmergencyContact
@@ -79,22 +85,14 @@ namespace PersonalSafety.Business.User
                         UserId = userId
                     });
                 }
+
                 _emergencyContactRepository.Save();
             }
 
-            var result = await _userManager.UpdateAsync(user);
-
-
-            if (!result.Succeeded)
-            {
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.IdentityError;
-                response.Messages = result.Errors.Select(e => e.Description).ToList();
-            }
 
             int addedContactsCount = request.EmergencyContacts?.Count ?? 0;
             response.Result = true;
-            response.Messages.Add("Added " + addedContactsCount + " new emergency contatcts to user with email " + user.Email);
+            response.Messages.Add("Added " + addedContactsCount + " new emergency contatcts to currently logged in user");
             response.Messages.Add("Current total emergency contacts: " + _emergencyContactRepository.GetByUserId(userId).Count());
             return response;
         }

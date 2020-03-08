@@ -10,8 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200228070557_InitialMigrationAfterDbDrop_FixId.cs" />
-    <Compile Remove="Migrations\20200228070557_InitialMigrationAfterDbDrop_FixId.Designer.cs" />
+    <Compile Remove="Migrations\20200308152537_InitialMigrationAfterDbDrop3.cs" />
+    <Compile Remove="Migrations\20200308152537_InitialMigrationAfterDbDrop3.Designer.cs" />
+    <Compile Remove="Migrations\20200308152737_InitialMigrationAfterDbDrop3.cs" />
+    <Compile Remove="Migrations\20200308152737_InitialMigrationAfterDbDrop3.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

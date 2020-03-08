@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PersonalSafety.Migrations
 {
-    public partial class InitialMigrationAfterDbDrop : Migration
+    public partial class InitialMigrationAfterDbDrop2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -40,8 +40,19 @@ namespace PersonalSafety.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
+                    FullName = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Clients",
+                columns: table => new
+                {
+                    ClientId = table.Column<string>(nullable: false),
                     NationalId = table.Column<string>(nullable: false),
-                    FullName = table.Column<string>(nullable: false),
                     Birthday = table.Column<DateTime>(nullable: false),
                     BloodType = table.Column<int>(nullable: false),
                     MedicalHistoryNotes = table.Column<string>(nullable: true),
@@ -51,7 +62,19 @@ namespace PersonalSafety.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.PrimaryKey("PK_Clients", x => x.ClientId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Personnels",
+                columns: table => new
+                {
+                    PersonnelId = table.Column<string>(nullable: false),
+                    AuthorityType = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Personnels", x => x.PersonnelId);
                 });
 
             migrationBuilder.CreateTable(
@@ -257,12 +280,6 @@ namespace PersonalSafety.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_NationalId",
-                table: "AspNetUsers",
-                column: "NationalId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
@@ -280,6 +297,12 @@ namespace PersonalSafety.Migrations
                 column: "PhoneNumber",
                 unique: true,
                 filter: "[PhoneNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clients_NationalId",
+                table: "Clients",
+                column: "NationalId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmergencyContacts_UserId",
@@ -315,10 +338,16 @@ namespace PersonalSafety.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Clients");
+
+            migrationBuilder.DropTable(
                 name: "EmergencyContacts");
 
             migrationBuilder.DropTable(
                 name: "Events");
+
+            migrationBuilder.DropTable(
+                name: "Personnels");
 
             migrationBuilder.DropTable(
                 name: "SOSRequests");

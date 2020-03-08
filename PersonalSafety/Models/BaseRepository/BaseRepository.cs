@@ -16,11 +16,10 @@ namespace PersonalSafety.Models
             this.context = context;
         }
 
-        public T Add(T item)
+        public bool Add(T item)
         {
-            context.Add(item);
-            context.SaveChanges();
-            return item;
+            var result = context.Add(item);
+            return result.State == EntityState.Added;
         }
 
         public IEnumerable<T> GetAll()
@@ -28,28 +27,30 @@ namespace PersonalSafety.Models
             return context.Set<T>().AsNoTracking().AsEnumerable<T>();
         }
 
-        public void Remove(int id)
-        {
-            T item = GetById(id);
-            context.Set<T>().Remove(item);
-            context.SaveChanges();
-        }
-
-        public T GetById(int Id)
+        public T GetById(string Id)
         {
             return context.Set<T>().Find(Id);
         }
 
-        public T Update(T item)
-        {
-            context.Set<T>().Update(item);
-            context.SaveChangesAsync();
-            return item;
-        }
+        // Needs testing, commented to take caution.
+        //public void Remove(string id)
+        //{
+        //    T item = GetById(id);
+        //    context.Set<T>().Remove(item);
+        //    context.SaveChanges();
+        //}
 
-        public void Save()
+        // Needs testing, commented to take caution.
+        //public T Update(T item)
+        //{
+        //    context.Set<T>().Update(item);
+        //    context.SaveChangesAsync();
+        //    return item;
+        //}
+
+        public int Save()
         {
-            context.SaveChanges();
+            return context.SaveChanges();
         }
     }
 }

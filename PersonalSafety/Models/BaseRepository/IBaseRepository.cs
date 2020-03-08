@@ -7,11 +7,11 @@ namespace PersonalSafety.Models
 {
     public interface IBaseRepository<T>
     {
-        T GetById(int Id);
+        T GetById(string Id);
         IEnumerable<T> GetAll();
-        T Add(T item);
-        T Update(T item);
-        void Remove(int Id);
-        void Save();
+        bool Add(T item);
+        //T Update(T item);
+        //void Remove(string Id);
+        int Save();
     }
 }

@@ -5,11 +5,10 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Models.Enums
 {
-    public enum AuthorityTypesEnum
+    public enum UserTypesEnum
     {
-        Police = 1,
-        Ambulance = 2,
-        Firefighting = 3,
-        TowTruck = 4
+        Adminstrator,
+        Client,
+        Personnel
     }
 }

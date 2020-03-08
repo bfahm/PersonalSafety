@@ -19,46 +19,9 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IAccountBusiness _accountBusiness;
 
-        public AccountController(IAccountBusiness identityService)
+        public AccountController(IAccountBusiness accountBusiness)
         {
-            _accountBusiness = identityService;
-        }
-
-        /// <summary>
-        /// Create a new account to be able to access the system.
-        /// </summary>
-        /// <remarks>
-        /// ## Main Functionality
-        /// All the JSON object values **are** required and must follow these rules:
-        /// 
-        /// - **Email** : must be unique and not used before, additionally it must follow the correct email structure
-        /// - **Password** : must be complex, contain number, symbols, Capital and Small letters
-        /// - **NationalId** : must be exactly of 14 digits
-        /// - **PhoneNumber** : must be exactly of 11 digits
-        /// 
-        /// After a valid attempt, this function also **automatically** sends a verification email to be used in `/api/Account/ConfirmMail` directly.
-        /// **IMPORTANT:** User does not have access to any of the system's functionality till he actually verify his email.
-        /// 
-        /// ## Possible Result Codes in case of Errors:
-        /// #### **[-1]**: Invalid Request
-        /// - User exsists and has registered before
-        /// - Someone with the same National ID has registered before
-        /// - Someone with the same Phone Number has registered before
-        /// 
-        /// #### **[-2]**: Identity Error
-        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
-        /// </remarks>
-        [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
-        {
-            var authResponse = await _accountBusiness.RegisterAsync(request);
-
-            if (authResponse.HasErrors)
-            {
-                return BadRequest(authResponse);
-            }
-
-            return Ok(authResponse);
+            _accountBusiness = accountBusiness;
         }
 
         /// <summary>

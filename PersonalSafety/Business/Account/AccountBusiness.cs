@@ -20,33 +20,27 @@ namespace PersonalSafety.Business.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtSettings _jwtSettings;
         private readonly IOptions<AppSettings> _appSettings;
+        private readonly IClientRepository _clientRepository;
         private readonly IEmergencyContactRepository _emergencyContactRepository;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings, IEmergencyContactRepository emergencyContactRepository)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
             _appSettings = appSettings;
+            _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
         }
 
-        public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
+        public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request, int userType)
         {
             APIResponse<bool> response = new APIResponse<bool>();
+            Client client = null;
 
             ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(request.Email);
             if (exsistingUserFoundByEmail != null)
             {
                 response.Messages.Add("User with this email address already exsists.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
-            }
-
-            ApplicationUser exsistingUserFoundByNationalId = _userManager.Users.Where(u => u.NationalId == request.NationalId).FirstOrDefault();
-            if (exsistingUserFoundByNationalId != null)
-            {
-                response.Messages.Add("User with this National Id was registered before.");
                 response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 response.HasErrors = true;
                 return response;
@@ -61,20 +55,45 @@ namespace PersonalSafety.Business.Account
                 return response;
             }
 
+            //If the user currently registering is a client, check for his NationalId
+            if(userType == (int)UserTypesEnum.Client)
+            {
+                Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
+                if (exsistingUserFoundByNationalId != null)
+                {
+                    response.Messages.Add("User with this National Id was registered before.");
+                    response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                    response.HasErrors = true;
+                    return response;
+                }
+            }
+
             ApplicationUser newUser = new ApplicationUser
             {
                 Email = request.Email,
                 UserName = request.Email,
                 FullName = request.FullName,
-                NationalId = request.NationalId,
                 PhoneNumber = request.PhoneNumber
             };
 
-            var creationResult = await _userManager.CreateAsync(newUser, request.Password);
-
-            if (!creationResult.Succeeded)
+            //If the user currently registering is a client, Add the additional data to his table
+            if(userType == (int)UserTypesEnum.Client)
             {
-                response.Messages = creationResult.Errors.Select(e => e.Description).ToList();
+                client = new Client
+                {
+                    ClientId = newUser.Id,
+                    NationalId = request.NationalId
+                };
+
+                _clientRepository.Add(client);
+            }
+
+            //_clientRepository.Add(client) still needs saving, but will be done automatically in the below line.
+            var creationResultForAccount = await _userManager.CreateAsync(newUser, request.Password);
+
+            if (!creationResultForAccount.Succeeded)
+            {
+                response.Messages = creationResultForAccount.Errors.Select(e => e.Description).ToList();
                 response.Status = (int)APIResponseCodesEnum.IdentityError;
                 response.HasErrors = true;
                 return response;

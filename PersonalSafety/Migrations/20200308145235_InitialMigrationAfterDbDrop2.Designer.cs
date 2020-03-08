@@ -10,8 +10,8 @@ using PersonalSafety.Models;
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200228065704_InitialMigrationAfterDbDrop")]
-    partial class InitialMigrationAfterDbDrop
+    [Migration("20200308145235_InitialMigrationAfterDbDrop2")]
+    partial class InitialMigrationAfterDbDrop2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -160,24 +160,9 @@ namespace PersonalSafety.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Birthday")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("BloodType")
-                        .HasColumnType("int");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CurrentAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CurrentInvolvement")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentOngoingEvent")
-                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(256)")
@@ -195,13 +180,6 @@ namespace PersonalSafety.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("MedicalHistoryNotes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NationalId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasColumnType("nvarchar(256)")
@@ -232,9 +210,6 @@ namespace PersonalSafety.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NationalId")
-                        .IsUnique();
-
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
 
@@ -250,9 +225,45 @@ namespace PersonalSafety.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("PersonalSafety.Models.Client", b =>
+                {
+                    b.Property<string>("ClientId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Birthday")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("BloodType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CurrentAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CurrentInvolvement")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentOngoingEvent")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MedicalHistoryNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NationalId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ClientId");
+
+                    b.HasIndex("NationalId")
+                        .IsUnique();
+
+                    b.ToTable("Clients");
+                });
+
             modelBuilder.Entity("PersonalSafety.Models.EmergencyContact", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
@@ -307,6 +318,19 @@ namespace PersonalSafety.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("PersonalSafety.Models.Personnel", b =>
+                {
+                    b.Property<string>("PersonnelId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AuthorityType")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonnelId");
+
+                    b.ToTable("Personnels");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>

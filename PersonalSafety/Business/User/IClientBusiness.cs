@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Business.User
 {
-    public interface IUserBusiness
+    public interface IClientBusiness
     {
-        Task<APIResponse<CompleteProfileViewModel>> GetEmergencyInfo(string userId);
-        Task<APIResponse<bool>> CompleteProfileAsync(string userId, CompleteProfileViewModel request);
+        APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId);
+        APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request);
     }
 }

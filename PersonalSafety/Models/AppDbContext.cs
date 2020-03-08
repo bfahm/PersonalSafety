@@ -23,11 +23,11 @@ namespace PersonalSafety.Models
             //-----------------------------------
             //Make the following columns unique in the table [User]
             builder.Entity<ApplicationUser>()
-                   .HasIndex(u => u.NationalId)
+                   .HasIndex(u => u.PhoneNumber)
                    .IsUnique();
 
-            builder.Entity<ApplicationUser>()
-                   .HasIndex(u => u.PhoneNumber)
+            builder.Entity<Client>()
+                   .HasIndex(u => u.NationalId)
                    .IsUnique();
         }
 
@@ -35,5 +35,7 @@ namespace PersonalSafety.Models
         public DbSet<EmergencyContact> EmergencyContacts { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<SOSRequest> SOSRequests { get; set; }
+        public DbSet<Client> Clients { get; set; }
+        public DbSet<Personnel> Personnels { get; set; }
     }
 }
