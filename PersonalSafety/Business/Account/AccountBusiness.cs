@@ -234,8 +234,10 @@ namespace PersonalSafety.Business.Account
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.IdentityError;
                 response.Messages = result.Errors.Select(e => e.Description).ToList();
+                return response;
             }
 
+            response.Messages.Add("Success! Password was changed for " + user.Email);
             response.Result = true;
             return response;
         }
