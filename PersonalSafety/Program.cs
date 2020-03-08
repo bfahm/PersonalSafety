@@ -17,10 +17,36 @@ namespace PersonalSafety
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var isDevelopment = environment == Environments.Development;
+            if (isDevelopment)
+            {
+                CreateHostBuilderDevelopment(args).Build().Run();
+            }
+            else
+            {
+                CreateHostBuilderPublished(args).Build().Run();
+            }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+
+        public static IHostBuilder CreateHostBuilderPublished(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    logging.AddEventSourceLogger();
+                    // Enable NLog as one of the Logging Provider
+                    logging.AddNLog();
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+
+        public static IHostBuilder CreateHostBuilderDevelopment(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging((hostingContext, logging) =>
                 {

@@ -38,20 +38,33 @@
 
                   <ul class="list-group text-sans-serif">
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/SendConfirmationMail" target="_blank" style="text-decoration:none">Send Account Activation Mail</a>
+                          <div>
+                              <h4 style="color:#007bff">Client Endpoint</h4>
+                              <p>Client registration moved from endpoint <samp>/Account</samp> to endpoint <samp>/Client</samp> to accomodate for the new roles <samp>Personnel</samp> and <samp>Adminstrators</samp></p>
+                              <p>Also note that <samp>/User</samp> also moved to <samp>/Client</samp></p>
+                          </div>
+                          <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Client Endpoint</a>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/ForgotPasswordMail" target="_blank" style="text-decoration:none">Send Password Reset Mail</a>
-                          <span class="badge badge-success badge-pill">NEW!</span>
-                      </li>
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger" target="_blank" style="text-decoration:none">Account Endpoint Documentations</a>
+                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Adminstrator Endpoint</a>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">User Endpoint</a>
-                          <span class="badge badge-success badge-pill">NEW!</span>
+                          <span class="badge badge-dark badge-pill">REMOVED</span>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a href="~/SendConfirmationMail" target="_blank" style="text-decoration:none">Send Account Activation Mail</a>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a href="~/ForgotPasswordMail" target="_blank" style="text-decoration:none">Send Password Reset Mail</a>
+                      </li>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a href="~/swagger" target="_blank" style="text-decoration:none">Account Endpoint Documentations</a>
                       </li>
                   </ul>
 

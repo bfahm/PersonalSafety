@@ -30,6 +30,12 @@ namespace PersonalSafety.Controllers.API
         /// </summary>
         /// <remarks>
         /// ## Main Functionality
+        /// Creates new personnel account for different departments.
+        /// 
+        /// 
+        /// **IMPORTANT:** Only **ADMINS** are alowed to use this method and not other **personnel**.
+        /// 
+        /// 
         /// All the JSON object values **are** required and must follow these rules:
         /// 
         /// - **Email** : must be unique and not used before, additionally it must follow the correct email structure

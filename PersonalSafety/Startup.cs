@@ -165,8 +165,6 @@ namespace PersonalSafety
                 app.UseDeveloperExceptionPage();
             }
 
-            ApplicationDbInitializer.SeedUsers(userManager);
-
             app.UseRouting();
 
             app.UseCors(MyAllowSpecificOrigins);
@@ -174,6 +172,7 @@ namespace PersonalSafety
             app.UseStaticFiles();
 
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
+            ApplicationDbInitializer.SeedUsers(userManager);
 
             app.UseSwagger();
             app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));
