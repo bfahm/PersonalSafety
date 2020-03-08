@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonalSafety.Models.Enums;
 using System;
@@ -29,6 +30,11 @@ namespace PersonalSafety.Models
             builder.Entity<Client>()
                    .HasIndex(u => u.NationalId)
                    .IsUnique();
+
+            //-----------------------------------
+            //Seed database initially with basic roles
+            builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "Admin".ToUpper() });
+            builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Personnel", NormalizedName = "Personnel".ToUpper() });
         }
 
         public DbSet<ApplicationUser> UserInfos { get; set; }

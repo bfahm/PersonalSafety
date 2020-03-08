@@ -24,6 +24,7 @@ using System.IO;
 using PersonalSafety.Business.Account;
 using System.Threading;
 using SignalRChatServer;
+using PersonalSafety.Installers;
 
 namespace PersonalSafety
 {
@@ -162,12 +163,14 @@ namespace PersonalSafety
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, UserManager<ApplicationUser> userManager)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            ApplicationDbInitializer.SeedUsers(userManager);
 
             app.UseRouting();
 

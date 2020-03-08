@@ -15,7 +15,7 @@ namespace PersonalSafety.Controllers.API
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminBusiness _adminBusiness;

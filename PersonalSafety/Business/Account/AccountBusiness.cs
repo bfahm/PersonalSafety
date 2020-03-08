@@ -67,11 +67,14 @@ namespace PersonalSafety.Business.Account
                 response.Messages = new List<string> { "This email was not confirmed, please activate your email first by tapping the link provided in the email we sent you then proceed." };
                 return response;
             }
+
             
-            response.Result = GenerateAuthenticationResult(user);
+            response.Result = await GenerateAuthenticationResult(user);
             response.Status = 0;
             response.HasErrors = false;
-            response.Messages = null;
+            response.Messages = new List<string>();
+            response.Messages.Add("Logged in, displaying list of roles current user have:");
+            response.Messages.AddRange(await _userManager.GetRolesAsync(user));
 
             return response;
         }
@@ -271,26 +274,34 @@ namespace PersonalSafety.Business.Account
             }
         }
 
-        private string GenerateAuthenticationResult(ApplicationUser user)
+        private async Task<string> GenerateAuthenticationResult(ApplicationUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim("id", user.Id)
+            };
+
+            // Add the fetched roles to the list of claims in the JWToken
+            claims.AddRange(roles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 // Things to be included and encoded in the token
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim("id", user.Id)
-                }),
+                Subject = new ClaimsIdentity(claims),
                 // Token will expire 2 hours from which it was created
                 Expires = DateTime.UtcNow.AddHours(_jwtSettings.JwtExpireInHours),
                 //
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
+            
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);

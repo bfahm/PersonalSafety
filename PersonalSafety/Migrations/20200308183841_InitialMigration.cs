@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PersonalSafety.Migrations
 {
-    public partial class InitialMigrationAfterDbDrop2 : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -45,36 +45,6 @@ namespace PersonalSafety.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Clients",
-                columns: table => new
-                {
-                    ClientId = table.Column<string>(nullable: false),
-                    NationalId = table.Column<string>(nullable: false),
-                    Birthday = table.Column<DateTime>(nullable: false),
-                    BloodType = table.Column<int>(nullable: false),
-                    MedicalHistoryNotes = table.Column<string>(nullable: true),
-                    CurrentAddress = table.Column<string>(nullable: true),
-                    CurrentOngoingEvent = table.Column<int>(nullable: false),
-                    CurrentInvolvement = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Clients", x => x.ClientId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Personnels",
-                columns: table => new
-                {
-                    PersonnelId = table.Column<string>(nullable: false),
-                    AuthorityType = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Personnels", x => x.PersonnelId);
                 });
 
             migrationBuilder.CreateTable(
@@ -184,6 +154,30 @@ namespace PersonalSafety.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Clients",
+                columns: table => new
+                {
+                    ClientId = table.Column<string>(nullable: false),
+                    NationalId = table.Column<string>(nullable: false),
+                    Birthday = table.Column<DateTime>(nullable: false),
+                    BloodType = table.Column<int>(nullable: false),
+                    MedicalHistoryNotes = table.Column<string>(nullable: true),
+                    CurrentAddress = table.Column<string>(nullable: true),
+                    CurrentOngoingEvent = table.Column<int>(nullable: false),
+                    CurrentInvolvement = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clients", x => x.ClientId);
+                    table.ForeignKey(
+                        name: "FK_Clients_AspNetUsers_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmergencyContacts",
                 columns: table => new
                 {
@@ -230,6 +224,24 @@ namespace PersonalSafety.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Personnels",
+                columns: table => new
+                {
+                    PersonnelId = table.Column<string>(nullable: false),
+                    AuthorityType = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Personnels", x => x.PersonnelId);
+                    table.ForeignKey(
+                        name: "FK_Personnels_AspNetUsers_PersonnelId",
+                        column: x => x.PersonnelId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SOSRequests",
                 columns: table => new
                 {
@@ -251,6 +263,16 @@ namespace PersonalSafety.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[] { "2e24b5ef-c59f-407d-ba1b-574afd031716", "5698c263-36d5-42da-98a0-e9a128661cfc", "Admin", "ADMIN" });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[] { "c61803b8-6bbd-42bd-9161-8f5620aaba90", "9adf8661-0033-43de-9767-bb8b75230884", "Personnel", "PERSONNEL" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

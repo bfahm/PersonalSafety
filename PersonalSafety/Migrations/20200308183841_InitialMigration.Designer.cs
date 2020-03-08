@@ -10,8 +10,8 @@ using PersonalSafety.Models;
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200308145235_InitialMigrationAfterDbDrop2")]
-    partial class InitialMigrationAfterDbDrop2
+    [Migration("20200308183841_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,6 +46,22 @@ namespace PersonalSafety.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "2e24b5ef-c59f-407d-ba1b-574afd031716",
+                            ConcurrencyStamp = "5698c263-36d5-42da-98a0-e9a128661cfc",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "c61803b8-6bbd-42bd-9161-8f5620aaba90",
+                            ConcurrencyStamp = "9adf8661-0033-43de-9767-bb8b75230884",
+                            Name = "Personnel",
+                            NormalizedName = "PERSONNEL"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -413,6 +429,15 @@ namespace PersonalSafety.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PersonalSafety.Models.Client", b =>
+                {
+                    b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("PersonalSafety.Models.EmergencyContact", b =>
                 {
                     b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
@@ -425,6 +450,15 @@ namespace PersonalSafety.Migrations
                     b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("PersonalSafety.Models.Personnel", b =>
+                {
+                    b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("PersonnelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>
