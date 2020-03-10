@@ -20,16 +20,14 @@ namespace PersonalSafety.Business
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtSettings _jwtSettings;
         private readonly IOptions<AppSettings> _appSettings;
-        private readonly IClientRepository _clientRepository;
-        private readonly IEmergencyContactRepository _emergencyContactRepository;
+        private readonly IPersonnelRepository _personnelRepository;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IPersonnelRepository personnelRepository)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
             _appSettings = appSettings;
-            _clientRepository = clientRepository;
-            _emergencyContactRepository = emergencyContactRepository;
+            _personnelRepository = personnelRepository;
         }
 
         public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings)
@@ -73,8 +71,25 @@ namespace PersonalSafety.Business
             response.Status = 0;
             response.HasErrors = false;
             response.Messages = new List<string>();
-            response.Messages.Add("Logged in, displaying list of roles current user have:");
-            response.Messages.AddRange(await _userManager.GetRolesAsync(user));
+            response.Messages.Add("Success! You are now logged in.");
+
+            IEnumerable<string> roles = await _userManager.GetRolesAsync(user);
+            
+            if (roles.Count() != 0)
+            {
+                response.Messages.Add("Displaying list of roles current user have:");
+                response.Messages.AddRange(roles);
+
+
+                if (roles.Where(r => r.Contains("Personnel")).Any() != false)
+                {
+                    response.Messages.Add("It appears that you are a working entity, displaying your authority number and value:");
+                    int authorityTypeInt = _personnelRepository.GetPersonnelAuthorityTypeInt(user.Id);
+                    string authorityTypeString = _personnelRepository.GetPersonnelAuthorityTypeString(user.Id);
+                    response.Messages.Add(authorityTypeInt.ToString());
+                    response.Messages.Add(authorityTypeString);
+                }
+            }
 
             return response;
         }

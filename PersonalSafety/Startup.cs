@@ -157,7 +157,7 @@ namespace PersonalSafety
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, UserManager<ApplicationUser> userManager)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository)
         {
             if (env.IsDevelopment())
             {
@@ -171,7 +171,9 @@ namespace PersonalSafety
             app.UseStaticFiles();
 
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
-            ApplicationDbInitializer.SeedUsers(userManager);
+            
+            ApplicationDbInitializer databaseInitializer = new ApplicationDbInitializer(userManager, clientRepository, personnelRepository);
+            databaseInitializer.SeedUsers();
 
             app.UseSwagger();
             app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));

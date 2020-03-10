@@ -64,8 +64,9 @@ namespace PersonalSafety.Business
 
             //_personnelRepository.Add(client) still needs saving, but will be done automatically in the below line.
             var creationResultForAccount = await _userManager.CreateAsync(newUser, request.Password);
+            var addToRoleResult = await _userManager.AddToRoleAsync(newUser, "Personnel");
 
-            if (!creationResultForAccount.Succeeded)
+            if (!creationResultForAccount.Succeeded || !addToRoleResult.Succeeded)
             {
                 response.Messages = creationResultForAccount.Errors.Select(e => e.Description).ToList();
                 response.Status = (int)APIResponseCodesEnum.IdentityError;

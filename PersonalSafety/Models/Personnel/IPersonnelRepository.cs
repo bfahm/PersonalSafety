@@ -7,6 +7,7 @@ namespace PersonalSafety.Models
 {
     public interface IPersonnelRepository : IBaseRepository<Personnel>
     {
-        
+        int GetPersonnelAuthorityTypeInt(string userId);
+        string GetPersonnelAuthorityTypeString(string userId);
     }
 }

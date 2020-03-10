@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PersonalSafety.Models;
+using PersonalSafety.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,27 +8,81 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Installers
 {
-    public static class ApplicationDbInitializer
+    public class ApplicationDbInitializer
     {
-        public static void SeedUsers(UserManager<ApplicationUser> userManager)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IClientRepository _clientRepository;
+        private readonly IPersonnelRepository _personnelRepository;
+
+        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository)
         {
-            if (userManager.FindByEmailAsync("admin@admin.com").Result == null)
+            _userManager = userManager;
+            _clientRepository = clientRepository;
+            _personnelRepository = personnelRepository;
+        }
+
+        public void SeedUsers()
+        {
+            ApplicationUser adminUser = new ApplicationUser
             {
-                ApplicationUser user = new ApplicationUser
-                {
-                    UserName = "admin@admin.com",
-                    Email = "admin@admin.com",
-                    FullName = "Adminstrator",
-                    EmailConfirmed = true
-                };
+                UserName = "admin@admin.com",
+                Email = "admin@admin.com",
+                FullName = "Adminstrator",
+                EmailConfirmed = true
+            };
 
-                IdentityResult result = userManager.CreateAsync(user, "Admin@123").Result;
+            CreateUserAndSetupRole(adminUser, "Admin@123", "Admin");
 
-                if (result.Succeeded)
+            ApplicationUser testUser = new ApplicationUser
+            {
+                UserName = "test@test.com",
+                Email = "test@test.com",
+                FullName = "Test User",
+                EmailConfirmed = true,
+                PhoneNumber = "00000000000"
+            };
+
+            CreateUserAndSetupRole(testUser, "Test@123", null);
+            Client client = new Client
+            {
+                ClientId = testUser.Id,
+                NationalId = "00000000000000"
+            };
+
+            _clientRepository.Add(client);
+            _clientRepository.Save();
+
+            ApplicationUser personnelUser = new ApplicationUser
+            {
+                UserName = "personnel@personnel.com",
+                Email = "personnel@personnel.com",
+                FullName = "Personnel Police",
+                EmailConfirmed = true
+            };
+
+            CreateUserAndSetupRole(personnelUser, "Test@123", "Personnel");
+            Personnel personnel = new Personnel
+            {
+                PersonnelId = personnelUser.Id,
+                AuthorityType = (int)AuthorityTypesEnum.Police
+            };
+
+            _personnelRepository.Add(personnel);
+            _personnelRepository.Save();
+        }
+
+        private void CreateUserAndSetupRole(ApplicationUser user, string password, string role)
+        {
+            if (_userManager.FindByEmailAsync(user.Email).Result == null)
+            {
+                IdentityResult result = _userManager.CreateAsync(user, password).Result;
+
+                if (result.Succeeded && !string.IsNullOrEmpty(role))
                 {
-                    userManager.AddToRoleAsync(user, "Admin").Wait();
+                    _userManager.AddToRoleAsync(user, role).Wait();
                 }
             }
+
         }
     }
 }
