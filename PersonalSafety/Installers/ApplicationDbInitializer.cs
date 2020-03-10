@@ -48,10 +48,13 @@ namespace PersonalSafety.Installers
                 ClientId = testUser.Id,
                 NationalId = "00000000000000"
             };
-
-            _clientRepository.Add(client);
-            _clientRepository.Save();
-
+            
+            if (_clientRepository.GetAll().Count() == 0)
+            {
+                _clientRepository.Add(client);
+                _clientRepository.Save();
+            }
+            
             ApplicationUser personnelUser = new ApplicationUser
             {
                 UserName = "personnel@personnel.com",
@@ -67,8 +70,11 @@ namespace PersonalSafety.Installers
                 AuthorityType = (int)AuthorityTypesEnum.Police
             };
 
-            _personnelRepository.Add(personnel);
-            _personnelRepository.Save();
+            if (_personnelRepository.GetAll().Count() == 0)
+            {
+                _personnelRepository.Add(personnel);
+                _personnelRepository.Save();
+            }
         }
 
         private void CreateUserAndSetupRole(ApplicationUser user, string password, string role)

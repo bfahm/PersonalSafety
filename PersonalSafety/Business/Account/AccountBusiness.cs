@@ -83,10 +83,8 @@ namespace PersonalSafety.Business
 
                 if (roles.Where(r => r.Contains("Personnel")).Any() != false)
                 {
-                    response.Messages.Add("It appears that you are a working entity, displaying your authority number and value:");
-                    int authorityTypeInt = _personnelRepository.GetPersonnelAuthorityTypeInt(user.Id);
+                    response.Messages.Add("It appears that you are a working entity, displaying your authority type:");
                     string authorityTypeString = _personnelRepository.GetPersonnelAuthorityTypeString(user.Id);
-                    response.Messages.Add(authorityTypeInt.ToString());
                     response.Messages.Add(authorityTypeString);
                 }
             }
