@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Business.Account;
+using PersonalSafety.Business;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Models.ViewModels.Admin;
 using System;
 using System.Collections.Generic;
 using System.Linq;

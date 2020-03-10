@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
-using PersonalSafety.Business.Account;
 
 namespace PersonalSafety.Controllers.Views
 {

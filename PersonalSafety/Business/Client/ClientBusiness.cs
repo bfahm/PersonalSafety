@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Business.Account;
+using PersonalSafety.Business;
+
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Models.Enums;

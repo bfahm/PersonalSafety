@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
-using PersonalSafety.Business.Account;
-using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Models.ViewModels.Admin;
 
 namespace PersonalSafety.Controllers.API
 {

@@ -13,7 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Business.Account
+namespace PersonalSafety.Business
 {
     public class AccountBusiness : IAccountBusiness
     {

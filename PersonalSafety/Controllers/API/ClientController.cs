@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
-using PersonalSafety.Business.Account;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 
