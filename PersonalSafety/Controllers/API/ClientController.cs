@@ -101,6 +101,7 @@ namespace PersonalSafety.Controllers.API
         ///     -  B = 3
         ///     -  AB = 4
         /// - Medical Notes (and history)
+        /// - User Birthday in format similar to: `yyyy-mm-dd`
         /// 
         /// #### **IMPORTANT:** These fields are not mandatory, and not providing any values for them will result in the fields not updated. So users can only provide data to which they want to update.
         /// 
@@ -127,7 +128,29 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
-        [HttpPut]
+        /// <summary>
+        /// This method sends an SOS request for the current user.
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Main Functionality
+        /// User should be login so critical information about him could be assigned to the sent request. This action sends additional dynamic info about the user:
+        /// - Authority Type:
+        ///     - Police : 1
+        ///     - Ambulance : 2
+        ///     - Firefighting : 3
+        ///     - TowTruck : 4
+        /// - Request Location (Longitude and Latitude)
+        /// 
+        /// #### **IMPORTANT:** These fields are not mandatory, and not providing any of the values will result in the request not being completed
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-1]**: InvalidRequest
+        /// User failed to provide complete information.
+        /// #### **[401]**: Unauthorized
+        /// Could happen if the provided token in the header has expired or is not valid.
+        /// </remarks>
+        [HttpPost]
         [Route("SOS/[action]")]
         public IActionResult SendSOSRequest([FromBody] SendSOSRequestViewModel request)
         {

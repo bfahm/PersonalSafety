@@ -8,5 +8,6 @@ namespace PersonalSafety.Models
     public interface ISOSRequestRepository : IBaseRepository<SOSRequest>
     {
         IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int state);
+        IEnumerable<SOSRequest> GetRelevantRequests(int authorityType);
     }
 }

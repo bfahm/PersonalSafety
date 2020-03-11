@@ -25,15 +25,17 @@ namespace PersonalSafety.Business
             _userManager = userManager;
         }
 
-        public async Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int requestState)
+        public async Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState)
         {
             // Get current personnel authority type
             int authorityTypeInt = _personnelRepository.GetPersonnelAuthorityTypeInt(userId);
 
             // Find SOS Requests related to the request
-            IEnumerable<SOSRequest> requests = _sosRequestRepository.GetRelevantRequests(authorityTypeInt, requestState);
+            
+            IEnumerable<SOSRequest> requests = (requestState != null) ? _sosRequestRepository.GetRelevantRequests(authorityTypeInt, (int)requestState)
+                                                : _sosRequestRepository.GetRelevantRequests(authorityTypeInt);
 
-            List<GetSOSRequestViewModel> responseViewModel = new List<GetSOSRequestViewModel>();
+            List <GetSOSRequestViewModel> responseViewModel = new List<GetSOSRequestViewModel>();
 
             foreach(var request in requests)
             {
@@ -45,7 +47,8 @@ namespace PersonalSafety.Business
                     UserPhoneNumber = requestOwner_Account.PhoneNumber,
                     UserNationalId = requestOwner_Client.NationalId,
                     UserAge = DateTime.Today.Year - requestOwner_Client.Birthday.Year,
-                    UserBloodType = requestOwner_Client.BloodType,
+                    UserBloodTypeId = requestOwner_Client.BloodType,
+                    UserBloodTypeName = ((BloodTypesEnum)requestOwner_Client.BloodType).ToString(),
                     UserMedicalHistoryNotes = requestOwner_Client.MedicalHistoryNotes,
                     UserSavedAddress = requestOwner_Client.CurrentAddress,
 

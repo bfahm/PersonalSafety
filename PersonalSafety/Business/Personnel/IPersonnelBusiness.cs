@@ -10,6 +10,6 @@ namespace PersonalSafety.Business
 {
     public interface IPersonnelBusiness
     {
-        Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int requestState);
+        Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState);
     }
 }
