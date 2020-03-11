@@ -25,6 +25,9 @@ namespace PersonalSafety.Models
         public bool IsValidated { get; set; }
         public bool IsOnGoing { get; set; }
 
+        public DateTime CreationDate { get; set; } = DateTime.Now;
+        public DateTime LastModified { get; set; } = DateTime.Now;
+
         public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

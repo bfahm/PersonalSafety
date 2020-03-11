@@ -17,13 +17,13 @@ namespace PersonalSafety.Models
         // Get all requests for the current personnel
         public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType)
         {
-            return context.SOSRequests.Where(r => r.AuthorityType == authorityType);
+           return context.SOSRequests.Where(r => r.AuthorityType == authorityType).OrderBy(r => r.CreationDate).OrderBy(r => r.State); ;
         }
 
         // Filter them depending on their state
         public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int state)
         {
-            return context.SOSRequests.Where(r => r.AuthorityType == authorityType).Where(r => r.State == state);
+           return context.SOSRequests.Where(r => r.AuthorityType == authorityType).Where(r => r.State == state).OrderBy(r => r.CreationDate).OrderBy(r => r.State); ;
         }
     }
 }

@@ -55,7 +55,9 @@ namespace PersonalSafety.Business
                     RequestStateId = request.State,
                     RequestStateName = ((StatesTypesEnum)request.State).ToString(),
                     RequestLocationLatitude = request.Latitude,
-                    RequestLocationLongitude = request.Longitude
+                    RequestLocationLongitude = request.Longitude,
+                    RequestCreationDate = request.CreationDate,
+                    RequestLastModified = request.LastModified
                 });
             }
 

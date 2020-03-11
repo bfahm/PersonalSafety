@@ -41,6 +41,8 @@ namespace PersonalSafety.Controllers.API
         /// - RequestLocationLongitude
         /// - RequestLocationLatitude
         /// 
+        /// **IMPORTANT NOTICE:** all requests are ordered by their state (Pending > Accepted > Solved > Canceled) and then by their creation date.
+        /// 
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
@@ -61,6 +63,8 @@ namespace PersonalSafety.Controllers.API
         /// # **`AuthenticatedRequest`**
         /// 
         /// ### *For returned list of object properties, see /GetAllAuthorityRequests documentation*
+        /// 
+        /// **IMPORTANT NOTICE:** all requests are ordered by their creation date.
         /// 
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
@@ -83,6 +87,8 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// ### *For returned list of object properties, see /GetAllAuthorityRequests documentation*
         /// 
+        /// **IMPORTANT NOTICE:** all requests are ordered by their creation date.
+        /// 
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
@@ -104,6 +110,8 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// ### *For returned list of object properties, see /GetAllAuthorityRequests documentation*
         /// 
+        /// **IMPORTANT NOTICE:** all requests are ordered by their creation date.
+        /// 
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
@@ -124,6 +132,8 @@ namespace PersonalSafety.Controllers.API
         /// # **`AuthenticatedRequest`**
         /// 
         /// ### *For returned list of object properties, see /GetAllAuthorityRequests documentation*
+        /// 
+        /// **IMPORTANT NOTICE:** all requests are ordered by their creation date.
         /// 
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***

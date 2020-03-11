@@ -19,9 +19,11 @@ namespace PersonalSafety.Models
         public int State { get; set; } = (int)StatesTypesEnum.Pending;
         public int AuthorityType { get; set; }
 
-        
         public double Longitude { get; set; }
         public double Latitude { get; set; }
+
+        public DateTime CreationDate { get; set; } = DateTime.Now;
+        public DateTime LastModified { get; set; } = DateTime.Now;
 
         public virtual ApplicationUser ApplicationUser { get; set; }
     }

@@ -22,5 +22,7 @@ namespace PersonalSafety.Models.ViewModels
         public string RequestStateName { get; set; }
         public double RequestLocationLongitude { get; set; }
         public double RequestLocationLatitude { get; set; }
+        public DateTime RequestCreationDate { get; set; }
+        public DateTime RequestLastModified { get; set; }
     }
 }
