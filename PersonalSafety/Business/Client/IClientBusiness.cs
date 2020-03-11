@@ -10,8 +10,12 @@ namespace PersonalSafety.Business
 {
     public interface IClientBusiness
     {
+        // /Registration
         Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
         APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId);
         APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request);
+
+        // /SOSRequest
+        APIResponse<bool> SendSOSRequest(string userId, SendSOSRequestViewModel request);
     }
 }

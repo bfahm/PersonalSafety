@@ -11,7 +11,7 @@ namespace PersonalSafety.Models.ViewModels
         public string UserEmail { get; set; }
         public string UserPhoneNumber { get; set; }
         public string UserNationalId { get; set; }
-        public DateTime UserBirthday { get; set; }
+        public int UserAge { get; set; }
         public int UserBloodType { get; set; }
         public string UserMedicalHistoryNotes { get; set; }
         public string UserSavedAddress { get; set; }

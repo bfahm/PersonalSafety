@@ -11,7 +11,7 @@ using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class ClientController : ControllerBase
@@ -52,6 +52,7 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [AllowAnonymous]
         [HttpPost]
+        [Route("Registration/[action]")]
         public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
             var authResponse = await _clientBusiness.RegisterAsync(request);
@@ -76,6 +77,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
+        [Route("Registration/[action]")]
         public IActionResult GetEmergencyInfo()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -114,12 +116,25 @@ namespace PersonalSafety.Controllers.API
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
         [HttpPut]
+        [Route("Registration/[action]")]
         public IActionResult CompleteProfile([FromBody] CompleteProfileViewModel request)
         {
             //? means : If value is not null, retrieve it
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
             var response = _clientBusiness.CompleteProfile(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("SOS/[action]")]
+        public IActionResult SendSOSRequest([FromBody] SendSOSRequestViewModel request)
+        {
+            //? means : If value is not null, retrieve it
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = _clientBusiness.SendSOSRequest(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }

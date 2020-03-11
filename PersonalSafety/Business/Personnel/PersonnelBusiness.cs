@@ -44,7 +44,7 @@ namespace PersonalSafety.Business
                     UserEmail = requestOwner_Account.Email,
                     UserPhoneNumber = requestOwner_Account.PhoneNumber,
                     UserNationalId = requestOwner_Client.NationalId,
-                    UserBirthday = requestOwner_Client.Birthday,
+                    UserAge = DateTime.Today.Year - requestOwner_Client.Birthday.Year,
                     UserBloodType = requestOwner_Client.BloodType,
                     UserMedicalHistoryNotes = requestOwner_Client.MedicalHistoryNotes,
                     UserSavedAddress = requestOwner_Client.CurrentAddress,

@@ -19,13 +19,15 @@ namespace PersonalSafety.Business
         private readonly IClientRepository _clientRepository;
         private readonly IEmergencyContactRepository _emergencyContactRepository;
         private readonly IOptions<AppSettings> _appSettings;
+        private readonly ISOSRequestRepository _sosRequestRepository;
 
-        public ClientBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository)
+        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IOptions<AppSettings> appSettings, ISOSRequestRepository sosRequestRepository)
         {
             _userManager = userManager;
-            _appSettings = appSettings;
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
+            _appSettings = appSettings;
+            _sosRequestRepository = sosRequestRepository;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -141,9 +143,10 @@ namespace PersonalSafety.Business
             user.CurrentAddress = string.IsNullOrEmpty(request.CurrentAddress) ? user.CurrentAddress : request.CurrentAddress;
             user.MedicalHistoryNotes = string.IsNullOrEmpty(request.MedicalHistoryNotes) ? user.MedicalHistoryNotes : request.MedicalHistoryNotes;
             user.BloodType = (request.BloodType != 0) ? request.BloodType : user.BloodType;
+            user.Birthday = (request.Birthday != null) ? request.Birthday : user.Birthday;
             //_clientRepository.Save() is NOT needed since EF already updates the values inline
 
-            
+
             // Delete functionality implemented in the same hybrid function by simply not providing values
             // Updaet functionality implemented in the same hybrid function by simply providing new values after deleting old ones
             _emergencyContactRepository.DeleteForUser(userId);
@@ -163,10 +166,46 @@ namespace PersonalSafety.Business
             }
 
 
-            int addedContactsCount = request.EmergencyContacts?.Count ?? 0;
-            response.Result = true;
-            response.Messages.Add("Added " + addedContactsCount + " new emergency contatcts to currently logged in user");
+           response.Result = true;
+            response.Messages.Add("Success! Saved your info.");
             response.Messages.Add("Current total emergency contacts: " + _emergencyContactRepository.GetByUserId(userId).Count());
+            return response;
+        }
+
+        public APIResponse<bool> SendSOSRequest(string userId, SendSOSRequestViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            Client user = _clientRepository.GetById(userId);
+            if (user == null)
+            {
+                response.Messages.Add("User not authorized.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
+                return response;
+            }
+
+            if(!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
+            {
+                response.Messages.Add("You provided a wrong department type, please try again.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            _sosRequestRepository.Add(new SOSRequest 
+            {
+                UserId = userId,
+                AuthorityType = request.AuthorityType,
+                Longitude = request.Longitude,
+                Latitude = request.Latitude
+            });
+
+            _sosRequestRepository.Save();
+
+            response.Result = true;
+            response.Messages.Add("Your request was sent successfully.");
+            
             return response;
         }
     }
