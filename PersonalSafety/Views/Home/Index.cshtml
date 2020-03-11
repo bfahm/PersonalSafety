@@ -37,34 +37,65 @@
 
 
                   <ul class="list-group text-sans-serif">
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <h4 style="color:#007bff">Client Endpoint</h4>
-                              <p>Client registration moved from endpoint <samp>/Account</samp> to endpoint <samp>/Client</samp> to accomodate for the new roles <samp>Personnel</samp> and <samp>Adminstrators</samp></p>
-                              <p>Also note that <samp>/User</samp> also moved to <samp>/Client</samp></p>
+                              <a href="~/swagger" target="_blank" style="text-decoration:none">Client Endpoint</a>
+                              <p>Client registration moved from endpoint <samp>/Client</samp> to endpoint <samp>/Client/Registration</samp> to accomodate for the new actions under <samp>/Client/SOS</samp></p>
                           </div>
                           <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
                       </li>
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Client Endpoint</a>
+                          <div>
+                              <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">SOS Requests</a>
+                              <p>Clients can now send SOS Requests via the <samp>/Client/SOS</samp> endpoint</p>
+                          </div>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Personnel Endpoint</a>
+                          <span class="badge badge-success badge-pill">NEW!</span>
+                      </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <div>
+                              <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Complete Profile</a>
+                              <p>Clients can now update their birthday to be used in retrieving their SOS Requests</p>
+                          </div>
+                          <span class="badge badge-success badge-pill">NEW!</span>
+                      </li>
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Adminstrator Endpoint</a>
-                          <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">User Endpoint</a>
-                          <span class="badge badge-dark badge-pill">REMOVED</span>
+                          <a href="~/swagger" target="_blank" style="text-decoration:none">Account Endpoint Documentations</a>
                       </li>
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <a href="~/SendConfirmationMail" target="_blank" style="text-decoration:none">Send Account Activation Mail</a>
                       </li>
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <a href="~/ForgotPasswordMail" target="_blank" style="text-decoration:none">Send Password Reset Mail</a>
                       </li>
+
+
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger" target="_blank" style="text-decoration:none">Account Endpoint Documentations</a>
+                          <div>
+                              <a style="text-decoration:none; color:darkgrey"><strike>Client Endpoint</strike></a>
+                              <p>Client registration moved from endpoint <samp>/Account</samp> to endpoint <samp>/Client</samp> to accomodate for the new roles <samp>Personnel</samp> and <samp>Adminstrators</samp></p>
+                              <p>Also note that <samp>/User</samp> also moved to <samp>/Client</samp></p>
+                          </div>
+                          <span class="badge badge-light badge-pill">BREAKING CHANGES</span>
+                      </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a style="text-decoration:none; color:darkgrey"><strike>User Endpoint</strike></a>
+                          <span class="badge badge-light badge-pill">REMOVED</span>
                       </li>
                   </ul>
 

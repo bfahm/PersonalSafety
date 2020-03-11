@@ -15,14 +15,11 @@ namespace PersonalSafety
 {
     public class Program
     {
+        private static string environment = "Production";
         public static void Main(string[] args)
         {
             // Get current working environment
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
-            //Add environment variable to the array of args
-            Array.Resize(ref args, args.Length + 1);
-            args[args.Length - 1] = environment;
+            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
             CreateHostBuilder(args).Build().Run();
         }
@@ -40,9 +37,9 @@ namespace PersonalSafety
                             logging.AddNLog();
                         });
 
-            bool isDevelopment = Array.FindAll(args, s => s.Equals(Environments.Development)).Length > 0;
-            bool isProduction = Array.FindAll(args, s => s.Equals(Environments.Production)).Length > 0;
-
+            bool isDevelopment = environment == Environments.Development;
+            bool isProduction = environment == Environments.Production;
+            
             if (isDevelopment)
             {
                 hostBuilder.ConfigureWebHostDefaults(webBuilder =>
