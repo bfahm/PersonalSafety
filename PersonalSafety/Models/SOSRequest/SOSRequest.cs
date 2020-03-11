@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PersonalSafety.Models.Enums;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +16,12 @@ namespace PersonalSafety.Models
         [ForeignKey("ApplicationUser")]
         public string UserId { get; set; }
 
-        public int State { get; set; }
+        public int State { get; set; } = (int)StatesTypesEnum.Pending;
         public int AuthorityType { get; set; }
 
+        [Required]
         public double Longitude { get; set; }
+        [Required]
         public double Latitude { get; set; }
 
         public virtual ApplicationUser ApplicationUser { get; set; }

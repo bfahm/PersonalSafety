@@ -104,11 +104,13 @@ namespace PersonalSafety
             services.AddScoped<IAccountBusiness, AccountBusiness>();
             services.AddScoped<IClientBusiness, ClientBusiness>();
             services.AddScoped<IAdminBusiness, AdminBusiness>();
+            services.AddScoped<IPersonnelBusiness, PersonnelBusiness>();
 
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();
             services.AddScoped<IPersonnelRepository, PersonnelRepository>();
+            services.AddScoped<ISOSRequestRepository, SOSRequestRepository>();
 
             // Setting up swagger generator
             services.AddSwaggerGen(sw => 
