@@ -139,13 +139,14 @@ namespace PersonalSafety.Controllers.API
         /// <remarks>
         /// # **`AuthenticatedRequest`**
         /// ## Main Functionality
-        /// User should be login so critical information about him could be assigned to the sent request. This action sends additional dynamic info about the user:
+        /// User should be logged in so critical information about him could be assigned to the sent request. This action sends additional dynamic info about the user:
         /// - Authority Type:
         ///     - Police : 1
         ///     - Ambulance : 2
         ///     - Firefighting : 3
         ///     - TowTruck : 4
         /// - Request Location (Longitude and Latitude)
+        /// - **(IMPORTANT)** ConnectionId: is an important string for tracking down the request evolution, new requests won't be sent unless a valid connection is established first with the server's SignalR endpoint.
         /// 
         /// #### **IMPORTANT:** These fields are not mandatory, and not providing any of the values will result in the request not being completed
         /// 
@@ -167,6 +168,18 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// This method cancels an SOS request via its Id.
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Main Functionality
+        /// User must only provide the Id of the request he/she wants to mark it as canceled, additionally **if** his connection is still maintained, the connectionId will be removed from the tracker.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[404]**: Notfound
+        /// Could happen if the provided Id does not match an exsisting request.
+        /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
         public IActionResult CancelSOSRequest([FromQuery] int requestId)

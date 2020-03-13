@@ -37,6 +37,7 @@ namespace PersonalSafety.Controllers.API
         /// # **`AuthenticatedRequest`**
         /// 
         /// ### Result is a list of objects that will have the following properties:
+        /// - RequestId
         /// - UserEmail
         /// - UserPhoneNumber
         /// - UserNationalId
