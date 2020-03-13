@@ -24,6 +24,8 @@ using System.IO;
 using System.Threading;
 using SignalRChatServer;
 using PersonalSafety.Installers;
+using PersonalSafety.Hubs;
+using SignalRChatServer.Hubs;
 
 namespace PersonalSafety
 {
@@ -49,6 +51,12 @@ namespace PersonalSafety
                 builder =>
                 {
                     builder.WithOrigins("http://127.0.0.1:5500")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                //.AllowAnyOrigin();
+                                .AllowCredentials();
+
+                    builder.WithOrigins("http://127.0.0.1:5501")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
                                 //.AllowAnyOrigin();
@@ -97,6 +105,23 @@ namespace PersonalSafety
                         ValidateAudience = false,
                         RequireExpirationTime = false,
                         ValidateLifetime = true
+                    };
+                    auth.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments("/hubs/sosparrot")))
+                            {
+                                // Read the token out of the query string
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 
@@ -190,7 +215,8 @@ namespace PersonalSafety
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<RealtimeHub>("/Realtime");
+                endpoints.MapHub<RealtimeHub>("/hubs/Realtime");
+                endpoints.MapHub<SOSParrot>("/hubs/sosparrot");
             });
 
             //app.UseMvc();

@@ -43,6 +43,8 @@ namespace PersonalSafety.Business
                 Client requestOwner_Client = _clientRepository.GetById(request.UserId);
                 responseViewModel.Add(new GetSOSRequestViewModel
                 {
+                    RequestId = request.Id,
+
                     UserEmail = requestOwner_Account.Email,
                     UserPhoneNumber = requestOwner_Account.PhoneNumber,
                     UserNationalId = requestOwner_Client.NationalId,

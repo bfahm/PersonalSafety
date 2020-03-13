@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Linq;
 
-namespace SignalRChatServer
+namespace SignalRChatServer.Hubs
 {
     public class RealtimeHub : Hub
     {

@@ -7,6 +7,9 @@ namespace PersonalSafety.Models.ViewModels
 {
     public class GetSOSRequestViewModel
     {
+        //Database
+        public int RequestId { get; set; }
+
         //User Data
         public string UserEmail { get; set; }
         public string UserPhoneNumber { get; set; }
