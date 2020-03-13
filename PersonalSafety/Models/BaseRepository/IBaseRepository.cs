@@ -10,7 +10,7 @@ namespace PersonalSafety.Models
         T GetById(string Id);
         IEnumerable<T> GetAll();
         bool Add(T item);
-        //T Update(T item);
+        T Update(T item);
         //void Remove(string Id);
         int Save();
     }

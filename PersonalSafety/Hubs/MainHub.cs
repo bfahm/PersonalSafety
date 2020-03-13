@@ -19,6 +19,11 @@ namespace PersonalSafety.Hubs
             return Clients.Caller.SendAsync("ReceiveMessage", json);
         }
 
+        public Task GetMyConnectionId()
+        {
+            return Clients.Caller.SendAsync("ReceiveMessage", Context.ConnectionId);
+        }
+
         public bool isConnected(string connectionId)
         {
             return UserHandler.ConnectionInfoSet.Where(c => c.ConnectionId == connectionId).FirstOrDefault() != null;

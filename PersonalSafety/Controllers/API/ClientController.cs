@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
 using PersonalSafety.Helpers;
 using PersonalSafety.Hubs;
+using PersonalSafety.Hubs.HubHelper;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 
@@ -20,10 +21,12 @@ namespace PersonalSafety.Controllers.API
     public class ClientController : ControllerBase
     {
         private readonly IClientBusiness _clientBusiness;
+        private readonly ISOSBusiness _sosBusiness;
 
-        public ClientController(IClientBusiness clientBusiness, IHubContext<SOSParrot> hubContext)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness)
         {
             _clientBusiness = clientBusiness;
+            _sosBusiness = sosBusiness;
         }
 
 
@@ -161,6 +164,22 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _clientBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
 
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("SOS/[action]")]
+        public IActionResult CancelSOSRequest([FromQuery] int requestId)
+        {
+            var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Canceled);
+
+            // Unsubscribe user from future notifications
+            int removed = SOSHandler.SOSInfoSet.RemoveWhere(r => r.SOSId == requestId);
+
+            if (removed == 0)
+            {
+                response.Messages.Add("Failed to remove user from the tracker, it appears that the request was corrupt.");
+            }
             return Ok(response);
         }
     }

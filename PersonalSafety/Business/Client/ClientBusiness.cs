@@ -213,7 +213,7 @@ namespace PersonalSafety.Business
             _sosRequestRepository.Add(sosRequest);
             _sosRequestRepository.Save();
 
-            AddWatcher(request.ConnectionId, await _userManager.FindByIdAsync(userId), sosRequest);
+            AddToTracker(request.ConnectionId, await _userManager.FindByIdAsync(userId), sosRequest.Id);
 
             response.Result = new SendSOSResponseViewModel { 
                 RequestId = sosRequest.Id,
@@ -226,15 +226,14 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        private void AddWatcher(string connectionId, ApplicationUser user, SOSRequest request)
+        private void AddToTracker(string connectionId, ApplicationUser user, int requestId)
         {
             SOSInfo currentRequest = new SOSInfo
             {
                 ConnectionId = connectionId,
                 UserId = user.Id,
                 UserEmail = user.Email,
-                SOSId = request.Id,
-                Status = request.State
+                SOSId = requestId
             };
 
             SOSHandler.SOSInfoSet.Add(currentRequest);

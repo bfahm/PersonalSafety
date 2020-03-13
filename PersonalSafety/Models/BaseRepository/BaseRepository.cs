@@ -29,7 +29,14 @@ namespace PersonalSafety.Models
 
         public T GetById(string Id)
         {
-            return context.Set<T>().Find(Id);
+            try
+            {
+                return context.Set<T>().Find(Id);
+            }catch(ArgumentException ex)
+            {
+                return context.Set<T>().Find(int.Parse(Id));
+            }
+            
         }
 
         // Needs testing, commented to take caution.
@@ -40,13 +47,11 @@ namespace PersonalSafety.Models
         //    context.SaveChanges();
         //}
 
-        // Needs testing, commented to take caution.
-        //public T Update(T item)
-        //{
-        //    context.Set<T>().Update(item);
-        //    context.SaveChangesAsync();
-        //    return item;
-        //}
+        public T Update(T item)
+        {
+            context.Set<T>().Update(item);
+            return item;
+        }
 
         public int Save()
         {

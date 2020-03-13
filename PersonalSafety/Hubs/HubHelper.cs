@@ -28,6 +28,5 @@ namespace PersonalSafety.Hubs.HubHelper
         public string UserId { get; set; }
         public string UserEmail { get; set; }
         public int SOSId { get; set; }
-        public int Status { get; set; }
     }
 }

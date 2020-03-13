@@ -15,5 +15,6 @@ namespace PersonalSafety.Models.Enums
         SignalRError = -5,
         BadRequest = 400, // Happens when validation error occur 
         Unauthorized = 401,
+        NotFound = 404
     }
 }

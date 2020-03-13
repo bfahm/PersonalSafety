@@ -133,6 +133,7 @@ namespace PersonalSafety
             services.AddScoped<IClientBusiness, ClientBusiness>();
             services.AddScoped<IAdminBusiness, AdminBusiness>();
             services.AddScoped<IPersonnelBusiness, PersonnelBusiness>();
+            services.AddScoped<ISOSBusiness, SOSBusiness>();
 
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
@@ -219,7 +220,7 @@ namespace PersonalSafety
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<RealtimeHub>("/hubs/Realtime");
-                endpoints.MapHub<SOSParrot>("/hubs/sosparrot");
+                endpoints.MapHub<MainHub>("/hubs/Main");
             });
 
             //app.UseMvc();

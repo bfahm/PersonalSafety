@@ -5,7 +5,7 @@ var connection;
 function startConnection(token) {
 
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("http://localhost:5566/hubs/sosparrot", {
+        .withUrl("http://localhost:5566/hubs/main", {
             accessTokenFactory: () => token
         })
         .build();
