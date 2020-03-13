@@ -40,6 +40,11 @@ $(document).ready(function () {
                 connection.invoke(method).catch(function (err) {
                     return console.error(err.toString());
                 });
+            }else if(groupValue === "GetMyConnectionId"){
+                var method = groupValue;
+                connection.invoke(method).catch(function (err) {
+                    return console.error(err.toString());
+                });
             }
 
             event.preventDefault();

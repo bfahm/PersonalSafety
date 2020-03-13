@@ -16,6 +16,6 @@ namespace PersonalSafety.Business
         APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request);
 
         // /SOSRequest
-        APIResponse<bool> SendSOSRequest(string userId, SendSOSRequestViewModel request);
+        Task<APIResponse<SendSOSResponseViewModel>> SendSOSRequestAsync(string userId, SendSOSRequestViewModel request);
     }
 }

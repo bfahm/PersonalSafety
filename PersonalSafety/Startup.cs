@@ -125,6 +125,9 @@ namespace PersonalSafety
                     };
                 });
 
+            // Register Services
+            services.AddScoped<IMainHub, MainHub>();
+
             // Register Businesses
             services.AddScoped<IAccountBusiness, AccountBusiness>();
             services.AddScoped<IClientBusiness, ClientBusiness>();

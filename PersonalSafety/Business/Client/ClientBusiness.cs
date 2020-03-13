@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Business;
-
 using PersonalSafety.Helpers;
+using PersonalSafety.Hubs;
+using PersonalSafety.Hubs.HubHelper;
 using PersonalSafety.Models;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,14 +19,16 @@ namespace PersonalSafety.Business
         private readonly IEmergencyContactRepository _emergencyContactRepository;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly ISOSRequestRepository _sosRequestRepository;
+        private readonly IMainHub _mainHub;
 
-        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IOptions<AppSettings> appSettings, ISOSRequestRepository sosRequestRepository)
+        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IOptions<AppSettings> appSettings, ISOSRequestRepository sosRequestRepository, IMainHub mainHub)
         {
             _userManager = userManager;
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
             _appSettings = appSettings;
             _sosRequestRepository = sosRequestRepository;
+            _mainHub = mainHub;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -172,9 +173,9 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public APIResponse<bool> SendSOSRequest(string userId, SendSOSRequestViewModel request)
+        public async Task<APIResponse<SendSOSResponseViewModel>> SendSOSRequestAsync(string userId, SendSOSRequestViewModel request)
         {
-            APIResponse<bool> response = new APIResponse<bool>();
+            APIResponse<SendSOSResponseViewModel> response = new APIResponse<SendSOSResponseViewModel>();
 
             Client user = _clientRepository.GetById(userId);
             if (user == null)
@@ -182,6 +183,14 @@ namespace PersonalSafety.Business
                 response.Messages.Add("User not authorized.");
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.Unauthorized;
+                return response;
+            }
+
+            if (!_mainHub.isConnected(request.ConnectionId))
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.SignalRError;
+                response.Messages.Add("The provided connection id is not valid anymore, establish a new connection and try again.");
                 return response;
             }
 
@@ -193,20 +202,42 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            _sosRequestRepository.Add(new SOSRequest 
+            SOSRequest sosRequest = new SOSRequest
             {
                 UserId = userId,
                 AuthorityType = request.AuthorityType,
                 Longitude = request.Longitude,
                 Latitude = request.Latitude
-            });
+            };
 
+            _sosRequestRepository.Add(sosRequest);
             _sosRequestRepository.Save();
 
-            response.Result = true;
+            AddWatcher(request.ConnectionId, await _userManager.FindByIdAsync(userId), sosRequest);
+
+            response.Result = new SendSOSResponseViewModel { 
+                RequestId = sosRequest.Id,
+                RequestStateId = sosRequest.State,
+                RequestStateName = ((StatesTypesEnum)sosRequest.State).ToString(),
+            };
+
             response.Messages.Add("Your request was sent successfully.");
             
             return response;
+        }
+
+        private void AddWatcher(string connectionId, ApplicationUser user, SOSRequest request)
+        {
+            SOSInfo currentRequest = new SOSInfo
+            {
+                ConnectionId = connectionId,
+                UserId = user.Id,
+                UserEmail = user.Email,
+                SOSId = request.Id,
+                Status = request.State
+            };
+
+            SOSHandler.SOSInfoSet.Add(currentRequest);
         }
     }
 }

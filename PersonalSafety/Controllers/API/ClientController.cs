@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
+using PersonalSafety.Helpers;
+using PersonalSafety.Hubs;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 
@@ -16,14 +19,13 @@ namespace PersonalSafety.Controllers.API
     [Authorize]
     public class ClientController : ControllerBase
     {
-        private readonly IAccountBusiness _accountBusiness;
         private readonly IClientBusiness _clientBusiness;
 
-        public ClientController(IAccountBusiness accountBusiness, IClientBusiness clientBusiness)
+        public ClientController(IClientBusiness clientBusiness, IHubContext<SOSParrot> hubContext)
         {
-            _accountBusiness = accountBusiness;
             _clientBusiness = clientBusiness;
         }
+
 
         /// <summary>
         /// Create a new client account to be able to access his services.
@@ -152,12 +154,12 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [HttpPost]
         [Route("SOS/[action]")]
-        public IActionResult SendSOSRequest([FromBody] SendSOSRequestViewModel request)
+        public async Task<IActionResult> SendSOSRequest([FromBody] SendSOSRequestViewModel request)
         {
             //? means : If value is not null, retrieve it
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = _clientBusiness.SendSOSRequest(currentlyLoggedInUserId, request);
+            var response = await _clientBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }
