@@ -26,6 +26,8 @@ using SignalRChatServer;
 using PersonalSafety.Installers;
 using PersonalSafety.Hubs;
 using SignalRChatServer.Hubs;
+using Swashbuckle.AspNetCore.Filters;
+using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety
 {
@@ -145,7 +147,8 @@ namespace PersonalSafety
             services.AddSwaggerGen(sw => 
             {
                 sw.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Personal Safety", Version = "V1" });
-
+                sw.ExampleFilters();
+                
                 sw.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
                 {
                     Description = "JWT Authorization header using bearer scheme",
@@ -180,6 +183,8 @@ namespace PersonalSafety
                 sw.IncludeXmlComments(xmlPath);
 
             });
+
+            services.AddSwaggerExamplesFromAssemblyOf<LoginRequestViewModel>();
 
             // Registering APP Settings
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));

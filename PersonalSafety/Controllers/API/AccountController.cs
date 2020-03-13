@@ -9,6 +9,10 @@ using PersonalSafety.Business;
 using Microsoft.AspNetCore.Authorization;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models.Enums;
+using PersonalSafety.Examples;
+using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -48,6 +52,7 @@ namespace PersonalSafety.Controllers.API
         /// Password combination is valid but the user did not verify his email.
         /// </remarks>
         [HttpPost]
+        [SwaggerRequestExample(typeof(LoginRequestViewModel), typeof(LoginNormalUserExample))]
         public async Task<IActionResult> Login([FromBody] LoginRequestViewModel request)
         {
             var authResponse = await _accountBusiness.LoginAsync(request);
