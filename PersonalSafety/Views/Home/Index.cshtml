@@ -37,52 +37,36 @@
 
 
                   <ul class="list-group text-sans-serif">
-
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <a href="~/swagger" target="_blank" style="text-decoration:none">Client Endpoint</a>
-                              <p>Client registration moved from endpoint <samp>/Client</samp> to endpoint <samp>/Client/Registration</samp> to accomodate for the new actions under <samp>/Client/SOS</samp></p>
-                          </div>
-                          <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">SOS Requests</a>
-                              <p>Clients can now send SOS Requests via the <samp>/Client/SOS</samp> endpoint</p>
+                              <a href="~/RealtimeClient" target="_blank" style="text-decoration:none">Realtime Client</a>
+                              <p>As a <b>Client</b>, sending SOS requests requires a valid <b>ongoing realtime</b> connection with the server, verified and maintained via a <samp>ConnectionId</samp> which is generated from <a href="~/RealtimeClient" target="_blank">here</a> after supplying a valid <samp>token</samp>. <br /> This <samp>ConnectionId</samp> helps the server in tracking the request state changes, where it can notify who's subscribed with relevant changes. <br />In a nutshell, this <b>Realtime</b> tool acts as a Swagger-like service to test the current connection with the server, and receive relevant messages upon state changes.</p>
                           </div>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Personnel Endpoint</a>
-                          <span class="badge badge-success badge-pill">NEW!</span>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Complete Profile</a>
+                              <a href="~/swagger" target="_blank" style="text-decoration:none">Complete Profile</a>
                               <p>Clients can now update their birthday to be used in retrieving their SOS Requests</p>
                           </div>
-                          <span class="badge badge-success badge-pill">NEW!</span>
+                          <span class="badge badge-warning badge-pill">Important</span>
                       </li>
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger#operations-tag-User" target="_blank" style="text-decoration:none">Adminstrator Endpoint</a>
+                          <div>
+                              <a href="~/swagger" target="_blank" style="text-decoration:none">Current Endpoints</a>
+                              <ul>
+                                  <li>Account management endpoint at <samp>api/Account</samp></li>
+                                  <li>Clients endpoint for completing registration at <samp>api/Client/Registration</samp></li>
+                                  <li>Clients endpoint for SOS actions at <samp>api/Client/SOS</samp></li>
+                                  <li>Personnel endpoint at <samp>api/Personnel</samp></li>
+                                  <li>Admin endpoint at <samp>api/Admin</samp></li>
+                              </ul>
+                          </div>
                       </li>
 
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/swagger" target="_blank" style="text-decoration:none">Account Endpoint Documentations</a>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/SendConfirmationMail" target="_blank" style="text-decoration:none">Send Account Activation Mail</a>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a href="~/ForgotPasswordMail" target="_blank" style="text-decoration:none">Send Password Reset Mail</a>
-                      </li>
-
+                      <!--Old Changes that were removed-->
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>

@@ -22,5 +22,11 @@ namespace PersonalSafety.Controllers.Views
         {
             return View();
         }
+
+        [Route("[action]")]
+        public IActionResult RealtimeClient()
+        {
+            return View();
+        }
     }
 }

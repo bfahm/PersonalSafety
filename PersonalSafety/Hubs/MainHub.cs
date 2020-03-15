@@ -13,15 +13,19 @@ namespace PersonalSafety.Hubs
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
+        /// <summary>
+        /// Warning: Lockdown this method to be accessed ONLY by admins.
+        /// </summary>
         public Task GetConnectionInfo()
         {
             var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.ToList());
             return Clients.Caller.SendAsync("ReceiveMessage", json);
         }
 
-        public Task GetMyConnectionId()
+        public Task GetMyConnectionInfo()
         {
-            return Clients.Caller.SendAsync("ReceiveMessage", Context.ConnectionId);
+            var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.Where(c=>c.ConnectionId == Context.ConnectionId).FirstOrDefault());
+            return Clients.Caller.SendAsync("ConnectionInfoChannel", json);
         }
 
         public bool isConnected(string connectionId)

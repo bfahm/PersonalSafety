@@ -45,6 +45,7 @@
   <ItemGroup>
     <Folder Include="Logs\" />
     <Folder Include="Models\BaseRepository\" />
+    <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
   <ItemGroup>
