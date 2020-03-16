@@ -13,13 +13,12 @@ namespace PersonalSafety.Hubs
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
-        /// <summary>
-        /// Warning: Lockdown this method to be accessed ONLY by admins.
-        /// </summary>
+        //Lockdown this function to only admins
+        [Authorize(Roles = "Admin")]
         public Task GetConnectionInfo()
         {
             var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.ToList());
-            return Clients.Caller.SendAsync("ReceiveMessage", json);
+            return Clients.Caller.SendAsync("ConnectionInfoChannel", json);
         }
 
         public Task GetMyConnectionInfo()
