@@ -36,7 +36,6 @@ function startConnection(token) {
     connection.start().then(function () {
 
         connection.invoke("GetMyConnectionInfo").catch(function (err) {
-            alert("invoked GetMyConnectionInfo");
             return console.error(err.toString());
         });
 
