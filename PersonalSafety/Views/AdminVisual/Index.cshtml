@@ -1,20 +1,12 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Admin Panel";
 }
 
-<style>
-    pre {
-        outline: 1px solid #ccc;
-        padding: 5px;
-        margin: 5px;
-    }
-    .string {color: green;}
-    .number {color: darkorange;}
-    .boolean {color: blue;}
-    .null {color: magenta;}
-    .key {color: red;}
-</style>
+    <style>
+        th {color: darkslategray;}
+        td {color: olivedrab;}
+    </style>
 
 <section class="pb_xl_py_cover pb_gradient_v1" style="padding:0px !important; background-image: url(assets/images/1900x1200_img_5.jpg);">
     <div class="container">
@@ -97,12 +89,26 @@
                                     <div class="pb_height-10" style="visibility:hidden"></div>
 
                                     <p class="pb_font-15">Get a fully detailed list of users who currently have an ongoing connection with the server's SignalR Realtime channel, including their emails, userIds, and connectionIds.</p>
-                                    <input id="btn_retrieve" type="button" class="btn btn-primary" value="Retrieve"/>
+                                    <input id="btn_retrieve" type="button" class="btn btn-primary" value="Retrieve" />
                                     <br />
                                     <br />
 
-                                    <div id="json_response" class="alert alert-secondary" style="font-family: Consolas, monaco, monospace;" role="alert" hidden>
-                                        A simple secondary alert—check it out!
+                                    <div id="retrieve_result" class="alert alert-secondary" style="font-family: Consolas, monaco, monospace;" role="alert" hidden>
+                                        <div class="table-responsive">
+                                            <table id="result_table"class="table table-sm table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">#</th>
+                                                        <th scope="col">Email</th>
+                                                        <th scope="col">UserId</th>
+                                                        <th scope="col">ConnectionId</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                   <!--Empty body to be filled from js-->
+                                                </tbody>
+                                            </table>
+                                        </div>    
                                     </div>
                                 </div>
                             </div>

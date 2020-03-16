@@ -110,13 +110,30 @@ function startConnection(token) {
         .build();
 
     connection.on("ConnectionInfoChannel", function (message) {
-        //BELOW: TO BE REPLACED
-        var sytaxedJson = syntaxHighlight(message);
         animateProgressBar("retrieve_connection_bar");
-        $("#json_response").html(sytaxedJson);
+        var parsedJson = JSON.parse(message);
+
+        for (var i = 0; i < parsedJson.length; i++) {
+            var obj = parsedJson[i];
+            console.log(obj);
+
+            var email = obj.UserEmail;
+            var userId = obj.UserId;
+            var connectionId = obj.ConnectionId;
+
+            var currentIndex = '<th>' + (i+1) + '</th>';
+            var emailInRow = '<td>' + email + '</td>';
+            var userIdInRow = '<td>' + userId + '</td>';
+            var connectionIdInRow = '<td>' + connectionId + '</td>';
+            var newRow = '<tr>' + currentIndex + emailInRow + userIdInRow + connectionIdInRow + '</tr>'
+
+            $("#result_table > tbody > tr").remove();
+            $('#result_table > tbody:last-child').append(newRow);
+        }
+
         setTimeout(function () {
-            $("#json_response").attr("hidden", false);
-        }, 2000); //time before animation starts execution
+            $("#retrieve_result").attr("hidden", false);
+        }, 1000); //time before animation starts execution
     });
 
     // Start connection after finishing all the settings
