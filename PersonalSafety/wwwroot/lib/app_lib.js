@@ -53,6 +53,14 @@ export function animateProgressBar(barId) {
     move();
 }
 
+export function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function () {
+        console.log('Async: Copying to clipboard was successful!');
+    }, function (err) {
+        console.error('Async: Could not copy text: ', err);
+    });
+}
+
 /*Cookie Related: */
 export function setCookie(name, value, hours) {
     var expires = "";

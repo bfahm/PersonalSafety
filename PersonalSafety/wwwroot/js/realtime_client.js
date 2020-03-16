@@ -1,4 +1,5 @@
 import { parseJwt } from "../lib/app_lib.js";
+import { copyToClipboard } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
@@ -10,12 +11,19 @@ $(document).ready(function () {
         var role = parseJwt(token).role;
         console.log(parseJwt(token));
         if (role != null) {
+            $("#alert_container_role").removeClass("alert-success");
+            $("#alert_container_role").addClass("alert-warning");
             $("#samp_role").html(role);
         } else {
             $("#samp_role").html("GeneralUser");
         }
         
         startConnection(token);
+    });
+
+    $("#btn_copy_to_clipboard").click(function () {
+        copyToClipboard($("#result_connectionId").val());
+        $(this).html("Copied")
     });
 
     $("#link_logout").click(function () {
@@ -33,6 +41,16 @@ function startConnection(token) {
 
     connection.on("ReceiveMessage", function (message) {
         var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        console.log(msg);
+        var isAccepted = msg.search("Accepted");
+        if (isAccepted != -1) {
+            $("#result_msg").removeClass('pb_color-primary');
+            $("#result_msg").addClass('pb_color-success');
+        } else {
+            $("#result_msg").removeClass('pb_color-success');
+            $("#result_msg").addClass('pb_color-primary');
+        }
+
         $("#result_msg").val(msg);
     });
 

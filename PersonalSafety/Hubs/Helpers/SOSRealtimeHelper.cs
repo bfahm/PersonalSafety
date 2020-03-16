@@ -30,7 +30,7 @@ namespace PersonalSafety.Hubs.Helpers
 
             if (connectionInformation != null)
             {
-                _hubContext.Clients.Client(connectionInformation.ConnectionId).SendAsync(channelName, "Your request with id " + sosRequestId + " was " + ((StatesTypesEnum)sosRequestState).ToString() + ".");
+                _hubContext.Clients.Client(connectionInformation.ConnectionId).SendAsync(channelName, "A request with id " + sosRequestId + " state was changed to " + ((StatesTypesEnum)sosRequestState).ToString() + ".");
 
                 return true;
             }

@@ -166,19 +166,12 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _clientBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
 
-            var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
-            if (notifierResult)
+            if (!response.HasErrors)
             {
-                return Ok(response);
+                _sosRealtimeHelper.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
             }
-
-            var fallback_response = _sosBusiness.UpdateSOSRequest(response.Result.RequestId, (int)StatesTypesEnum.Orphaned);
-            fallback_response.Messages.Add("Orphan request detected.");
-            fallback_response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
-            fallback_response.Messages.Add("Reverting Changes...");
-            fallback_response.Messages.Add("SOS Request was canceled.");
-
-            return Ok(fallback_response);
+            
+            return Ok(response);
         }
 
         /// <summary>
