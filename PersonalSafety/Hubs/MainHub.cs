@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using PersonalSafety.Hubs.HubHelper;
+using PersonalSafety.Hubs.HubTracker;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,12 +50,20 @@ namespace PersonalSafety.Hubs
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
+            // Remove user from user trackers
             ConnectionInfo currentDisconnection = UserHandler.ConnectionInfoSet.Where(c => c.ConnectionId == Context.ConnectionId).FirstOrDefault();
-            
             if(currentDisconnection != null)
             {
                 UserHandler.ConnectionInfoSet.Remove(currentDisconnection);
                 Console.WriteLine(currentDisconnection.UserEmail + " has disconnected from the server, he had connection id: " + currentDisconnection.ConnectionId);
+            }
+
+            // Remove user requests from SOS trackers
+            int currentOngoingSOSes = SOSHandler.SOSInfoSet.Where(c => c.ConnectionId == Context.ConnectionId).Count();
+            if (currentOngoingSOSes>0)
+            {
+                SOSHandler.SOSInfoSet.RemoveWhere(sc => sc.ConnectionId == Context.ConnectionId);
+                Console.WriteLine(currentDisconnection.UserEmail + " had some SOS requests that where tracked and now dismissed.");
             }
 
             await base.OnDisconnectedAsync(ex);

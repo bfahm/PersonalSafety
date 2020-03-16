@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
 using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubHelper;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 
@@ -20,13 +20,13 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IPersonnelBusiness _personnelBusiness;
         private readonly ISOSBusiness _sosBusiness;
-        private readonly IHubContext<MainHub> _hubContext;
+        private readonly ISOSRealtimeHelper _sosRealtimeHelper;
 
-        public PersonnnelController(IPersonnelBusiness personnelBusiness, ISOSBusiness sosBusiness, IHubContext<MainHub> hubContext)
+        public PersonnnelController(IPersonnelBusiness personnelBusiness, ISOSBusiness sosBusiness, ISOSRealtimeHelper sosRealtimeHelper)
         {
             _personnelBusiness = personnelBusiness;
             _sosBusiness = sosBusiness;
-            _hubContext = hubContext;
+            _sosRealtimeHelper = sosRealtimeHelper;
         }
 
 
@@ -163,23 +163,17 @@ namespace PersonalSafety.Controllers.API
         {
             var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Accepted);
 
-            // Notify user about the change
-            SOSInfo connectionInformation = SOSHandler.SOSInfoSet.Where(r => r.SOSId == requestId).FirstOrDefault();
-
-            if (connectionInformation != null)
+            var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
+            if (notifierResult)
             {
-                _hubContext.Clients.Client(connectionInformation.ConnectionId).SendAsync("ReceiveMessage", "Your request with id " + requestId + " was accepted!");
-
                 return Ok(response);
             }
-            else
-            {
-                response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Pending);
-                response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
-                response.Messages.Add("Reverting Changes...");
-                response.Messages.Add("Changes were reverted back to 'Pending'.");
-                return Ok(response);
-            }
+
+            response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Orphaned);
+            response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
+            response.Messages.Add("Reverting Changes...");
+            response.Messages.Add("Changes were reverted back to 'Orphaned'.");
+            return Ok(response);
         }
     }
 }

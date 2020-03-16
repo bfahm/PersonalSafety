@@ -28,6 +28,7 @@ using PersonalSafety.Hubs;
 using SignalRChatServer.Hubs;
 using Swashbuckle.AspNetCore.Filters;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety
 {
@@ -131,6 +132,7 @@ namespace PersonalSafety
 
             // Register Services
             services.AddScoped<IMainHub, MainHub>();
+            services.AddScoped<ISOSRealtimeHelper, SOSRealtimeHelper>();
 
             // Register Businesses
             services.AddScoped<IAccountBusiness, AccountBusiness>();

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
 using PersonalSafety.Helpers;
 using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubHelper;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;
 
@@ -22,13 +22,14 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IClientBusiness _clientBusiness;
         private readonly ISOSBusiness _sosBusiness;
+        private readonly ISOSRealtimeHelper _sosRealtimeHelper;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ISOSRealtimeHelper sosRealtimeHelper)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
+            _sosRealtimeHelper = sosRealtimeHelper;
         }
-
 
         /// <summary>
         /// Create a new client account to be able to access his services.
@@ -165,7 +166,19 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _clientBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
 
-            return Ok(response);
+            var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
+            if (notifierResult)
+            {
+                return Ok(response);
+            }
+
+            var fallback_response = _sosBusiness.UpdateSOSRequest(response.Result.RequestId, (int)StatesTypesEnum.Orphaned);
+            fallback_response.Messages.Add("Orphan request detected.");
+            fallback_response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
+            fallback_response.Messages.Add("Reverting Changes...");
+            fallback_response.Messages.Add("SOS Request was canceled.");
+
+            return Ok(fallback_response);
         }
 
         /// <summary>
@@ -186,14 +199,29 @@ namespace PersonalSafety.Controllers.API
         {
             var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Canceled);
 
-            // Unsubscribe user from future notifications
-            int removed = SOSHandler.SOSInfoSet.RemoveWhere(r => r.SOSId == requestId);
-
-            if (removed == 0)
+            // Notify user about the change
+            var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
+            if (notifierResult)
             {
-                response.Messages.Add("Failed to remove user from the tracker, it appears that the request was corrupt.");
+                // Unsubscribe user from future notifications
+                int removed = SOSHandler.SOSInfoSet.RemoveWhere(r => r.SOSId == requestId);
+
+                if (removed == 0)
+                {
+                    response.Messages.Add("Failed to remove user from the tracker, it appears that the request was corrupt.");
+                }
+                return Ok(response);
             }
-            return Ok(response);
+
+            
+            var fallback_response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Orphaned);
+            fallback_response.Messages.Add("Orphan request detected.");
+            fallback_response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
+
+            return Ok(fallback_response);
+
+
+
         }
     }
 }

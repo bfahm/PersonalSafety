@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using PersonalSafety.Helpers;
 using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubHelper;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models;
 using PersonalSafety.Models.Enums;
 using PersonalSafety.Models.ViewModels;

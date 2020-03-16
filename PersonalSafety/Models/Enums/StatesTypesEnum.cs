@@ -11,6 +11,7 @@ namespace PersonalSafety.Models.Enums
         Pending,
         Accepted,
         Solved,
-        Canceled
+        Canceled,
+        Orphaned
     }
 }
