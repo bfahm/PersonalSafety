@@ -28,19 +28,26 @@
 
                         <div id="hidden_div_till_connected" hidden>
 
-                            <div class="pb_height-30" style="visibility:hidden"></div>
+                            <div class="pb_height-5" style="visibility:hidden"></div>
                             <hr />
-                            <div class="pb_height-30" style="visibility:hidden"></div>
+                            <div class="pb_height-10" style="visibility:hidden"></div>
+
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <strong>Current role: </strong> <samp id="samp_role">role</samp>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
 
                             <div>
                                 <div class="form-group">
                                     <input id="result_email" type="text" class="form-control py-3 reverse" placeholder="Your Email" disabled>
                                 </div>
                                 <div class="form-group">
-                                    <input id="result_connectionId" type="text" class="form-control py-3 reverse" placeholder="Your ConnectionId" disabled>
+                                    <input id="result_connectionId" type="text" class="form-control py-3 reverse" style="font-family:Consolas, monospace" placeholder="Your ConnectionId" disabled>
                                 </div>
                                 <div class="form-group">
-                                    <input id ="result_msg" type="text" class="form-control py-3 reverse pb_color-success" placeholder="Messages received from the server appears here" disabled>
+                                    <input id="result_msg" type="text" class="form-control py-3 reverse pb_color-success" placeholder="Messages received from the server appears here" disabled>
                                 </div>
                             </div>
                             <div class="row justify-content-center align-items-center">
@@ -54,5 +61,5 @@
     </section>
 
 @section Scripts{
-    <script src="~/js/realtime_client.js"></script>
+    <script src="~/js/realtime_client.js" type="module"></script>
 }

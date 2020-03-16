@@ -1,15 +1,35 @@
+import { parseJwt } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
 
-function startConnection(token) {
+$(document).ready(function () {
+    $("#btn_connect").click(function () {
+        var token = $("#ip_token").val();
 
+        var role = parseJwt(token).role;
+        console.log(parseJwt(token));
+        if (role != null) {
+            $("#samp_role").html(role);
+        } else {
+            $("#samp_role").html("GeneralUser");
+        }
+        
+        startConnection(token);
+    });
+
+    $("#link_logout").click(function () {
+        connection.stop();
+        location.reload();
+    });
+});
+
+function startConnection(token) {
     connection = new signalR.HubConnectionBuilder()
         .withUrl("/hubs/main", {
             accessTokenFactory: () => token
         })
         .build();
-
 
     connection.on("ReceiveMessage", function (message) {
         var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -34,25 +54,10 @@ function startConnection(token) {
     });
 
     connection.start().then(function () {
-
         connection.invoke("GetMyConnectionInfo").catch(function (err) {
             return console.error(err.toString());
         });
-
     }).catch(function (err) {
         return console.error(err.toString());
     });
 }
-
-$(document).ready(function () {
-    $("#btn_connect").click(function () {
-        var token = $("#ip_token").val();
-
-        startConnection(token);
-    });
-
-    $("#link_logout").click(function () {
-        connection.stop();
-        location.reload();
-    });
-});
