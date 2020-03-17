@@ -13,14 +13,6 @@ namespace PersonalSafety.Hubs
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
-        //Lockdown this function to only admins
-        [Authorize(Roles = "Admin")]
-        public Task GetConnectionInfo()
-        {
-            var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.ToList());
-            return Clients.Caller.SendAsync("ConnectionInfoChannel", json);
-        }
-
         public Task GetMyConnectionInfo()
         {
             var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.Where(c=>c.ConnectionId == Context.ConnectionId).FirstOrDefault());
@@ -43,8 +35,10 @@ namespace PersonalSafety.Hubs
             
             UserHandler.ConnectionInfoSet.Add(currentConnection);
 
-            Console.WriteLine(currentConnection.UserEmail + " has connected to the server with connection id: " + currentConnection.ConnectionId);
-
+            string consoleLine = currentConnection.UserEmail + " has connected to the server with connection id: " + currentConnection.ConnectionId;
+            ConsoleHandler.ConsoleSet.Add(consoleLine);
+            Console.WriteLine(consoleLine);
+            
             await base.OnConnectedAsync();
         }
 
@@ -55,7 +49,10 @@ namespace PersonalSafety.Hubs
             if(currentDisconnection != null)
             {
                 UserHandler.ConnectionInfoSet.Remove(currentDisconnection);
-                Console.WriteLine(currentDisconnection.UserEmail + " has disconnected from the server, he had connection id: " + currentDisconnection.ConnectionId);
+
+                string consoleLine = currentDisconnection.UserEmail + " has disconnected from the server, he had connection id: " + currentDisconnection.ConnectionId;
+                ConsoleHandler.ConsoleSet.Add(consoleLine);
+                Console.WriteLine(consoleLine);
             }
 
             // Remove user requests from SOS trackers
@@ -63,7 +60,10 @@ namespace PersonalSafety.Hubs
             if (currentOngoingSOSes>0)
             {
                 SOSHandler.SOSInfoSet.RemoveWhere(sc => sc.ConnectionId == Context.ConnectionId);
-                Console.WriteLine(currentDisconnection.UserEmail + " had some SOS requests that where tracked and now dismissed.");
+                
+                string consoleLine = currentDisconnection.UserEmail + " had some SOS requests that where tracked and now dismissed.";
+                ConsoleHandler.ConsoleSet.Add(consoleLine);
+                Console.WriteLine(consoleLine);
             }
 
             await base.OnDisconnectedAsync(ex);

@@ -15,6 +15,11 @@ namespace PersonalSafety.Hubs.HubTracker
         public static HashSet<SOSInfo> SOSInfoSet = new HashSet<SOSInfo>();
     }
 
+    public static class ConsoleHandler
+    {
+        public static HashSet<string> ConsoleSet = new HashSet<string>();
+    }
+
     public class ConnectionInfo
     {
         public string ConnectionId { get; set; }

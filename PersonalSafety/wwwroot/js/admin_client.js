@@ -92,6 +92,43 @@ function loginViaAjax(email, password) {
     })
 }
 
+function loadConnectionsTable(parsedJson) {
+    // Clear current table entries first
+    $("#result_table > tbody > tr").remove();
+
+    for (var i = 0; i < parsedJson.length; i++) {
+        var obj = parsedJson[i];
+        console.log(obj);
+
+        var email = obj.UserEmail;
+        var userId = obj.UserId;
+        var connectionId = obj.ConnectionId;
+
+        var currentIndex = '<th>' + (i + 1) + '</th>';
+        var emailInRow = '<td>' + email + '</td>';
+        var userIdInRow = '<td>' + userId + '</td>';
+        var connectionIdInRow = '<td>' + connectionId + '</td>';
+        var newRow = '<tr>' + currentIndex + emailInRow + userIdInRow + connectionIdInRow + '</tr>'
+
+        $('#result_table > tbody:last-child').append(newRow);
+    }
+}
+
+function loadConsoleContents(parsedJson) {
+    // Clear current table entries first
+    $("#console_container").empty();
+
+    for (var i = 0; i < parsedJson.length; i++) {
+        var obj = parsedJson[i];
+        console.log(obj);
+
+        $('#console_container').append('<p> > ' + obj + '</p>');
+    }
+
+    if (parsedJson.length == 0) {
+        $('#console_container').append('<p> > </p>');
+    }
+}
 
 function replaceElementsForLoggedInUser(token, email) {
     startConnection(token);
@@ -104,46 +141,60 @@ function replaceElementsForLoggedInUser(token, email) {
 // SignalR related code..
 function startConnection(token) {
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("/hubs/main", {
+        .withUrl("/hubs/admin", {
             accessTokenFactory: () => token
         })
         .build();
 
-    connection.on("ConnectionInfoChannel", function (message) {
+    connection.on("AdminGetConnectionInfo", function (message) {
         animateProgressBar("retrieve_connection_bar");
         var parsedJson = JSON.parse(message);
 
-        for (var i = 0; i < parsedJson.length; i++) {
-            var obj = parsedJson[i];
-            console.log(obj);
-
-            var email = obj.UserEmail;
-            var userId = obj.UserId;
-            var connectionId = obj.ConnectionId;
-
-            var currentIndex = '<th>' + (i+1) + '</th>';
-            var emailInRow = '<td>' + email + '</td>';
-            var userIdInRow = '<td>' + userId + '</td>';
-            var connectionIdInRow = '<td>' + connectionId + '</td>';
-            var newRow = '<tr>' + currentIndex + emailInRow + userIdInRow + connectionIdInRow + '</tr>'
-
-            $("#result_table > tbody > tr").remove();
-            $('#result_table > tbody:last-child').append(newRow);
-        }
-
+        loadConnectionsTable(parsedJson);
+        
         setTimeout(function () {
             $("#retrieve_result").attr("hidden", false);
+        }, 1000); //time before animation starts execution
+    });
+
+    connection.on("AdminGetConsoleLines", function (message) {
+        animateProgressBar("retrieve_console_bar");
+        var parsedJson = JSON.parse(message);
+
+        console.log(parsedJson);
+        loadConsoleContents(parsedJson) 
+
+        setTimeout(function () {
+            $("#console_container").attr("hidden", false);
         }, 1000); //time before animation starts execution
     });
 
     // Start connection after finishing all the settings
     connection.start().then(function () {
         // Wait for connection to be established before trying to retreive data
+
         $("#btn_retrieve").click(function () {
             connection.invoke("GetConnectionInfo").catch(function (err) {
                 return console.error(err.toString());
             });
         });
+
+        $("#btn_update").click(function () {
+            connection.invoke("GetConsoleLines").catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+
+        $("#btn_clear").click(function () {
+            connection.invoke("ClearConsoleLines").catch(function (err) {
+                return console.error(err.toString());
+            });
+            connection.invoke("GetConsoleLines").catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+
+
     }).catch(function (err) {
         return console.error(err.toString());
     });
