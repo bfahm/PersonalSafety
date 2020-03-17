@@ -177,12 +177,18 @@ function startConnection(token) {
             connection.invoke("GetConnectionInfo").catch(function (err) {
                 return console.error(err.toString());
             });
+            $(this).removeClass("btn-secondary");
+            $(this).addClass("btn-primary");
+            $("#retrieve_main_container").addClass("border-primary");
         });
 
         $("#btn_update").click(function () {
             connection.invoke("GetConsoleLines").catch(function (err) {
                 return console.error(err.toString());
             });
+            $(this).removeClass("btn-secondary");
+            $(this).addClass("btn-primary");
+            $("#console_main_container").addClass("border-primary");
         });
 
         $("#btn_clear").click(function () {
