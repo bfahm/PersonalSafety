@@ -157,6 +157,18 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// This method accepts a requests using its Id.
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// 
+        /// ## Main Functionality
+        /// Gives a Personnel the ability to accept a request using its id.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
+        /// </remarks>
         [HttpPut]
         public IActionResult AcceptSOSRequest([FromQuery] int requestId)
         {
