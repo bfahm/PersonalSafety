@@ -70,13 +70,19 @@
         </div>
     </section>
 
-<section id="section_docs" class="pb_section pb_slant-light" hidden>
+<section class="pb_section pb_slant-light">
     <div class="container">
         <div class="row">
             <div class="col-lg-10 pl-md-5 pl-sm-0">
                 <div class="row">
                     <div class="col">
-                        <h2>Client Documentation</h2>
+                        <h1>Documentation</h1>
+                        <p class="pb_font-18">Below is a simple introduction on how to use the Realtime Client tool, and what to expect from messages received from the server.</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h2>General Notes</h2>
                     </div>
                 </div>
                 <div class="row">
@@ -84,41 +90,106 @@
                         <div class="media pb_feature-v2 text-left mb-1 mt-1">
                             <div class="media-body">
                                 <h3 class="mt-2 mb-2 heading">Connecting to the Server</h3>
-                                <p class="text-sans-serif pb_font-16">Connecting via the SignalR Flutter library only needs a valid token (exactly the same as the one received after a successful login attempt).</p>
-                                <p class="text-sans-serif pb_font-16">The server listens for connections on the endpoint: <samp>/hubs/main</samp> for the MainHub in addition to the AdminHub and the LocationSharingHub.</p>
+                                <p class="text-sans-serif pb_font-16">Connecting to the SignalR Server Service needs a valid token (exactly the same as the one received after a successful login attempt).</p>
+                                <p class="text-sans-serif pb_font-16">The server listens for connections to different Hubs on different endpoints.<br /> Currently, the available hubs to connect to are: </p>
+                                <ul class="text-sans-serif pb_font-16">
+                                    <li>AdminHub @@ <samp>/hubs/admin</samp></li>
+                                    <li>ClientHub @@ <samp>/hubs/client</samp></li>
+                                    <li>PersonnelHub @@ <samp>/hubs/personnel</samp></li>
+                                </ul>
+                                <p class="text-sans-serif pb_font-16">Technically speaking, these hubs inheret from the MainHub (doesn't have an endpoint). Basically, this means that the three hubs share methods like <code>GetMyConnectionInfo()</code>, in addition to being secured, requiring a valid token upon connection.<br />Note that different hubs may require specific user <strong>Roles</strong> to be granted access.</p>
                                 <p class="text-sans-serif pb_font-16">After providing the token for the connection object and intiating the connection, clients are now granted access to various channels each for their own type of data exepectancy.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                <hr />
-
+                <div class="row">
+                    <div class="col">
+                        <h2 id="client_docs">Client Hub</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg">
+                        <div class="media pb_feature-v2 text-left mb-1 mt-1">
+                            <div class="media-body">
                                 <h3 class="mt-2 mb-2 heading">Listening to Messages</h3>
                                 <p class="text-sans-serif pb_font-16">Currently, there are just two channels for communication between the Main Server and Mobile Devices, and these are: </p>
                                 <ul class="text-sans-serif pb_font-16">
                                     <li><samp>ConnectionInfoChannel</samp></li>
-                                    <li><samp>ReceiveMessage</samp></li>
+                                    <li><samp>ClientChannel</samp></li>
                                 </ul>
 
                                 <hr />
 
                                 <h3 class="mt-2 mb-2 heading">Connection Info</h3>
                                 <p class="text-sans-serif pb_font-16">Right after establishing a realtime connection with the server, the client <strong>must</strong> request his own connection info, to be used later in any realtime-needing API method.</p>
-                                <p class="text-sans-serif pb_font-16">Requesting information about the connection is done by <strong>invoking</strong> <samp>GetMyConnectionInfo()</samp> method which in turn returns all needed information to the "Caller", the invoker.</p>
-                                <p class="text-sans-serif pb_font-16">Invoking the remote procedure results in returning this exact info about the currrent ongoing connection:</p>
-                                <ul class="text-sans-serif pb_font-16">
-                                    <li><samp>UserEmail</samp>: This verifies that the entered token is a correct one and matches its user email</li>
-                                    <li><samp>ConnectionId</samp>: This is the important part of the response, and needs to be saved somewhere. This code is how the server identifies the client, and should be attached along requests needing realtime tracking, such as sending an SOS Request.</li>
-                                </ul>
-                                <i class="text-sans-serif pb_font-12">Note that the responses recieved on this channel is in the format of JSON, and can be easily parsed the same way other JSON API responses are parsed.</i>
+                                <p class="text-sans-serif pb_font-16">Requesting information about the connection is done by <strong>invoking</strong> <code>GetMyConnectionInfo()</code> method which in turn returns all needed information to the "Caller", the invoker.</p>
+                                <p class="text-sans-serif pb_font-16">Messages received on this channel are in the form of JSON strings that can be easily parsed to a JSON Object and extract different fields from it.</p>
+                                <p class="text-sans-serif pb_font-16">Here is how a sample message is supposed to look like:</p>
+                                <div class="alert alert-secondary pb_font-16">
+                                    <code>
+                                        {<br />
+                                        &nbsp;"UserEmail":"test@test.com",<br />
+                                        &nbsp;"ConnectionId":"ihcZXEvH-vrmbeUbqkah4A"<br />
+                                        }
+                                    </code>
+                                </div>
 
                                 <hr />
 
                                 <h3 class="mt-2 mb-2 heading">Receiving Messages</h3>
-                                <i class="text-sans-serif pb_font-12">Channel name and return type of messages are yet under some changes.</i>
+                                <p class="text-sans-serif pb_font-16">Clients have their own channel: <samp>ClientChannel</samp> under their own hub <samp>ClientHub</samp>. Currently, the only main usage for the <samp>ClientChannel</samp> is tracing the changes that occurs to a new SOS request, from being Pending until being Accepted, or Canceled by the client.</p>
+                                <p class="text-sans-serif pb_font-16">Messages received on this channel are in the form of JSON strings that can be easily parsed to a JSON Object and extract different fields from it.</p>
+                                <p class="text-sans-serif pb_font-16">Here is how a sample message is supposed to look like:</p>
+                                <div class="alert alert-secondary pb_font-16">
+                                    <code>
+                                        {<br />
+                                        &nbsp;"requestId":82,<br />
+                                        &nbsp;"requestState":"Pending"<br />
+                                        }
+                                    </code>
+                                </div>
 
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col">
+                        <h2 id="personnel_docs">Personnel Hub</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg">
+                        <div class="media pb_feature-v2 text-left mb-1 mt-1">
+                            <div class="media-body">
+                                <h3 class="mt-2 mb-2 heading">Listening to Messages</h3>
+                                <p class="text-sans-serif pb_font-16">There is only one channel to get notifications about changes to the SOS tables: </p>
+                                <ul class="text-sans-serif pb_font-16">
+                                    <li><samp>PersonnelChannel</samp></li>
+                                </ul>
+
+                                <hr />
+
+
+                                <h3 class="mt-2 mb-2 heading">Receiving Messages</h3>
+                                <p class="text-sans-serif pb_font-16">Messages received on this channel are in the form of JSON strings that can be easily parsed to a JSON Object and extract different fields from it.</p>
+                                <p class="text-sans-serif pb_font-16">Here is how a sample message is supposed to look like:</p>
+                                <div class="alert alert-secondary pb_font-16">
+                                    <code>
+                                        {<br />
+                                        &nbsp;"requestId":82,<br />
+                                        &nbsp;"requestState":"Pending"<br />
+                                        }
+                                    </code>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

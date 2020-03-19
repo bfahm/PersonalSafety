@@ -8,23 +8,7 @@ $(document).ready(function () {
     $("#btn_connect").click(function () {
         var token = $("#ip_token").val();
 
-        var role = parseJwt(token).role;
-        console.log(parseJwt(token));
-        if (role != null) {
-            $("#alert_container_role").removeClass("alert-success");
-            $("#alert_container_role").addClass("alert-warning");
-            $("#samp_role").html(role);
-        } else {
-            $("#samp_role").html("GeneralUser");
-        }
-        
         startConnection(token);
-    });
-
-    $("#a_scroll_to_docs").click(function () {
-        $('html, body').animate({
-            scrollTop: $("#section_docs").offset().top + 75
-        }, 1000);
     });
 
     $("#btn_copy_to_clipboard").click(function () {
@@ -39,33 +23,69 @@ $(document).ready(function () {
 });
 
 function startConnection(token) {
-    connection = new signalR.HubConnectionBuilder()
-        .withUrl("/hubs/client", {
-            accessTokenFactory: () => token
-        })
-        .build();
+    var role = parseJwt(token).role;
+    console.log(parseJwt(token));
+    if (role != null) {
+        $("#alert_container_role").removeClass("alert-success");
+        $("#alert_container_role").addClass("alert-warning");
+        $("#samp_role").html(role);
 
-    connection.on("ClientChannel", function (message) {
-        console.log(message);
+        if (role == "Personnel") {
 
-        var parsedMsg = JSON.parse(message);
-        console.log(parsedMsg);
+            $("#a_scroll_to_docs").click(function () {
+                $('html, body').animate({
+                    scrollTop: $("#personnel_docs").offset().top - 100
+                }, 1000);
+            });
 
-        var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
-        console.log(outputMsg);
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/personnel", {
+                    accessTokenFactory: () => token
+                })
+                .build();
 
-        var isAccepted = parsedMsg.requestState == "Accepted";
-        if (isAccepted) {
-            $("#result_msg").removeClass('pb_color-primary');
-            $("#result_msg").addClass('pb_color-success');
-        } else {
-            $("#result_msg").removeClass('pb_color-success');
-            $("#result_msg").addClass('pb_color-primary');
+            connection.on("PersonnelChannel", function (message) {
+                var parsedMsg = JSON.parse(message);
+                var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
+
+                $("#result_msg").addClass('pb_color-primary');
+                $("#result_msg").val(outputMsg);
+            });
+
         }
 
-        $("#result_msg").val(outputMsg);
-    });
+    } else {
+        $("#samp_role").html("GeneralUser");
+        $("#a_scroll_to_docs").click(function () {
+            $('html, body').animate({
+                scrollTop: $("#client_docs").offset().top -100
+            }, 1000);
+        });
 
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/client", {
+                accessTokenFactory: () => token
+            })
+            .build();
+
+        connection.on("ClientChannel", function (message) {
+            var parsedMsg = JSON.parse(message);
+            var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
+
+            var isAccepted = parsedMsg.requestState == "Accepted";
+            if (isAccepted) {
+                $("#result_msg").removeClass('pb_color-primary');
+                $("#result_msg").addClass('pb_color-success');
+            } else {
+                $("#result_msg").removeClass('pb_color-success');
+                $("#result_msg").addClass('pb_color-primary');
+            }
+
+            $("#result_msg").val(outputMsg);
+        });
+    }
+
+    
     connection.on("ConnectionInfoChannel", function (message) {
         var parsedMessage = JSON.parse(message);
         var email = parsedMessage.UserEmail;
@@ -85,8 +105,6 @@ function startConnection(token) {
         $('html, body').animate({
             scrollTop: $("#start_of_form").offset().top - 20
         }, 500);
-
-        $("#section_docs").removeAttr('hidden');
     });
 
     connection.start().then(function () {
