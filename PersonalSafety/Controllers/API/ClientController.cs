@@ -23,12 +23,14 @@ namespace PersonalSafety.Controllers.API
         private readonly IClientBusiness _clientBusiness;
         private readonly ISOSBusiness _sosBusiness;
         private readonly ISOSRealtimeHelper _sosRealtimeHelper;
+        private readonly IPersonnelHub _personnelHub;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ISOSRealtimeHelper sosRealtimeHelper)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ISOSRealtimeHelper sosRealtimeHelper, IPersonnelHub personnelHub)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
             _sosRealtimeHelper = sosRealtimeHelper;
+            _personnelHub = personnelHub;
         }
 
         /// <summary>
@@ -169,6 +171,7 @@ namespace PersonalSafety.Controllers.API
             if (!response.HasErrors)
             {
                 _sosRealtimeHelper.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
+                await _personnelHub.NotifyNewChanges(response.Result.RequestId, (int)StatesTypesEnum.Pending);
             }
             
             return Ok(response);
@@ -194,6 +197,7 @@ namespace PersonalSafety.Controllers.API
 
             // Notify user about the change
             var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
+            _personnelHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
             if (notifierResult)
             {
                 // Unsubscribe user from future notifications

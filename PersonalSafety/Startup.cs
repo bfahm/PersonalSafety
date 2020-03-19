@@ -38,6 +38,7 @@ namespace PersonalSafety
         readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
         readonly string MainHubUrl = "/hubs/main";
         readonly string AdminHubUrl = "/hubs/admin";
+        readonly string PersonnelHubUrl = "/hubs/Personnel";
         readonly string LocationTrackingHubUrl = "/hubs/Realtime";
 
         public Startup(IConfiguration configuration)
@@ -121,7 +122,7 @@ namespace PersonalSafety
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) && 
-                                    (path.StartsWithSegments(MainHubUrl) || path.StartsWithSegments(AdminHubUrl)))
+                                    (path.StartsWithSegments(MainHubUrl) || path.StartsWithSegments(AdminHubUrl) || path.StartsWithSegments(PersonnelHubUrl)))
                             {
                                 // Read the token out of the query string
                                 context.Token = accessToken;
@@ -134,6 +135,7 @@ namespace PersonalSafety
             // Register Services
             services.AddScoped<IMainHub, MainHub>();
             services.AddScoped<ISOSRealtimeHelper, SOSRealtimeHelper>();
+            services.AddScoped<IPersonnelHub, PersonnelHub>();
 
             // Register Businesses
             services.AddScoped<IAccountBusiness, AccountBusiness>();
@@ -232,6 +234,7 @@ namespace PersonalSafety
                 endpoints.MapHub<RealtimeHub>(LocationTrackingHubUrl);
                 endpoints.MapHub<MainHub>(MainHubUrl);
                 endpoints.MapHub<AdminHub>(AdminHubUrl);
+                endpoints.MapHub<PersonnelHub>(PersonnelHubUrl);
             });
 
             //app.UseMvc();
