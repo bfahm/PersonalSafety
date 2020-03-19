@@ -21,6 +21,12 @@ $(document).ready(function () {
         startConnection(token);
     });
 
+    $("#a_scroll_to_docs").click(function () {
+        $('html, body').animate({
+            scrollTop: $("#section_docs").offset().top + 75
+        }, 1000);
+    });
+
     $("#btn_copy_to_clipboard").click(function () {
         copyToClipboard($("#result_connectionId").val());
         $(this).html("Copied")
@@ -69,6 +75,12 @@ function startConnection(token) {
         $("#btn_connect").prop('disabled', true);
         $("#btn_connect").val('Connected');
         $("#ip_token").prop('disabled', true);
+
+        $('html, body').animate({
+            scrollTop: $("#start_of_form").offset().top - 20
+        }, 500);
+
+        $("#section_docs").removeAttr('hidden');
     });
 
     connection.start().then(function () {

@@ -3,7 +3,7 @@
     ViewData["Title"] = "Realtime Client";
 }
 
-    <section class="pb_xl_py_cover pb_gradient_v1" style="padding:0px !important; background-image: url(assets/images/1900x1200_img_5.jpg);">
+<section class="pb_xl_py_cover pb_gradient_v1" style="padding:0px !important; background-image: url(assets/images/1900x1200_img_5.jpg);">
         <div class="container">
             <div class="row align-items-center justify-content-center">
                 <div class="col-md-4 justify-content-center">
@@ -13,7 +13,7 @@
                     </div>
                 </div>
                 <div class="col-md-1"></div>
-                <div class="col-md-7">
+                <div id="start_of_form" class="col-md-7">
                     <div class="bg-white rounded pb_form_v1">
                         <h2 class="mb-4 mt-0 text-center">Login</h2>
                         <div>
@@ -34,6 +34,12 @@
 
                             <div id="alert_container_role" class="alert alert-success alert-dismissible fade show" role="alert">
                                 <strong>Current role: </strong> <samp id="samp_role">role</samp>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div id="alert_container_link_to_docs" class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <a id="a_scroll_to_docs" class="text-dark" style="text-decoration:none; cursor: pointer;">Documentation available below.</a>
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -63,6 +69,60 @@
             </div>
         </div>
     </section>
+
+<section id="section_docs" class="pb_section pb_slant-light" hidden>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 pl-md-5 pl-sm-0">
+                <div class="row">
+                    <div class="col">
+                        <h2>Client Documentation</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg">
+                        <div class="media pb_feature-v2 text-left mb-1 mt-1">
+                            <div class="media-body">
+                                <h3 class="mt-2 mb-2 heading">Connecting to the Server</h3>
+                                <p class="text-sans-serif pb_font-16">Connecting via the SignalR Flutter library only needs a valid token (exactly the same as the one received after a successful login attempt).</p>
+                                <p class="text-sans-serif pb_font-16">The server listens for connections on the endpoint: <samp>/hubs/main</samp> for the MainHub in addition to the AdminHub and the LocationSharingHub.</p>
+                                <p class="text-sans-serif pb_font-16">After providing the token for the connection object and intiating the connection, clients are now granted access to various channels each for their own type of data exepectancy.</p>
+
+                                <hr />
+
+                                <h3 class="mt-2 mb-2 heading">Listening to Messages</h3>
+                                <p class="text-sans-serif pb_font-16">Currently, there are just two channels for communication between the Main Server and Mobile Devices, and these are: </p>
+                                <ul class="text-sans-serif pb_font-16">
+                                    <li><samp>ConnectionInfoChannel</samp></li>
+                                    <li><samp>ReceiveMessage</samp></li>
+                                </ul>
+
+                                <hr />
+
+                                <h3 class="mt-2 mb-2 heading">Connection Info</h3>
+                                <p class="text-sans-serif pb_font-16">Right after establishing a realtime connection with the server, the client <strong>must</strong> request his own connection info, to be used later in any realtime-needing API method.</p>
+                                <p class="text-sans-serif pb_font-16">Requesting information about the connection is done by <strong>invoking</strong> <samp>GetMyConnectionInfo()</samp> method which in turn returns all needed information to the "Caller", the invoker.</p>
+                                <p class="text-sans-serif pb_font-16">Invoking the remote procedure results in returning this exact info about the currrent ongoing connection:</p>
+                                <ul class="text-sans-serif pb_font-16">
+                                    <li><samp>UserEmail</samp>: This verifies that the entered token is a correct one and matches its user email</li>
+                                    <li><samp>ConnectionId</samp>: This is the important part of the response, and needs to be saved somewhere. This code is how the server identifies the client, and should be attached along requests needing realtime tracking, such as sending an SOS Request.</li>
+                                </ul>
+                                <i class="text-sans-serif pb_font-12">Note that the responses recieved on this channel is in the format of JSON, and can be easily parsed the same way other JSON API responses are parsed.</i>
+
+                                <hr />
+
+                                <h3 class="mt-2 mb-2 heading">Receiving Messages</h3>
+                                <i class="text-sans-serif pb_font-12">Channel name and return type of messages are yet under some changes.</i>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
 
 @section Scripts{
     <script src="~/js/realtime_client.js" type="module"></script>
