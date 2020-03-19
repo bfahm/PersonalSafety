@@ -20,15 +20,14 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IPersonnelBusiness _personnelBusiness;
         private readonly ISOSBusiness _sosBusiness;
-        private readonly ISOSRealtimeHelper _sosRealtimeHelper;
+        private readonly IClientHub _clientHub;
 
-        public PersonnnelController(IPersonnelBusiness personnelBusiness, ISOSBusiness sosBusiness, ISOSRealtimeHelper sosRealtimeHelper)
+        public PersonnnelController(IPersonnelBusiness personnelBusiness, ISOSBusiness sosBusiness, IClientHub clientHub)
         {
             _personnelBusiness = personnelBusiness;
             _sosBusiness = sosBusiness;
-            _sosRealtimeHelper = sosRealtimeHelper;
+            _clientHub = clientHub;
         }
-
 
         /// <summary>
         /// This method returns a list of all Requests that relates to current Personnel Authority.
@@ -163,7 +162,7 @@ namespace PersonalSafety.Controllers.API
         {
             var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Accepted);
 
-            var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
+            var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
             if (notifierResult)
             {
                 return Ok(response);

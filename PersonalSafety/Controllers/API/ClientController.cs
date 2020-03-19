@@ -22,14 +22,14 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IClientBusiness _clientBusiness;
         private readonly ISOSBusiness _sosBusiness;
-        private readonly ISOSRealtimeHelper _sosRealtimeHelper;
+        private readonly IClientHub _clientHub;
         private readonly IPersonnelHub _personnelHub;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ISOSRealtimeHelper sosRealtimeHelper, IPersonnelHub personnelHub)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, IClientHub clientHub, IPersonnelHub personnelHub)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
-            _sosRealtimeHelper = sosRealtimeHelper;
+            _clientHub = clientHub;
             _personnelHub = personnelHub;
         }
 
@@ -170,7 +170,7 @@ namespace PersonalSafety.Controllers.API
 
             if (!response.HasErrors)
             {
-                _sosRealtimeHelper.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
+                _clientHub.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
                 await _personnelHub.NotifyNewChanges(response.Result.RequestId, (int)StatesTypesEnum.Pending);
             }
             
@@ -196,7 +196,7 @@ namespace PersonalSafety.Controllers.API
             var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Canceled);
 
             // Notify user about the change
-            var notifierResult = _sosRealtimeHelper.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
+            var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
             _personnelHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
             if (notifierResult)
             {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Hubs
 {
-    public interface ISOSRealtimeHelper
+    public interface IClientHub
     {
         bool NotifyUserSOSState(int sosRequestId, int sosRequestState);
     }

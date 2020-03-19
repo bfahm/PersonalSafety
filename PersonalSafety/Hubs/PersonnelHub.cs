@@ -13,6 +13,7 @@ namespace PersonalSafety.Hubs
     public class PersonnelHub : MainHub, IPersonnelHub
     {
         private readonly IHubContext<PersonnelHub> _hubContext;
+        private readonly string channelName = "PersonnelChannel";
 
         public PersonnelHub(IHubContext<PersonnelHub> hubContext)
         {
@@ -23,7 +24,7 @@ namespace PersonalSafety.Hubs
         {
             var jsonMsg = JsonSerializer.Serialize(new { requestId = requestId, requestState = ((StatesTypesEnum)requestState).ToString() });
             
-            return _hubContext.Clients.All.SendAsync("PersonnelChannel", jsonMsg);
+            return _hubContext.Clients.All.SendAsync(channelName, jsonMsg);
         }
     }
 }

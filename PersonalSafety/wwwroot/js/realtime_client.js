@@ -40,16 +40,22 @@ $(document).ready(function () {
 
 function startConnection(token) {
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("/hubs/main", {
+        .withUrl("/hubs/client", {
             accessTokenFactory: () => token
         })
         .build();
 
-    connection.on("ReceiveMessage", function (message) {
-        var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        console.log(msg);
-        var isAccepted = msg.search("Accepted");
-        if (isAccepted != -1) {
+    connection.on("ClientChannel", function (message) {
+        console.log(message);
+
+        var parsedMsg = JSON.parse(message);
+        console.log(parsedMsg);
+
+        var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
+        console.log(outputMsg);
+
+        var isAccepted = parsedMsg.requestState == "Accepted";
+        if (isAccepted) {
             $("#result_msg").removeClass('pb_color-primary');
             $("#result_msg").addClass('pb_color-success');
         } else {
@@ -57,7 +63,7 @@ function startConnection(token) {
             $("#result_msg").addClass('pb_color-primary');
         }
 
-        $("#result_msg").val(msg);
+        $("#result_msg").val(outputMsg);
     });
 
     connection.on("ConnectionInfoChannel", function (message) {

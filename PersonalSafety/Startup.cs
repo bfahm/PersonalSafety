@@ -28,7 +28,6 @@ using PersonalSafety.Hubs;
 using SignalRChatServer.Hubs;
 using Swashbuckle.AspNetCore.Filters;
 using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety
 {
@@ -36,8 +35,8 @@ namespace PersonalSafety
     {
 
         readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-        readonly string MainHubUrl = "/hubs/main";
-        readonly string AdminHubUrl = "/hubs/admin";
+        readonly string ClientHubUrl = "/hubs/Client";
+        readonly string AdminHubUrl = "/hubs/Admin";
         readonly string PersonnelHubUrl = "/hubs/Personnel";
         readonly string LocationTrackingHubUrl = "/hubs/Realtime";
 
@@ -122,7 +121,7 @@ namespace PersonalSafety
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) && 
-                                    (path.StartsWithSegments(MainHubUrl) || path.StartsWithSegments(AdminHubUrl) || path.StartsWithSegments(PersonnelHubUrl)))
+                                    (path.StartsWithSegments(ClientHubUrl) || path.StartsWithSegments(AdminHubUrl) || path.StartsWithSegments(PersonnelHubUrl)))
                             {
                                 // Read the token out of the query string
                                 context.Token = accessToken;
@@ -134,7 +133,7 @@ namespace PersonalSafety
 
             // Register Services
             services.AddScoped<IMainHub, MainHub>();
-            services.AddScoped<ISOSRealtimeHelper, SOSRealtimeHelper>();
+            services.AddScoped<IClientHub, ClientHub>();
             services.AddScoped<IPersonnelHub, PersonnelHub>();
 
             // Register Businesses
@@ -232,7 +231,7 @@ namespace PersonalSafety
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<RealtimeHub>(LocationTrackingHubUrl);
-                endpoints.MapHub<MainHub>(MainHubUrl);
+                endpoints.MapHub<ClientHub>(ClientHubUrl);
                 endpoints.MapHub<AdminHub>(AdminHubUrl);
                 endpoints.MapHub<PersonnelHub>(PersonnelHubUrl);
             });
