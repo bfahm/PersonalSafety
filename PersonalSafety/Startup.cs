@@ -28,6 +28,8 @@ using PersonalSafety.Hubs;
 using SignalRChatServer.Hubs;
 using Swashbuckle.AspNetCore.Filters;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Options;
+using PersonalSafety.Services;
 
 namespace PersonalSafety
 {
@@ -87,12 +89,23 @@ namespace PersonalSafety
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            
 
-            // Setting up basic JWT settings
+
+            // Registering basic JWT settings
             JwtSettings jwtSettings = new JwtSettings();
             Configuration.Bind(nameof(jwtSettings), jwtSettings);
             services.AddSingleton(jwtSettings);
+
+            // Registering APP Settings
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
+            // Registering FacebookAuth Settings
+            var facebookAuthSettings = new FacebookAuthSettings();
+            Configuration.Bind(nameof(FacebookAuthSettings), facebookAuthSettings);
+            services.AddSingleton(facebookAuthSettings);
+
+            // Add Services required by FacebookAuth
+            services.AddHttpClient();
 
             // Add authentication middleware and set its parameters
             services.AddAuthentication(auth =>
@@ -130,6 +143,9 @@ namespace PersonalSafety
                         }
                     };
                 });
+
+            // Register External Services Here
+            services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
 
             // Register Services
             services.AddScoped<IMainHub, MainHub>();
@@ -191,11 +207,6 @@ namespace PersonalSafety
             });
 
             services.AddSwaggerExamplesFromAssemblyOf<LoginRequestViewModel>();
-
-            // Registering APP Settings
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

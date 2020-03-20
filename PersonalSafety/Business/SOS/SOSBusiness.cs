@@ -1,6 +1,6 @@
 ﻿using PersonalSafety.Helpers;
 using PersonalSafety.Models;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

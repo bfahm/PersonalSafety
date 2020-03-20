@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -8,7 +8,7 @@ using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
 using Microsoft.AspNetCore.Authorization;
 using PersonalSafety.Helpers;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Examples;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Annotations;

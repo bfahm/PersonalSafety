@@ -4,8 +4,9 @@ using PersonalSafety.Helpers;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,8 +21,9 @@ namespace PersonalSafety.Business
         private readonly IOptions<AppSettings> _appSettings;
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IMainHub _mainHub;
+        private readonly IFacebookAuthService _facebookAuthService;
 
-        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IOptions<AppSettings> appSettings, ISOSRequestRepository sosRequestRepository, IMainHub mainHub)
+        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IOptions<AppSettings> appSettings, ISOSRequestRepository sosRequestRepository, IMainHub mainHub, IFacebookAuthService facebookAuthService)
         {
             _userManager = userManager;
             _clientRepository = clientRepository;
@@ -29,6 +31,7 @@ namespace PersonalSafety.Business
             _appSettings = appSettings;
             _sosRequestRepository = sosRequestRepository;
             _mainHub = mainHub;
+            _facebookAuthService = facebookAuthService;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -96,6 +99,108 @@ namespace PersonalSafety.Business
             response.Messages.Add("Successfully created a new user with email " + request.Email);
             response.Messages.Add("Please check your email for activation links before you continue.");
             response.Messages.AddRange(confirmationMailResult.Messages);
+            response.Result = true;
+            return response;
+        }
+
+        public async Task<APIResponse<string>> LoginWithFacebookAsync(string accessToken)
+        {
+            APIResponse<string> response = new APIResponse<string>();
+
+            var tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(accessToken);
+            if (!tokenValidationResult.Data.IsValid)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.FacebookAuthError;
+                response.Messages.Add("An error occured while trying to validate the provided access token.");
+                return response;
+            }
+
+            var userInfo = await _facebookAuthService.GetUserInfoAsync(accessToken);
+
+            var user = await _userManager.FindByEmailAsync(userInfo.Email);
+            if(user == null)
+            {
+                response.Messages.Add("This access token does not map to a registered user, use the access token to register the user first and try logging in again.");
+                return response;
+            }
+
+            //TODO: return a valid token here after moving the logic arround
+            return null;
+        }
+
+        public async Task<APIResponse<bool>> RegisterWithFacebookAsync(RegistrationWithFacebookViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(request.accessToken);
+            if (!tokenValidationResult.Data.IsValid)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.FacebookAuthError;
+                response.Messages.Add("An error occured while trying to validate the provided access token.");
+                return response;
+            }
+
+            var userInfo = await _facebookAuthService.GetUserInfoAsync(request.accessToken);
+
+            ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(userInfo.Email);
+            if (exsistingUserFoundByEmail != null)
+            {
+                response.Messages.Add("User with this email address already exsists.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            ApplicationUser exsistingUserFoundByPhoneNumber = _userManager.Users.Where(u => u.PhoneNumber == request.PhoneNumber).FirstOrDefault();
+            if (exsistingUserFoundByPhoneNumber != null)
+            {
+                response.Messages.Add("User with this Phone Number was registered before.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            Client exsistingUserFoundByNationalId = _clientRepository.GetAll().Where(u => u.NationalId == request.NationalId).FirstOrDefault();
+            if (exsistingUserFoundByNationalId != null)
+            {
+                response.Messages.Add("User with this National Id was registered before.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            ApplicationUser newUser = new ApplicationUser
+            {
+                Email = userInfo.Email,
+                UserName = userInfo.Email,
+                FullName = userInfo.FirstName + " " + userInfo.LastName,
+                PhoneNumber = request.PhoneNumber
+            };
+
+            //If the user currently registering is a client, Add the additional data to his table
+            Client client = new Client
+            {
+                ClientId = newUser.Id,
+                NationalId = request.NationalId
+            };
+
+            _clientRepository.Add(client);
+
+            //_clientRepository.Add(client) still needs saving, but will be done automatically in the below line.
+            var creationResultForAccount = await _userManager.CreateAsync(newUser);
+
+            if (!creationResultForAccount.Succeeded)
+            {
+                response.Messages = creationResultForAccount.Errors.Select(e => e.Description).ToList();
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.HasErrors = true;
+                return response;
+            }
+
+
+            response.Messages.Add("Successfully created a new user with email " + userInfo.Email + ", they can now login directly via Facebook.");
             response.Result = true;
             return response;
         }

@@ -1,4 +1,4 @@
-﻿using PersonalSafety.Models.Enums;
+﻿using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

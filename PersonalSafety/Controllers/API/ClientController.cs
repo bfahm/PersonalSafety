@@ -10,7 +10,7 @@ using PersonalSafety.Business;
 using PersonalSafety.Helpers;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
@@ -64,6 +64,36 @@ namespace PersonalSafety.Controllers.API
         public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
             var authResponse = await _clientBusiness.RegisterAsync(request);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("Registration/[action]")]
+        public async Task<IActionResult> RegisterViaFacebook([FromBody] RegistrationWithFacebookViewModel request)
+        {
+            var authResponse = await _clientBusiness.RegisterWithFacebookAsync(request);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("Registration/[action]")]
+        public async Task<IActionResult> LoginViaFacebook([FromQuery] string accessToken)
+        {
+            var authResponse = await _clientBusiness.LoginWithFacebookAsync(accessToken);
 
             if (authResponse.HasErrors)
             {

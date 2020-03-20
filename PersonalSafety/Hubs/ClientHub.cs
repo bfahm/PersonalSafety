@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Hubs.HubTracker;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;

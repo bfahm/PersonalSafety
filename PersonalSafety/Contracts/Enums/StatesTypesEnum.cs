@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Models.Enums
+namespace PersonalSafety.Contracts.Enums
 {
     // These states are used for the two tables: [Event] and [SOSRequest]
     public enum StatesTypesEnum

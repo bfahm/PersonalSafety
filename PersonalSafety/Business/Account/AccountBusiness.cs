@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Helpers;
 using PersonalSafety.Models;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 using System;
 using System.Collections.Generic;

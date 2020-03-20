@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
-using PersonalSafety.Models.Enums;
+using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
