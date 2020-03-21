@@ -1,0 +1,52 @@
+﻿
+@{
+    ViewData["Title"] = "Realtime Client";
+}
+
+<section class="pb_xl_py_cover pb_gradient_v1" style="padding:0px !important; background-image: url(assets/images/1900x1200_img_5.jpg);">
+    <div class="container">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-md-6 justify-content-center">
+                <h2 class="heading mb-5 pb_font-40">Login with Facebook</h2>
+                <div class="sub-heading">
+                    <p class="mb-4">Use this tool to test the returned values from the action of logging in with Facebook, and give the API methods a try using the returned <samp>access_token</samp>.</p>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div id="start_of_form" class="col-md-5">
+                <div class="bg-white rounded pb_form_v1">
+                    <h2 class="mb-4 mt-0 text-center">Login</h2>
+                    <div class="row align-items-center justify-content-center">
+                        <div onlogin="checkLoginState();" class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true"></div>
+                        <div id="fb-root"></div>
+                    </div>
+
+                    <div id="hidden_div_till_connected" hidden>
+
+                        <div class="pb_height-5" style="visibility:hidden"></div>
+                        <hr />
+                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                        <div id="alert_container_link_to_docs" class="alert alert-warning fade show" role="alert">
+                            <span class="text-dark">Access token retrieved below.</span>
+                        </div>
+
+                        <div>
+                            <div class="input-group mb-3">
+                                <input id="result_access_token" type="text" class="form-control py-3 reverse" style="font-family:Consolas, monospace" placeholder="Access_Token appears here." disabled>
+                                <div class="input-group-append">
+                                    <button id="btn_copy_to_clipboard" class="btn btn-secondary" type="button" autocomplete="off">Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0&appId=2938465296176364&autoLogAppEvents=1"></script>
+    <script src="~/js/facebook_client.js" type="module"></script>
+}

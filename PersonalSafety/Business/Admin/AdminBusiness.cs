@@ -43,7 +43,8 @@ namespace PersonalSafety.Business
             {
                 Email = request.Email,
                 UserName = request.Email,
-                FullName = request.FullName
+                FullName = request.FullName,
+                EmailConfirmed = true
             };
 
             // Check if provided authority type is valid

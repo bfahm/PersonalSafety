@@ -28,5 +28,11 @@ namespace PersonalSafety.Controllers.Views
         {
             return View();
         }
+
+        [Route("[action]")]
+        public IActionResult FacebookLoginTool()
+        {
+            return View();
+        }
     }
 }
