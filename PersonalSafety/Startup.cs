@@ -34,8 +34,6 @@ namespace PersonalSafety
 {
     public class Startup
     {
-
-        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
         readonly string ClientHubUrl = "/hubs/Client";
         readonly string AdminHubUrl = "/hubs/Admin";
         readonly string PersonnelHubUrl = "/hubs/Personnel";
@@ -51,6 +49,17 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                builder =>
+                {
+                    builder.AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                });
+            });
+
             // Required for API functionality
             services.AddControllers();
 
@@ -199,7 +208,7 @@ namespace PersonalSafety
 
             app.UseRouting();
 
-            // Allow headers required by SignalR
+            // Allow headers required by SignalR, order is important
             app.Use((context, next) =>
             {
                 context.Response.Headers.Add("Access-Control-Allow-Origin", context.Request.Headers.Where(h => h.Key == "Origin").FirstOrDefault().Value.ToString());
@@ -208,6 +217,8 @@ namespace PersonalSafety
                 context.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, X-Requested-With");
                 return next.Invoke();
             });
+
+            app.UseCors();
 
             app.UseStaticFiles();
 
