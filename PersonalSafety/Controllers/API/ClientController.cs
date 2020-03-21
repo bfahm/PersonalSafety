@@ -69,13 +69,28 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(authResponse);
         }
-
+        /// <summary>
+        /// Instantly log in with user's exsisting Facebook Account
+        /// </summary>
+        /// <remarks>
+        /// ## Flow
+        /// 1. Client Side user taps "Login with Facebook" button.
+        /// 2. Client Side app finishes the heavy lifting of retrieving `access_token` **in the background** and saves it somewhere.
+        /// 3. Client Side app sends a request to this method, ataching the `access_token` in the URI query.
+        /// 4. If user was registered before, he is granted a JWT token, exactly similar to the one retrieved via `/Account/Login`
+        ///     - If user was not registered before: the returned JWT token would be `null`, 
+        ///     - Client Side app then utilizes `/RegisterViaFacebook` instead, also in the background and without user interaction.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-6]**: FacebookAuthError
+        /// - Accesss Token is invalid or has expired
+        /// </remarks>
         [AllowAnonymous]
         [HttpPost]
         [Route("Registration/[action]")]
-        public async Task<IActionResult> RegisterViaFacebook([FromBody] RegistrationWithFacebookViewModel request)
+        public async Task<IActionResult> LoginViaFacebook([FromQuery] string accessToken)
         {
-            var authResponse = await _clientBusiness.RegisterWithFacebookAsync(request);
+            var authResponse = await _clientBusiness.LoginWithFacebookAsync(accessToken);
 
             if (authResponse.HasErrors)
             {
@@ -85,12 +100,35 @@ namespace PersonalSafety.Controllers.API
             return Ok(authResponse);
         }
 
+        /// <summary>
+        /// Register user using his exsisting Facebook Account
+        /// </summary>
+        /// <remarks>
+        /// ## Flow
+        /// 
+        /// *This method exsists because registration to our services require other sensitive information that doesn't simply exsist, like the user's National Id and his Phone Number.*
+        /// 
+        /// 1. Client Side app redirects user to a page similar to the ordinary registration form, except that, this page won't ask user about information other than his:
+        ///     - `NationalId`
+        ///     - `PhoneNumber`
+        /// 2. Client Side user finishes the form and taps "submit"
+        /// 3. Client Side app sends a request to this method, ataching the `access_token` in the body, along his other info.
+        /// 4. Upon `Status=0` response, meaning user with was successfully registered, Client Side app sends a new request, again, in the background, to `/LoginViaFacebook` which should return a valid JWT token, exactly similar to the one retrieved from `/Account/Login`.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-6]**: FacebookAuthError
+        /// - Accesss Token is invalid or has expired
+        /// #### **[-1]**: Invalid Request
+        /// - User exsists and has registered before
+        /// - Someone with the same National ID has registered before
+        /// - Someone with the same Phone Number has registered before
+        /// </remarks>
         [AllowAnonymous]
         [HttpPost]
         [Route("Registration/[action]")]
-        public async Task<IActionResult> LoginViaFacebook([FromQuery] string accessToken)
+        public async Task<IActionResult> RegisterViaFacebook([FromBody] RegistrationWithFacebookViewModel request)
         {
-            var authResponse = await _clientBusiness.LoginWithFacebookAsync(accessToken);
+            var authResponse = await _clientBusiness.RegisterWithFacebookAsync(request);
 
             if (authResponse.HasErrors)
             {

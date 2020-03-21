@@ -39,16 +39,17 @@
                   <ul class="list-group text-sans-serif">
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <a href="~/RealtimeClient" style="text-decoration:none">Realtime Client</a>
-                              <p>As a <b>Client</b>, sending SOS requests requires a valid <b>ongoing realtime</b> connection with the server, verified and maintained via a <samp>ConnectionId</samp> which is generated from <a href="~/RealtimeClient" target="_blank">here</a> after supplying a valid <samp>token</samp>. <br /> This <samp>ConnectionId</samp> helps the server in tracking the request state changes, where it can notify who's subscribed with relevant changes. <br />In a nutshell, this <b>Realtime</b> tool acts as a Swagger-like service to test the current connection with the server, and receive relevant messages upon state changes.</p>
+                              <a href="~/swagger" target="_blank" style="text-decoration:none">Facebook Login Endpoints</a>
+                              <p>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</p>
+                              <p>Available methods are <samp>/Client/Registration/LoginWithFacebook</samp> for exsisting clients and <samp>/Client/Registration/RegisterWithFacebook</samp> for new clients.</p>
                           </div>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <a href="~/Admin" style="text-decoration:none">Adminstrator Portal</a>
-                              <p>Simple page to quickly view current SignalR connections to the server. Access to this page needs and Adminstrator privileges though. <br /> Also note that the page supports saving user token in cookies, be aware that tokens expire every 2 hours and so does these cookies.</p>
+                              <a href="~/FacebookLoginTool" style="text-decoration:none">Facebook Login Tool</a>
+                              <p>Quickly try the new Facebook Login API Endpoints by generating an access token from this tool.</p>
                           </div>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
@@ -59,6 +60,20 @@
                               <p>Clients can now update their birthday to be used in retrieving their SOS Requests</p>
                           </div>
                           <span class="badge badge-warning badge-pill">Important</span>
+                      </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <div>
+                              <a href="~/RealtimeClient" style="text-decoration:none">Realtime Client</a>
+                              <p>As a <b>Client</b>, sending SOS requests requires a valid <b>ongoing realtime</b> connection with the server, verified and maintained via a <samp>ConnectionId</samp> which is generated from <a href="~/RealtimeClient" target="_blank">here</a> after supplying a valid <samp>token</samp>. <br /> This <samp>ConnectionId</samp> helps the server in tracking the request state changes, where it can notify who's subscribed with relevant changes. <br />In a nutshell, this <b>Realtime</b> tool acts as a Swagger-like service to test the current connection with the server, and receive relevant messages upon state changes.</p>
+                          </div>
+                      </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <div>
+                              <a href="~/Admin" style="text-decoration:none">Adminstrator Portal</a>
+                              <p>Simple page to quickly view current SignalR connections to the server. Access to this page needs and Adminstrator privileges though. <br /> Also note that the page supports saving user token in cookies, be aware that tokens expire every 2 hours and so does these cookies.</p>
+                          </div>
                       </li>
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -75,15 +90,6 @@
                       </li>
 
                       <!--Old Changes that were removed-->
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a style="text-decoration:none; color:darkgrey"><strike>Client Endpoint</strike></a>
-                              <p>Client registration moved from endpoint <samp>/Account</samp> to endpoint <samp>/Client</samp> to accomodate for the new roles <samp>Personnel</samp> and <samp>Adminstrators</samp></p>
-                              <p>Also note that <samp>/User</samp> also moved to <samp>/Client</samp></p>
-                          </div>
-                          <span class="badge badge-light badge-pill">BREAKING CHANGES</span>
-                      </li>
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <a style="text-decoration:none; color:darkgrey"><strike>User Endpoint</strike></a>
