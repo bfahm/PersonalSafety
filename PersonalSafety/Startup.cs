@@ -214,7 +214,7 @@ namespace PersonalSafety
                 context.Response.Headers.Add("Access-Control-Allow-Origin", context.Request.Headers.Where(h => h.Key == "Origin").FirstOrDefault().Value.ToString());
                 context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                 context.Response.Headers.Add("Access-Control-Allow-Methods", "*");
-                context.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, X-Requested-With");
+                context.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, X-Requested-With, Content-Type");
                 return next.Invoke();
             });
 
