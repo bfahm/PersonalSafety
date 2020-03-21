@@ -51,26 +51,6 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy(MyAllowSpecificOrigins,
-                builder =>
-                {
-                    builder.WithOrigins("http://127.0.0.1:5500")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                //.AllowAnyOrigin();
-                                .AllowCredentials();
-
-                    builder.WithOrigins("http://127.0.0.1:5501")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                //.AllowAnyOrigin();
-                                .AllowCredentials();
-                });
-            });
-
             // Required for API functionality
             services.AddControllers();
 
@@ -219,7 +199,15 @@ namespace PersonalSafety
 
             app.UseRouting();
 
-            app.UseCors(MyAllowSpecificOrigins);
+            // Allow headers required by SignalR
+            app.Use((context, next) =>
+            {
+                context.Response.Headers.Add("Access-Control-Allow-Origin", context.Request.Headers.Where(h => h.Key == "Origin").FirstOrDefault().Value.ToString());
+                context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+                context.Response.Headers.Add("Access-Control-Allow-Methods", "*");
+                context.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, X-Requested-With");
+                return next.Invoke();
+            });
 
             app.UseStaticFiles();
 
