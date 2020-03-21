@@ -12,28 +12,30 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using PersonalSafety.Services;
 
 namespace PersonalSafety.Business
 {
     public class AccountBusiness : IAccountBusiness
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly JwtSettings _jwtSettings;
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IPersonnelRepository _personnelRepository;
+        private readonly IJwtAuthService _jwtAuthService;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, JwtSettings jwtSettings, IOptions<AppSettings> appSettings, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IPersonnelRepository personnelRepository)
-        {
-            _userManager = userManager;
-            _jwtSettings = jwtSettings;
-            _appSettings = appSettings;
-            _personnelRepository = personnelRepository;
-        }
 
         public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings)
         {
             _userManager = userManager;
             _appSettings = appSettings;
+        }
+
+        public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, IPersonnelRepository personnelRepository, IJwtAuthService jwtAuthService)
+        {
+            _userManager = userManager;
+            _appSettings = appSettings;
+            _personnelRepository = personnelRepository;
+            _jwtAuthService = jwtAuthService;
         }
 
         public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
@@ -67,7 +69,7 @@ namespace PersonalSafety.Business
             }
 
             
-            response.Result = await GenerateAuthenticationResult(user);
+            response.Result = await _jwtAuthService.GenerateAuthenticationTokenAsync(user);
             response.Status = 0;
             response.HasErrors = false;
             response.Messages = new List<string>();
@@ -285,39 +287,6 @@ namespace PersonalSafety.Business
                 response.Messages.Add("Email and Token did not match.");
                 return response;
             }
-        }
-
-        private async Task<string> GenerateAuthenticationResult(ApplicationUser user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("id", user.Id)
-            };
-
-            // Add the fetched roles to the list of claims in the JWToken
-            claims.AddRange(roles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                // Things to be included and encoded in the token
-                Subject = new ClaimsIdentity(claims),
-                // Token will expire 2 hours from which it was created
-                Expires = DateTime.UtcNow.AddHours(_jwtSettings.JwtExpireInHours),
-                //
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
         }
 
         private async Task<bool> ConfirmMailHybrid(ApplicationUser user, string token)

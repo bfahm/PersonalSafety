@@ -15,23 +15,25 @@ namespace PersonalSafety.Business
 {
     public class ClientBusiness : IClientBusiness
     {
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IClientRepository _clientRepository;
         private readonly IEmergencyContactRepository _emergencyContactRepository;
-        private readonly IOptions<AppSettings> _appSettings;
         private readonly ISOSRequestRepository _sosRequestRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMainHub _mainHub;
+        private readonly IOptions<AppSettings> _appSettings;
         private readonly IFacebookAuthService _facebookAuthService;
+        private readonly IJwtAuthService _jwtAuthService;
 
-        public ClientBusiness(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, IOptions<AppSettings> appSettings, ISOSRequestRepository sosRequestRepository, IMainHub mainHub, IFacebookAuthService facebookAuthService)
+        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, ISOSRequestRepository sosRequestRepository, UserManager<ApplicationUser> userManager, IMainHub mainHub, IOptions<AppSettings> appSettings, IFacebookAuthService facebookAuthService, IJwtAuthService jwtAuthService)
         {
-            _userManager = userManager;
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
-            _appSettings = appSettings;
             _sosRequestRepository = sosRequestRepository;
+            _userManager = userManager;
             _mainHub = mainHub;
+            _appSettings = appSettings;
             _facebookAuthService = facebookAuthService;
+            _jwtAuthService = jwtAuthService;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -125,8 +127,9 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            //TODO: return a valid token here after moving the logic arround
-            return null;
+            response.Result = await _jwtAuthService.GenerateAuthenticationTokenAsync(user);
+            response.Messages.Add("Success, use the JWToken to access the api in the future requests");
+            return response;
         }
 
         public async Task<APIResponse<bool>> RegisterWithFacebookAsync(RegistrationWithFacebookViewModel request)
@@ -176,7 +179,8 @@ namespace PersonalSafety.Business
                 Email = userInfo.Email,
                 UserName = userInfo.Email,
                 FullName = userInfo.FirstName + " " + userInfo.LastName,
-                PhoneNumber = request.PhoneNumber
+                PhoneNumber = request.PhoneNumber,
+                EmailConfirmed = true
             };
 
             //If the user currently registering is a client, Add the additional data to his table

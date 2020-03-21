@@ -146,6 +146,7 @@ namespace PersonalSafety
 
             // Register External Services Here
             services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
+            services.AddScoped<IJwtAuthService, JwtAuthService>();
 
             // Register Services
             services.AddScoped<IMainHub, MainHub>();
