@@ -604,7 +604,7 @@
 
 .cover-bg-black,
 .cover-bg-white,
-.cover-bg-blue,
+.cover-bg-milon,
 .cover-bg-indigo,
 .cover-bg-purple,
 .cover-bg-pink,
@@ -616,7 +616,7 @@
   position: relative; }
   .cover-bg-black:before,
   .cover-bg-white:before,
-  .cover-bg-blue:before,
+  .cover-bg-milon:before,
   .cover-bg-indigo:before,
   .cover-bg-purple:before,
   .cover-bg-pink:before,
@@ -668,7 +668,7 @@
 .cover-bg-white:before {
   background: white; }
 
-.cover-bg-blue:before {
+.cover-bg-milon:before {
   background: #FF6584; }
 
 .cover-bg-indigo:before {
@@ -793,7 +793,7 @@ input, select, textarea {
   box-shadow: none !important;
   outline: none !important; }
 
-.btn-shadow-blue {
+.btn-shadow-milon {
   -webkit-box-shadow: 0px 15px 28px -5px rgba(255, 101, 132, 0.45);
   -moz-box-shadow: 0px 15px 28px -5px rgba(255, 101, 132, 0.45);
   box-shadow: 0px 15px 28px -5px rgba(255, 101, 132, 0.45); }

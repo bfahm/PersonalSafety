@@ -273,7 +273,7 @@
 
 .cover-bg-black,
 .cover-bg-white,
-.cover-bg-blue,
+.cover-bg-milon,
 .cover-bg-indigo,
 .cover-bg-purple,
 .cover-bg-pink,
@@ -354,9 +354,9 @@
 		background: rgba($white, 1);
 	}
 }
-.cover-bg-blue {
+.cover-bg-milon {
 	&:before {
-		background: rgba($blue, 1);
+		background: rgba($milon, 1);
 	}
 }
 .cover-bg-indigo {

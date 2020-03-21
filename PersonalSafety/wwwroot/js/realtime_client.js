@@ -96,7 +96,7 @@ function startConnection(token) {
 
         $("#hidden_div_till_connected").removeAttr('hidden');
         $("#btn_connect").removeClass('btn-primary');
-        $("#btn_connect").removeClass('btn-shadow-blue');
+        $("#btn_connect").removeClass('btn-shadow-milon');
         $("#btn_connect").addClass('btn-success');
         $("#btn_connect").prop('disabled', true);
         $("#btn_connect").val('Connected');
