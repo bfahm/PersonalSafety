@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using PersonalSafety.Helpers;
+using PersonalSafety.Options;
 using PersonalSafety.Models;
 using System;
 using System.Collections.Generic;

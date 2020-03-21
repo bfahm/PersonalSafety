@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
 using Microsoft.AspNetCore.Authorization;
-using PersonalSafety.Helpers;
+using PersonalSafety.Options;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Examples;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using PersonalSafety.Helpers;
 
 namespace PersonalSafety.Controllers.API
 {

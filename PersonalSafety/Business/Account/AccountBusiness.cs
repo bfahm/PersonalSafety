@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using PersonalSafety.Services;
+using PersonalSafety.Options;
 
 namespace PersonalSafety.Business
 {

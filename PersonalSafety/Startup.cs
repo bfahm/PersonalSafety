@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Extensions;
 using PersonalSafety.Models;
-using PersonalSafety.Helpers;
+using PersonalSafety.Options;
 using PersonalSafety.Business;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -28,7 +28,6 @@ using PersonalSafety.Hubs;
 using SignalRChatServer.Hubs;
 using Swashbuckle.AspNetCore.Filters;
 using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Options;
 using PersonalSafety.Services;
 
 namespace PersonalSafety

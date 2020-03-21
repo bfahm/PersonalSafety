@@ -32,7 +32,7 @@ namespace PersonalSafety.Models
             try
             {
                 return context.Set<T>().Find(Id);
-            }catch(ArgumentException ex)
+            }catch
             {
                 return context.Set<T>().Find(int.Parse(Id));
             }

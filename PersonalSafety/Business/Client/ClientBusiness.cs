@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Helpers;
+using PersonalSafety.Options;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models;
@@ -10,6 +10,8 @@ using PersonalSafety.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Contracts;
+using PersonalSafety.Helpers;
 
 namespace PersonalSafety.Business
 {
@@ -109,7 +111,7 @@ namespace PersonalSafety.Business
         {
             APIResponse<string> response = new APIResponse<string>();
 
-            var tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(accessToken);
+            FacebookTokenValidationResult tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(accessToken);
             if (!tokenValidationResult.Data.IsValid)
             {
                 response.HasErrors = true;
@@ -118,9 +120,9 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var userInfo = await _facebookAuthService.GetUserInfoAsync(accessToken);
+            FacebookUserInfoResult userInfo = await _facebookAuthService.GetUserInfoAsync(accessToken);
 
-            var user = await _userManager.FindByEmailAsync(userInfo.Email);
+            ApplicationUser user = await _userManager.FindByEmailAsync(userInfo.Email);
             if(user == null)
             {
                 response.Messages.Add("This access token does not map to a registered user, use the access token to register the user first and try logging in again.");
@@ -136,7 +138,7 @@ namespace PersonalSafety.Business
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            var tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(request.accessToken);
+            FacebookTokenValidationResult tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(request.accessToken);
             if (!tokenValidationResult.Data.IsValid)
             {
                 response.HasErrors = true;
@@ -145,7 +147,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var userInfo = await _facebookAuthService.GetUserInfoAsync(request.accessToken);
+            FacebookUserInfoResult userInfo = await _facebookAuthService.GetUserInfoAsync(request.accessToken);
 
             ApplicationUser exsistingUserFoundByEmail = await _userManager.FindByEmailAsync(userInfo.Email);
             if (exsistingUserFoundByEmail != null)

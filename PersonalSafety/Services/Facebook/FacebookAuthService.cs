@@ -24,17 +24,18 @@ namespace PersonalSafety.Services
 
         public async Task<FacebookTokenValidationResult> ValidateAccessTokenAsync(string accessToken)
         {
-            var formattedUrl = string.Format(TokenValidationUrl, accessToken, _facebookAuthSettings.AppId, _facebookAuthSettings.AppSecret);
+            string formattedUrl = string.Format(TokenValidationUrl, accessToken, _facebookAuthSettings.AppId, _facebookAuthSettings.AppSecret);
 
-            var result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
+            HttpResponseMessage result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
 
             //The above call returns a bad request whenever there is a bad access token.
             if (result.IsSuccessStatusCode)
             {
-                var responseAsString = await result.Content.ReadAsStringAsync();
+                string responseAsString = await result.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<FacebookTokenValidationResult>(responseAsString);
             }
 
+            //Escape null pointers while checking for data (default for IsValid will be false)..
             return new FacebookTokenValidationResult
             {
                 Data = new FacebookTokenValidationData()
@@ -43,13 +44,14 @@ namespace PersonalSafety.Services
 
         public async Task<FacebookUserInfoResult> GetUserInfoAsync(string accessToken)
         {
-            var formattedUrl = string.Format(UserInfoUrl, accessToken);
+            string formattedUrl = string.Format(UserInfoUrl, accessToken);
 
-            var result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
+            HttpResponseMessage result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
+            
             //There shouldn't be a non 200OK http response as Validation is required to run first before running this method.
             result.EnsureSuccessStatusCode();
 
-            var responseAsString = await result.Content.ReadAsStringAsync();
+            string responseAsString = await result.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<FacebookUserInfoResult>(responseAsString);
         }
     }

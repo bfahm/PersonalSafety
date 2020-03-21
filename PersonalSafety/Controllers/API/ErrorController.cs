@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Helpers;
+using PersonalSafety.Options;
 
 namespace PersonalSafety.Controllers.API
 {
