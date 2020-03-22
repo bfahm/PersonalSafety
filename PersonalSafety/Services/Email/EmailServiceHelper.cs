@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using PersonalSafety.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Helpers
+namespace PersonalSafety.Services.Email
 {
-    public class EmailHelper
+    public class EmailServiceHelper
     {
         public string RecepientMail { get; set; }
         public string Token { get; set; }
@@ -17,7 +18,7 @@ namespace PersonalSafety.Helpers
         public string ActivationLink { get; set; }
         public string OTP { get; set; }
 
-        public EmailHelper(string recepientMail, string token, string otp, string baseUrl, string endpoint)
+        public EmailServiceHelper(string recepientMail, string token, string otp, string baseUrl, string endpoint)
         {
             RecepientMail = recepientMail;
             Token = token;

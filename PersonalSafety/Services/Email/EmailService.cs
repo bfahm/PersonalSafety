@@ -32,7 +32,7 @@ namespace PersonalSafety.Services.Email
 
             string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             string mailConfirmationOTP = OTPHelper.GenerateOTP(user.Id).ComputeTotp();
-            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, mailConfirmationOTP, _appSettings.Value.AppBaseUrlView, "ConfirmMail").SendEmail();
+            List<string> emailSendingResults = new EmailServiceHelper(email, mailConfirmationToken, mailConfirmationOTP, _appSettings.Value.AppBaseUrlView, "ConfirmMail").SendEmail();
 
             return emailSendingResults;
         }

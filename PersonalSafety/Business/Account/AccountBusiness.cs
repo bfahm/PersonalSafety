@@ -115,7 +115,7 @@ namespace PersonalSafety.Business
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            List<string> emailSendingResults = new EmailHelper(email, resetPasswordToken, null ,_appSettings.Value.AppBaseUrlView, "ResetPassword").SendEmail();
+            List<string> emailSendingResults = new EmailServiceHelper(email, resetPasswordToken, null ,_appSettings.Value.AppBaseUrlView, "ResetPassword").SendEmail();
             if (emailSendingResults != null)
             {
                 response.Messages.AddRange(emailSendingResults);
