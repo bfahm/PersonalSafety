@@ -49,7 +49,7 @@ namespace PersonalSafety.Helpers
                         smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                         smtp.Send(mail);
                     }
-                    return null;
+                    return new List<string> {"Google SMTP: Success."};
                 }
             }catch(Exception ex)
             {

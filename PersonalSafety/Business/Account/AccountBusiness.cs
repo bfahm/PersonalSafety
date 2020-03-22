@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using PersonalSafety.Services;
 using PersonalSafety.Options;
 using PersonalSafety.Contracts;
+using PersonalSafety.Services.Email;
 
 namespace PersonalSafety.Business
 {
@@ -24,20 +25,15 @@ namespace PersonalSafety.Business
         private readonly IOptions<AppSettings> _appSettings;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IJwtAuthService _jwtAuthService;
+        private readonly IEmailService _emailService;
 
-
-        public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings)
-        {
-            _userManager = userManager;
-            _appSettings = appSettings;
-        }
-
-        public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, IPersonnelRepository personnelRepository, IJwtAuthService jwtAuthService)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, IPersonnelRepository personnelRepository, IJwtAuthService jwtAuthService, IEmailService emailService)
         {
             _userManager = userManager;
             _appSettings = appSettings;
             _personnelRepository = personnelRepository;
             _jwtAuthService = jwtAuthService;
+            _emailService = emailService;
         }
 
         public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
@@ -170,18 +166,9 @@ namespace PersonalSafety.Business
             APIResponse<bool> response = new APIResponse<bool>();
             response.Messages.Add("We got your email, if this email is registered you should get an activation link and an OTP shortly.");
 
-            ApplicationUser user = await _userManager.FindByEmailAsync(email);
+            var emailSendingResults = await _emailService.SendConfirmMailAsync(email);
 
-            if(user == null)
-            {
-                return response;
-            }
-            
-            string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            string mailConfirmationOTP = OTPHelper.GenerateOTP(user.Id).ComputeTotp();
-            List<string> emailSendingResults = new EmailHelper(email, mailConfirmationToken, mailConfirmationOTP ,_appSettings.Value.AppBaseUrlView, "ConfirmMail").SendEmail();
-            
-            if(emailSendingResults != null)
+            if (emailSendingResults != null)
             {
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.TechnicalError;
@@ -190,7 +177,6 @@ namespace PersonalSafety.Business
             }
 
             response.Result = true;
-
             return response;
         }
 

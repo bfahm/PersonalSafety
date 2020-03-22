@@ -29,6 +29,8 @@ using SignalRChatServer.Hubs;
 using Swashbuckle.AspNetCore.Filters;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services;
+using PersonalSafety.Services.Registration;
+using PersonalSafety.Services.Email;
 
 namespace PersonalSafety
 {
@@ -132,11 +134,14 @@ namespace PersonalSafety
                     };
                 });
 
-            // Register External Services Here
+            // Register Services Here
             services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
             services.AddScoped<IJwtAuthService, JwtAuthService>();
+            services.AddScoped<IRegistrationService, RegistrationService>();
+            services.AddScoped<IEmailService, EmailService>();
 
-            // Register Services
+
+            // Register Hubs Here
             services.AddScoped<IMainHub, MainHub>();
             services.AddScoped<IClientHub, ClientHub>();
             services.AddScoped<IPersonnelHub, PersonnelHub>();
