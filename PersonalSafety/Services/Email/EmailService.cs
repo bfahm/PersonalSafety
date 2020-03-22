@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Options;
+using PersonalSafety.Services.Otp;
 using System;
 using System.Collections.Generic;
 using System.Linq;

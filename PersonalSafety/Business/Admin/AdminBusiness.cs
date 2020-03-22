@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Business;
-using PersonalSafety.Options;
 using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
@@ -9,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PersonalSafety.Helpers;
 using PersonalSafety.Contracts;
 using PersonalSafety.Services.Registration;
 

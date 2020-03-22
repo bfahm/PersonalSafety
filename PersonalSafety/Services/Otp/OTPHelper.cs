@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Helpers
+namespace PersonalSafety.Services.Otp
 {
     public class OTPHelper
     {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using PersonalSafety.Helpers;
+using PersonalSafety.Services.Otp;
 using System;
 using System.Collections.Generic;
 using System.Linq;

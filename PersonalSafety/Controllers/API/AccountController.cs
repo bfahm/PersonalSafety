@@ -13,7 +13,6 @@ using PersonalSafety.Examples;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
-using PersonalSafety.Helpers;
 using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Controllers.API

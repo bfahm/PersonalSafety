@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using PersonalSafety.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
@@ -16,6 +15,7 @@ using PersonalSafety.Services;
 using PersonalSafety.Options;
 using PersonalSafety.Contracts;
 using PersonalSafety.Services.Email;
+using PersonalSafety.Services.Otp;
 
 namespace PersonalSafety.Business
 {

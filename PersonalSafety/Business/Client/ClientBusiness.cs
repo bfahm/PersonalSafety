@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using PersonalSafety.Options;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models;
@@ -11,7 +10,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
-using PersonalSafety.Helpers;
 using PersonalSafety.Services.Registration;
 
 namespace PersonalSafety.Business
