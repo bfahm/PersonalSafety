@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using PersonalSafety.Extensions;
 using PersonalSafety.Models;
 using PersonalSafety.Options;
 using PersonalSafety.Business;

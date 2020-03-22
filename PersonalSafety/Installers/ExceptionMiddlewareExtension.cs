@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PersonalSafety.Contracts;
 
-namespace PersonalSafety.Extensions
+namespace PersonalSafety.Installers
 {
     public static class ExceptionMiddlewareExtension
     {
