@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PersonalSafety.Services;
 using PersonalSafety.Options;
+using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Business
 {

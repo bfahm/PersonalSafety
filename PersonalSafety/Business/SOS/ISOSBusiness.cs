@@ -1,4 +1,5 @@
-﻿using PersonalSafety.Helpers;
+﻿using PersonalSafety.Contracts;
+using PersonalSafety.Helpers;
 using PersonalSafety.Options;
 using System;
 using System.Collections.Generic;

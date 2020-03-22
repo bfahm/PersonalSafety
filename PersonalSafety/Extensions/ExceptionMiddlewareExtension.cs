@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PersonalSafety.Helpers;
+using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Extensions
 {
