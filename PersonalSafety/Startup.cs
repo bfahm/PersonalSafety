@@ -1,46 +1,19 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Models;
-using PersonalSafety.Options;
-using PersonalSafety.Business;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
-using System.IO;
-using System.Threading;
-using SignalRChatServer;
 using PersonalSafety.Installers;
-using PersonalSafety.Hubs;
-using SignalRChatServer.Hubs;
-using Swashbuckle.AspNetCore.Filters;
-using PersonalSafety.Models.ViewModels;
-using PersonalSafety.Services;
-using PersonalSafety.Services.Registration;
-using PersonalSafety.Services.Email;
 using PersonalSafety.Extensions;
 
 namespace PersonalSafety
 {
     public class Startup
     {
-        readonly string ClientHubUrl = "/hubs/Client";
-        readonly string AdminHubUrl = "/hubs/Admin";
-        readonly string PersonnelHubUrl = "/hubs/Personnel";
-        readonly string LocationTrackingHubUrl = "/hubs/Realtime";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
