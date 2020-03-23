@@ -2,13 +2,12 @@
 using PersonalSafety.Contracts;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models;
-using PersonalSafety.Services.Email;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Services.Registration
+namespace PersonalSafety.Services
 {
     public class RegistrationService : IRegistrationService
     {

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Services.Email
+namespace PersonalSafety.Services
 {
     public class EmailService : IEmailService
     {

@@ -10,7 +10,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
-using PersonalSafety.Services.Registration;
 
 namespace PersonalSafety.Business
 {

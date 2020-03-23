@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
-using PersonalSafety.Services.Registration;
+using PersonalSafety.Services;
 
 namespace PersonalSafety.Business
 {

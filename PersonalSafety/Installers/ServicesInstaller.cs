@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PersonalSafety.Services;
-using PersonalSafety.Services.Email;
-using PersonalSafety.Services.Registration;
 using System;
 using System.Collections.Generic;
 using System.Linq;

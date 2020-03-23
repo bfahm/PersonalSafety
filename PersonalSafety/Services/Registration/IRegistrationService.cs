@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Services.Registration
+namespace PersonalSafety.Services
 {
     public interface IRegistrationService
     {

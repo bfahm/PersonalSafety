@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using PersonalSafety.Services;
 using PersonalSafety.Options;
 using PersonalSafety.Contracts;
-using PersonalSafety.Services.Email;
 using PersonalSafety.Services.Otp;
 
 namespace PersonalSafety.Business

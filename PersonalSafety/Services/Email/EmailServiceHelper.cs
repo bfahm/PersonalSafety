@@ -8,7 +8,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PersonalSafety.Services.Email
+namespace PersonalSafety.Services
 {
     public class EmailServiceHelper
     {
