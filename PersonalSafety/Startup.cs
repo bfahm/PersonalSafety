@@ -73,15 +73,25 @@ namespace PersonalSafety
                 app.UseDeveloperExceptionPage();
             }
 
+            if (env.IsProduction())
+            {
+                // APIResponses that support HTTP 500
+                app.ConfigureExceptionHandler();
+                
+                // APIResponses that support HTTP 401 and HTTP 404
+                app.UseStatusCodePagesWithReExecute("/Error/{0}");
+            }
+
             app.UseRouting();
 
-            // Allow headers required by SignalR, order is important
+            //Allow headers required by SignalR, order is important
             app.Use((context, next) =>
             {
-                context.Response.Headers.Add("Access-Control-Allow-Origin", context.Request.Headers.Where(h => h.Key == "Origin").FirstOrDefault().Value.ToString());
-                context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
-                context.Response.Headers.Add("Access-Control-Allow-Methods", "*");
-                context.Response.Headers.Add("Access-Control-Allow-Headers", "Authorization, X-Requested-With, Content-Type");
+                context.Response.Headers["Access-Control-Allow-Origin"] = context.Request.Headers.Where(h => h.Key == "Origin").FirstOrDefault().Value.ToString();
+                context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+                context.Response.Headers["Access-Control-Allow-Methods"] = "*";
+                context.Response.Headers["Access-Control-Allow-Headers"] = "Authorization, X-Requested-With, Content-Type";
+
                 return next.Invoke();
             });
 
@@ -97,20 +107,13 @@ namespace PersonalSafety
             app.UseSwagger();
             app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));
 
-            //app.UseStatusCodePagesWithReExecute("/Error/{0}");
-
-            //app.ConfigureExceptionHandler();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<RealtimeHub>(LocationTrackingHubUrl);
-                endpoints.MapHub<ClientHub>(ClientHubUrl);
-                endpoints.MapHub<AdminHub>(AdminHubUrl);
-                endpoints.MapHub<PersonnelHub>(PersonnelHubUrl);
+                HubsInstaller.MapToEndpoints(endpoints);
             });
 
             //app.UseMvc();
