@@ -256,13 +256,15 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
-        public IActionResult CancelSOSRequest([FromQuery] int requestId)
+        public async Task<IActionResult> CancelSOSRequest([FromQuery] int requestId)
         {
-            var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Canceled);
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Canceled, currentlyLoggedInUserId);
 
             // Notify user about the change
             var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
-            _personnelHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
+            await _personnelHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
             if (notifierResult)
             {
                 // Unsubscribe user from future notifications
@@ -276,7 +278,7 @@ namespace PersonalSafety.Controllers.API
             }
 
             
-            var fallback_response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Orphaned);
+            var fallback_response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Orphaned, currentlyLoggedInUserId);
             fallback_response.Messages.Add("Orphan request detected.");
             fallback_response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
 

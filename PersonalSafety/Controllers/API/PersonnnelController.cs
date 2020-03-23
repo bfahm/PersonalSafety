@@ -170,9 +170,11 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpPut]
-        public IActionResult AcceptSOSRequest([FromQuery] int requestId)
+        public async Task<IActionResult> AcceptSOSRequest([FromQuery] int requestId)
         {
-            var response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Accepted);
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Accepted, currentlyLoggedInUserId);
 
             var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
             if (notifierResult)
@@ -180,7 +182,7 @@ namespace PersonalSafety.Controllers.API
                 return Ok(response);
             }
 
-            response = _sosBusiness.UpdateSOSRequest(requestId, (int)StatesTypesEnum.Orphaned);
+            response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Orphaned, currentlyLoggedInUserId);
             response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
             response.Messages.Add("Reverting Changes...");
             response.Messages.Add("Changes were reverted back to 'Orphaned'.");
