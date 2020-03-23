@@ -30,6 +30,7 @@ using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services;
 using PersonalSafety.Services.Registration;
 using PersonalSafety.Services.Email;
+using PersonalSafety.Extensions;
 
 namespace PersonalSafety
 {
@@ -50,156 +51,18 @@ namespace PersonalSafety
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(
-                builder =>
-                {
-                    builder.AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                });
-            });
+            // Define a list of installers, where they are:
+            // - Accessible from the same assembly of that of Startup.cs
+            // - A type of IInstaller Interface
+            // - Not Empty interfaces
+            // - Not abstract classes
+            // And then create instances of each of them and add them to a list.
+            var installers = typeof(Startup).Assembly.ExportedTypes.Where(i =>
+                typeof(IInstaller).IsAssignableFrom(i) && !i.IsInterface && !i.IsAbstract)
+                .Select(Activator.CreateInstance).Cast<IInstaller>().ToList();
 
-            // Required for API functionality
-            services.AddControllers();
-
-            // Needed to display the home page "view"
-            services.AddMvc().AddSessionStateTempDataProvider();
-            services.AddSession();
-
-            services.AddSignalR();
-
-            // Setup the connextion string to be used by AppDbContext
-            services.AddDbContextPool<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionString")));
-
-            // Setup ASP Identity to use the database
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-
-
-            // Registering basic JWT settings
-            JwtSettings jwtSettings = new JwtSettings();
-            Configuration.Bind(nameof(jwtSettings), jwtSettings);
-            services.AddSingleton(jwtSettings);
-
-            // Registering APP Settings
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-            // Registering FacebookAuth Settings
-            var facebookAuthSettings = new FacebookAuthSettings();
-            Configuration.Bind(nameof(FacebookAuthSettings), facebookAuthSettings);
-            services.AddSingleton(facebookAuthSettings);
-
-            // Add Services required by FacebookAuth
-            services.AddHttpClient();
-
-            // Add authentication middleware and set its parameters
-            services.AddAuthentication(auth =>
-            {
-                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                auth.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(auth => {
-                    auth.SaveToken = true;
-                    auth.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        RequireExpirationTime = false,
-                        ValidateLifetime = true
-                    };
-                    auth.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = context =>
-                        {
-                            var accessToken = context.Request.Query["access_token"];
-
-                            // If the request is for our hub...
-                            var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) && 
-                                    (path.StartsWithSegments(ClientHubUrl) || path.StartsWithSegments(AdminHubUrl) || path.StartsWithSegments(PersonnelHubUrl)))
-                            {
-                                // Read the token out of the query string
-                                context.Token = accessToken;
-                            }
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
-
-            // Register Services Here
-            services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
-            services.AddScoped<IJwtAuthService, JwtAuthService>();
-            services.AddScoped<IRegistrationService, RegistrationService>();
-            services.AddScoped<IEmailService, EmailService>();
-
-
-            // Register Hubs Here
-            services.AddScoped<IMainHub, MainHub>();
-            services.AddScoped<IClientHub, ClientHub>();
-            services.AddScoped<IPersonnelHub, PersonnelHub>();
-
-            // Register Businesses
-            services.AddScoped<IAccountBusiness, AccountBusiness>();
-            services.AddScoped<IClientBusiness, ClientBusiness>();
-            services.AddScoped<IAdminBusiness, AdminBusiness>();
-            services.AddScoped<IPersonnelBusiness, PersonnelBusiness>();
-            services.AddScoped<ISOSBusiness, SOSBusiness>();
-
-            // Register here any Repositories that will be used:
-            services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
-            services.AddScoped<IClientRepository, ClientRepository>();
-            services.AddScoped<IPersonnelRepository, PersonnelRepository>();
-            services.AddScoped<ISOSRequestRepository, SOSRequestRepository>();
-
-            // Setting up swagger generator
-            services.AddSwaggerGen(sw => 
-            {
-                sw.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Personal Safety", Version = "V1" });
-                sw.ExampleFilters();
-                
-                sw.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
-                {
-                    Description = "JWT Authorization header using bearer scheme",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
-
-                sw.AddSecurityRequirement(new OpenApiSecurityRequirement()
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
-                            In = ParameterLocation.Header,
-
-                        },
-                        new List<string>()
-                    }
-                });
-
-                // Activate swagger to sense XML comments
-                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                sw.IncludeXmlComments(xmlPath);
-
-            });
-
-            services.AddSwaggerExamplesFromAssemblyOf<LoginRequestViewModel>();
+            // Run the function InstallServices in each object in the list.
+            installers.ForEach(installer => installer.InstallServices(services, Configuration));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
