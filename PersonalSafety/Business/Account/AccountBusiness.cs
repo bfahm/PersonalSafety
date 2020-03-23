@@ -22,12 +22,12 @@ namespace PersonalSafety.Business
     public class AccountBusiness : IAccountBusiness
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IOptions<AppSettings> _appSettings;
+        private readonly AppSettings _appSettings;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IJwtAuthService _jwtAuthService;
         private readonly IEmailService _emailService;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, IOptions<AppSettings> appSettings, IPersonnelRepository personnelRepository, IJwtAuthService jwtAuthService, IEmailService emailService)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, IPersonnelRepository personnelRepository, IJwtAuthService jwtAuthService, IEmailService emailService)
         {
             _userManager = userManager;
             _appSettings = appSettings;
@@ -115,12 +115,13 @@ namespace PersonalSafety.Business
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            List<string> emailSendingResults = new EmailServiceHelper(email, resetPasswordToken, null ,_appSettings.Value.AppBaseUrlView, "ResetPassword").SendEmail();
-            if (emailSendingResults != null)
+            List<string> emailSendingResults = new EmailServiceHelper(email, resetPasswordToken, null ,_appSettings.AppBaseUrlView, "ResetPassword").SendEmail();
+            if (emailSendingResults.Count != 0)
             {
                 response.Messages.AddRange(emailSendingResults);
                 response.Status = (int)APIResponseCodesEnum.TechnicalError;
                 response.HasErrors = true;
+                return response;
             }
 
             response.Result = true;

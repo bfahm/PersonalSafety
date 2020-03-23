@@ -50,7 +50,7 @@ namespace PersonalSafety.Services.Email
                         smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                         smtp.Send(mail);
                     }
-                    return new List<string> {"Google SMTP: Success."};
+                    return new List<string>();
                 }
             }catch(Exception ex)
             {
