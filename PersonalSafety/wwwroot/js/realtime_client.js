@@ -68,16 +68,18 @@ function startConnection(token) {
             })
             .build();
 
-        connection.on("ClientChannel", function (message) {
-            var parsedMsg = JSON.parse(message);
-            var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
+        connection.on("ClientChannel", function (requestId, requestState) {
+            console.log(requestId);
+            console.log(requestState);
 
-            var isAccepted = parsedMsg.requestState == "Accepted";
+            var outputMsg = "The state of the request with Id " + requestId + " was changed to " + requestState + ".";
+
+            var isAccepted = requestState == "Accepted";
             if (isAccepted) {
                 $("#result_msg").removeClass('pb_color-primary');
-                $("#result_msg").addClass('pb_color-success');
+                $("#result_msg").addClass('text-success');
             } else {
-                $("#result_msg").removeClass('pb_color-success');
+                $("#result_msg").removeClass('text-success');
                 $("#result_msg").addClass('pb_color-primary');
             }
 

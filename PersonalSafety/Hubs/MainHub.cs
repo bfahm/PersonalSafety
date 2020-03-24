@@ -13,10 +13,11 @@ namespace PersonalSafety.Hubs
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
+        public static readonly string connectionInfoChannel = "ConnectionInfoChannel";
         public Task GetMyConnectionInfo()
         {
             var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.Where(c=>c.ConnectionId == Context.ConnectionId).FirstOrDefault());
-            return Clients.Caller.SendAsync("ConnectionInfoChannel", json);
+            return Clients.Caller.SendAsync(connectionInfoChannel, json);
         }
 
         public bool isConnected(string connectionId)

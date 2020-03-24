@@ -123,9 +123,9 @@
                                 <hr />
 
                                 <h3 class="mt-2 mb-2 heading">Connection Info</h3>
-                                <p class="text-sans-serif pb_font-16">Right after establishing a realtime connection with the server, the client <strong>must</strong> request his own connection info, to be used later in any realtime-needing API method.</p>
-                                <p class="text-sans-serif pb_font-16">Requesting information about the connection is done by <strong>invoking</strong> <code>GetMyConnectionInfo()</code> method which in turn returns all needed information to the "Caller", the invoker.</p>
-                                <p class="text-sans-serif pb_font-16">Messages received on this channel are in the form of JSON strings that can be easily parsed to a JSON Object and extract different fields from it.</p>
+                                <p class="text-sans-serif pb_font-16">Right after establishing a realtime connection with the server, the client is automatically sent his <code>connectionId</code> to be used in further requests.</p>
+                                <p class="text-sans-serif pb_font-16">Requesting <strong>additional</strong> information about the connection is done by <strong>invoking</strong> <code>GetMyConnectionInfo()</code> method which in turn returns connection data to the "Caller", the invoker.</p>
+                                <p class="text-sans-serif pb_font-16">The initial message that should be received on this channel should be a simple string, though, invoking <code>GetMyConnectionInfo()</code> returns the object in the form of JSON string that can be easily parsed to a JSON Object and extract different fields from it.</p>
                                 <p class="text-sans-serif pb_font-16">Here is how a sample message is supposed to look like:</p>
                                 <div class="alert alert-secondary pb_font-16">
                                     <code>

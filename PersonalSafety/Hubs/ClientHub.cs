@@ -26,12 +26,21 @@ namespace PersonalSafety.Hubs
 
             if (connectionInformation != null)
             {
-                var jsonMsg = JsonSerializer.Serialize(new { requestId = sosRequestId, requestState = ((StatesTypesEnum)sosRequestState).ToString() });
-                _hubContext.Clients.Client(connectionInformation.ConnectionId).SendAsync(channelName, jsonMsg);
+                _hubContext.Clients.Client(connectionInformation.ConnectionId).SendAsync(channelName, sosRequestId, ((StatesTypesEnum)sosRequestState).ToString());
 
                 return true;
             }
             return false;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            await base.OnConnectedAsync();
+            
+            // Send to the client his connectionID whenever he connects through the clienthub
+            // Note that GetMyConnectionInfo also works, and also sends its information on the same channel, 
+            // but when invoked, the whole connectionInfo object is sent through a JSON string.
+            await Clients.Caller.SendAsync(connectionInfoChannel, UserHandler.ConnectionInfoSet.Where(c => c.ConnectionId == Context.ConnectionId).FirstOrDefault().ConnectionId);
         }
     }
 }
