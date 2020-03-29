@@ -12,5 +12,7 @@ namespace PersonalSafety.Models
     {
         [Required]
         public string FullName { get; set; }
+
+        public bool ForceChangePassword { get; set; } = false;
     }
 }

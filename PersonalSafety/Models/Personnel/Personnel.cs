@@ -18,7 +18,5 @@ namespace PersonalSafety.Models
         public virtual Department Department { get; set; }
 
         public bool IsRescuer { get; set; } // False means he is an agent
-
-        public bool IsFirstLogin { get; set; } = true;
     }
 }

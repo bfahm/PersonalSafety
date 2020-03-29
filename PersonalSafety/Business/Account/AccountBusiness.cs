@@ -65,12 +65,24 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            if (user.ForceChangePassword)
+            {
+                response.Result = await _userManager.GeneratePasswordResetTokenAsync(user);
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.HasErrors = false;
+                response.Messages = new List<string>
+                {
+                    "It appears it is time to change you password, use this token to update your password, then try logging in again.",
+                    "Use /ResetPasswordAsync to update your password."
+                };
+                return response;
+            }
+
             
             response.Result = await _jwtAuthService.GenerateAuthenticationTokenAsync(user);
             response.Status = 0;
             response.HasErrors = false;
-            response.Messages = new List<string>();
-            response.Messages.Add("Success! You are now logged in.");
+            response.Messages = new List<string> {"Success! You are now logged in."};
 
             IEnumerable<string> roles = await _userManager.GetRolesAsync(user);
             
@@ -155,8 +167,13 @@ namespace PersonalSafety.Business
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.IdentityError;
                 response.Messages = result.Errors.Select(e => e.Description).ToList();
+                return response;
             }
 
+            user.ForceChangePassword = false;
+            await _userManager.UpdateAsync(user);
+
+            response.Messages = new List<string>{"Success! Password was changed successfully."};
             response.Result = true;
             return response;
         }

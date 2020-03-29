@@ -85,8 +85,7 @@ namespace PersonalSafety.Extensions
             {
                 PersonnelId = personnelUser.Id,
                 Department = policeDpt,
-                IsRescuer = false,
-                IsFirstLogin = false
+                IsRescuer = false
             };
 
             if (!_personnelRepository.GetAll().Any())

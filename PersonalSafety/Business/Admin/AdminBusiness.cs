@@ -52,7 +52,8 @@ namespace PersonalSafety.Business
                 Email = request.Email,
                 UserName = request.Email,
                 FullName = request.FullName,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                ForceChangePassword = true
             };
 
             Personnel personnel = new Personnel
