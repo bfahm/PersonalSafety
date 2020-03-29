@@ -10,6 +10,6 @@ namespace PersonalSafety.Services
     public interface IRegistrationService
     {
         Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Client client);
-        Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Personnel personnel);
+        Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Personnel personnel, params string[] roles);
     }
 }

@@ -19,7 +19,7 @@ namespace PersonalSafety.Models
 
         public int GetPersonnelAuthorityTypeInt(string userId)
         {
-            return context.Personnels.Find(userId).Department.AuthorityType;
+            return context.Personnels.Include(p => p.Department).FirstOrDefault(p => p.PersonnelId == userId).Department.AuthorityType;
         }
 
         public string GetPersonnelAuthorityTypeString(string userId)

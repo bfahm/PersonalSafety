@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Hubs
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.ROLE_ADMIN)]
     public class AdminHub : MainHub
     {
         public Task GetConnectionInfo()

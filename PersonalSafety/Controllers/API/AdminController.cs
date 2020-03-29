@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
+using PersonalSafety.Contracts;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = Roles.ROLE_ADMIN)]
     public class AdminController : ControllerBase
     {
         private readonly IAdminBusiness _adminBusiness;

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
+using PersonalSafety.Services;
 
 namespace PersonalSafety.Business
 {
@@ -17,13 +18,15 @@ namespace PersonalSafety.Business
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IClientRepository _clientRepository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRegistrationService _registrationService;
 
-        public AgentBusiness(IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager)
+        public AgentBusiness(IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRegistrationService registrationService)
         {
             _personnelRepository = personnelRepository;
             _sosRequestRepository = sosRequestRepository;
             _clientRepository = clientRepository;
             _userManager = userManager;
+            _registrationService = registrationService;
         }
 
         public async Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState)
@@ -74,6 +77,29 @@ namespace PersonalSafety.Business
 
 
             return response;
+        }
+
+        public async Task<APIResponse<bool>> RegisterRescuersAsync(string userId, RegisterRescuerViewModel rescuer)
+        {
+            var currentAgent = _personnelRepository.GetById(userId);
+
+            ApplicationUser newUser = new ApplicationUser
+            {
+                Email = rescuer.Email,
+                UserName = rescuer.Email,
+                FullName = rescuer.Email,
+                EmailConfirmed = true,
+                ForceChangePassword = true
+            };
+
+            Personnel personnel = new Personnel
+            {
+                PersonnelId = newUser.Id,
+                DepartmentId = currentAgent.DepartmentId,
+                IsRescuer = true
+            };
+
+            return await _registrationService.RegisterNewUserAsync(newUser, rescuer.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
         }
     }
 }

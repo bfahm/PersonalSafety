@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
+using PersonalSafety.Contracts;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Contracts.Enums;
@@ -15,18 +16,29 @@ namespace PersonalSafety.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Personnel")]
+    [Authorize(Roles = Roles.ROLE_AGENT)]
     public class AgentController : ControllerBase
     {
-        private readonly IAgentBusiness _personnelBusiness;
+        private readonly IAgentBusiness _agentBusiness;
         private readonly ISOSBusiness _sosBusiness;
         private readonly IClientHub _clientHub;
 
         public AgentController(IAgentBusiness personnelBusiness, ISOSBusiness sosBusiness, IClientHub clientHub)
         {
-            _personnelBusiness = personnelBusiness;
+            _agentBusiness = personnelBusiness;
             _sosBusiness = sosBusiness;
             _clientHub = clientHub;
+        }
+
+        [HttpPost]
+        [Route("SOS/[action]")]
+        public async Task<IActionResult> RegisterRescuer(RegisterRescuerViewModel request)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _agentBusiness.RegisterRescuersAsync(currentlyLoggedInUserId, request);
+
+            return Ok(response);
         }
 
         /// <summary>
@@ -61,7 +73,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _personnelBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, null);
+            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, null);
 
             return Ok(response);
         }
@@ -85,7 +97,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _personnelBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Pending);
+            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Pending);
 
             return Ok(response);
         }
@@ -109,7 +121,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _personnelBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Accepted);
+            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Accepted);
 
             return Ok(response);
         }
@@ -133,7 +145,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _personnelBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Solved);
+            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Solved);
 
             return Ok(response);
         }
@@ -157,7 +169,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _personnelBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Canceled);
+            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Canceled);
 
             return Ok(response);
         }

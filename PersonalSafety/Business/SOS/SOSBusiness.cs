@@ -35,7 +35,7 @@ namespace PersonalSafety.Business
             }
 
             // If user is not a personnel (meaning he's a client), he must only modify his own requests.
-            if(!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(issuerId), "Personnel"))
+            if(!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(issuerId), Roles.ROLE_PERSONNEL))
             {
                 if(sosRequest.UserId != issuerId)
                 {

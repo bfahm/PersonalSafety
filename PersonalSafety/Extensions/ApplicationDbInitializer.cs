@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Extensions
 {
@@ -73,13 +74,13 @@ namespace PersonalSafety.Extensions
 
             ApplicationUser personnelUser = new ApplicationUser
             {
-                UserName = "personnel@personnel.com",
-                Email = "personnel@personnel.com",
-                FullName = "Personnel Police",
+                UserName = "agent@test.com",
+                Email = "agent@test.com",
+                FullName = "Police Agent",
                 EmailConfirmed = true
             };
 
-            CreateUserAndSetupRole(personnelUser, "Test@123", "Personnel");
+            CreateUserAndSetupRole(personnelUser, "Test@123", Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
 
             Personnel personnel = new Personnel
             {
@@ -95,15 +96,18 @@ namespace PersonalSafety.Extensions
             }
         }
 
-        private void CreateUserAndSetupRole(ApplicationUser user, string password, string role)
+        private void CreateUserAndSetupRole(ApplicationUser user, string password, params string[] roles)
         {
             if (_userManager.FindByEmailAsync(user.Email).Result == null)
             {
                 IdentityResult result = _userManager.CreateAsync(user, password).Result;
 
-                if (result.Succeeded && !string.IsNullOrEmpty(role))
+                if (result.Succeeded && roles != null && roles.Length>0)
                 {
-                    _userManager.AddToRoleAsync(user, role).Wait();
+                    foreach (var role in roles)
+                    {
+                        _userManager.AddToRoleAsync(user, role).Wait();
+                    }
                 }
             }
 

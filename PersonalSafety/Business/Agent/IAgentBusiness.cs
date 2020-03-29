@@ -12,5 +12,6 @@ namespace PersonalSafety.Business
     public interface IAgentBusiness
     {
         Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState);
+        Task<APIResponse<bool>> RegisterRescuersAsync(string userId, RegisterRescuerViewModel accounts);
     }
 }

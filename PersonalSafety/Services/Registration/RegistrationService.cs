@@ -83,7 +83,7 @@ namespace PersonalSafety.Services
             return response;
         }
 
-        public async Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Personnel personnel)
+        public async Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Personnel personnel, params string[] roles)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -105,14 +105,17 @@ namespace PersonalSafety.Services
                 return response;
             }
 
-            var addToRoleResult = await _userManager.AddToRoleAsync(applicationUser, "Personnel");
-            var roleAddingCheckResult = CheckIdentityResult(addToRoleResult);
-            if (roleAddingCheckResult != null) 
+            foreach (var role in roles)
             {
-                response.WrapResponseData(roleAddingCheckResult);
-                return response;
+                var addToRoleResult = await _userManager.AddToRoleAsync(applicationUser, role);
+                var roleAddingCheckResult = CheckIdentityResult(addToRoleResult);
+                if (roleAddingCheckResult != null)
+                {
+                    response.WrapResponseData(roleAddingCheckResult);
+                    return response;
+                }
             }
-
+            
             // TODO: send just congratulation email using the service here
             response.Messages.Add("Successfully created a new personnel with email " + applicationUser.Email);
             return response;

@@ -33,8 +33,10 @@ namespace PersonalSafety.Models
 
             //-----------------------------------
             //Seed database initially with basic roles
-            builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "Admin".ToUpper() });
-            builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Personnel", NormalizedName = "Personnel".ToUpper() });
+            foreach (var role in Contracts.Roles.GetRoles())
+            {
+                builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = role, NormalizedName = role.ToUpper() });
+            }
         }
 
         public DbSet<ApplicationUser> UserInfos { get; set; }

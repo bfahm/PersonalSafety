@@ -62,7 +62,7 @@ namespace PersonalSafety.Business
                 DepartmentId = department.Id
             };
 
-            return await _registrationService.RegisterNewUserAsync(newUser, request.Password, personnel);
+            return await _registrationService.RegisterNewUserAsync(newUser, request.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
         }
     }
 }

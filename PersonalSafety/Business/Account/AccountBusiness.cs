@@ -92,7 +92,7 @@ namespace PersonalSafety.Business
                 response.Messages.AddRange(roles);
 
 
-                if (roles.Where(r => r.Contains("Personnel")).Any() != false)
+                if (roles.Where(r => r.Contains(Roles.ROLE_PERSONNEL)).Any() != false)
                 {
                     response.Messages.Add("It appears that you are a working entity, displaying your authority type:");
                     string authorityTypeString = _personnelRepository.GetPersonnelAuthorityTypeString(user.Id);
