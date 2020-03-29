@@ -27,5 +27,24 @@ namespace PersonalSafety.Models
             int authorityTypeInt = context.Personnels.Include(p => p.Department).FirstOrDefault(p => p.PersonnelId == userId).Department.AuthorityType;
             return ((AuthorityTypesEnum)authorityTypeInt).ToString();
         }
+
+        public Department GetPersonnelDepartment(string userId)
+        {
+            return context.Personnels.Include(p => p.Department).FirstOrDefault()?.Department;
+        }
+
+        public List<string> GetDepartmentAgentsEmails(int departmentId)
+        {
+            return context.Personnels.Include(p => p.Department)
+                .Where(p => !p.IsRescuer && p.Department.Id == departmentId).Select(p => p.ApplicationUser.Email)
+                .ToList();
+        }
+
+        public List<string> GetDepartmentRescuersEmails(int departmentId)
+        {
+            return context.Personnels.Include(p => p.Department)
+                .Where(p => p.IsRescuer && p.Department.Id == departmentId).Select(p => p.ApplicationUser.Email)
+                .ToList();
+        }
     }
 }

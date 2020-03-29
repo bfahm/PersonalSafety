@@ -101,5 +101,25 @@ namespace PersonalSafety.Business
 
             return await _registrationService.RegisterNewUserAsync(newUser, rescuer.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
         }
+
+        public APIResponse<DepartmentDetailsViewModel> GetDepartmentDetails(string userId)
+        {
+            var currentAgent = _personnelRepository.GetById(userId);
+            var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
+
+
+            var dptDetails = new DepartmentDetailsViewModel
+            {
+                DepartmentId = currentAgent.DepartmentId,
+                AuthorityTypeId = currentAgentDepartment.Id,
+                AuthorityTypeName = ((AuthorityTypesEnum)currentAgentDepartment.Id).ToString(),
+                DepartmentLongitude = currentAgentDepartment.Longitude,
+                DepartmentLatitude = currentAgentDepartment.Latitude,
+                AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(currentAgentDepartment.Id),
+                RescuerEmails = _personnelRepository.GetDepartmentRescuersEmails(currentAgentDepartment.Id)
+            };
+
+            return new APIResponse<DepartmentDetailsViewModel> { Result = dptDetails };
+        }
     }
 }

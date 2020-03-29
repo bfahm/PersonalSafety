@@ -31,12 +31,23 @@ namespace PersonalSafety.Controllers.API
         }
 
         [HttpPost]
-        [Route("SOS/[action]")]
+        [Route("Rescuer/[action]")]
         public async Task<IActionResult> RegisterRescuer(RegisterRescuerViewModel request)
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
             var response = await _agentBusiness.RegisterRescuersAsync(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("Rescuer/[action]")]
+        public IActionResult GetDepartmentDetails()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = _agentBusiness.GetDepartmentDetails(currentlyLoggedInUserId);
 
             return Ok(response);
         }

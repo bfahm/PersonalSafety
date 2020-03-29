@@ -9,5 +9,8 @@ namespace PersonalSafety.Models
     {
         int GetPersonnelAuthorityTypeInt(string userId);
         string GetPersonnelAuthorityTypeString(string userId);
+        List<string> GetDepartmentAgentsEmails(int departmentId);
+        List<string> GetDepartmentRescuersEmails(int departmentId);
+        Department GetPersonnelDepartment(string userId);
     }
 }
