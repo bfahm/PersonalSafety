@@ -138,7 +138,7 @@ namespace PersonalSafety.Services
 
         private APIResponseData CheckPhoneNumberDuplication(string phoneNumber)
         {
-            if (_userManager.Users.Where(u => u.PhoneNumber == phoneNumber).FirstOrDefault() != null)
+            if (_userManager.Users.FirstOrDefault(u => u.PhoneNumber == phoneNumber) != null)
             {
                 APIResponseData data = new APIResponseData((int)APIResponseCodesEnum.InvalidRequest, 
                     new List<string> { "User with this Phone Number was registered before." });
@@ -150,7 +150,7 @@ namespace PersonalSafety.Services
 
         private APIResponseData CheckNationalIdDuplication(string nationalId)
         {
-            if (_clientRepository.GetAll().Where(u => u.NationalId == nationalId).FirstOrDefault() != null)
+            if (_clientRepository.GetByNationalId(nationalId) != null)
             {
                 APIResponseData data = new APIResponseData((int)APIResponseCodesEnum.InvalidRequest, 
                     new List<string> { "User with this National Id was registered before." });

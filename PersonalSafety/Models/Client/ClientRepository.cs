@@ -14,5 +14,10 @@ namespace PersonalSafety.Models
         {
             this.context = context;
         }
+
+        public Client GetByNationalId(string nationalId)
+        {
+            return context.Clients.FirstOrDefault(u => u.NationalId == nationalId);
+        }
     }
 }
