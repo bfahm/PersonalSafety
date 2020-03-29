@@ -55,9 +55,9 @@ namespace PersonalSafety.Controllers.API
         /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
         /// </remarks>
         [HttpPost]
-        public async Task<IActionResult> RegisterPersonnel([FromBody] RegisterPersonnelViewModel request)
+        public async Task<IActionResult> RegisterAgent([FromBody] RegisterAgentViewModel request)
         {
-            var authResponse = await _adminBusiness.RegisterPersonnelAsync(request);
+            var authResponse = await _adminBusiness.RegisterAgentAsync(request);
 
             if (authResponse.HasErrors)
             {

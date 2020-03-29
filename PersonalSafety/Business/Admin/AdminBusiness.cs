@@ -15,13 +15,15 @@ namespace PersonalSafety.Business
     public class AdminBusiness : IAdminBusiness
     {
         private readonly IRegistrationService _registrationService;
+        private readonly IDepartmentRepository _departmentRepository;
 
-        public AdminBusiness(IRegistrationService registrationService)
+        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository)
         {
             _registrationService = registrationService;
+            _departmentRepository = departmentRepository;
         }
 
-        public async Task<APIResponse<bool>> RegisterPersonnelAsync(RegisterPersonnelViewModel request)
+        public async Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request)
         {
             // Check if provided authority type is valid
             if (!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
@@ -33,6 +35,18 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            // Create department to put the agent in:
+            Department department = new Department
+            {
+                AuthorityType = request.AuthorityType,
+                Latitude = request.DepartmentLatitude,
+                Longitude = request.DepartmentLongitude
+            };
+
+            _departmentRepository.Add(department);
+            _departmentRepository.Save();
+
+            // Then create the agent:
             ApplicationUser newUser = new ApplicationUser
             {
                 Email = request.Email,
@@ -44,7 +58,7 @@ namespace PersonalSafety.Business
             Personnel personnel = new Personnel
             {
                 PersonnelId = newUser.Id,
-                AuthorityType = request.AuthorityType
+                DepartmentId = department.Id
             };
 
             return await _registrationService.RegisterNewUserAsync(newUser, request.Password, personnel);

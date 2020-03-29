@@ -48,6 +48,21 @@ namespace PersonalSafety.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Departments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AuthorityType = table.Column<int>(nullable: false),
+                    Longitude = table.Column<double>(nullable: false),
+                    Latitude = table.Column<double>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Departments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -210,7 +225,9 @@ namespace PersonalSafety.Migrations
                     Latitude = table.Column<double>(nullable: false),
                     State = table.Column<int>(nullable: false),
                     IsValidated = table.Column<bool>(nullable: false),
-                    IsOnGoing = table.Column<bool>(nullable: false)
+                    IsOnGoing = table.Column<bool>(nullable: false),
+                    CreationDate = table.Column<DateTime>(nullable: false),
+                    LastModified = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -228,11 +245,19 @@ namespace PersonalSafety.Migrations
                 columns: table => new
                 {
                     PersonnelId = table.Column<string>(nullable: false),
-                    AuthorityType = table.Column<int>(nullable: false)
+                    DepartmentId = table.Column<int>(nullable: false),
+                    IsRescuer = table.Column<bool>(nullable: false),
+                    IsFirstLogin = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Personnels", x => x.PersonnelId);
+                    table.ForeignKey(
+                        name: "FK_Personnels_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Personnels_AspNetUsers_PersonnelId",
                         column: x => x.PersonnelId,
@@ -251,11 +276,28 @@ namespace PersonalSafety.Migrations
                     State = table.Column<int>(nullable: false),
                     AuthorityType = table.Column<int>(nullable: false),
                     Longitude = table.Column<double>(nullable: false),
-                    Latitude = table.Column<double>(nullable: false)
+                    Latitude = table.Column<double>(nullable: false),
+                    AssignedDepartmentId = table.Column<int>(nullable: false),
+                    AssignedRescuerId = table.Column<string>(nullable: true),
+                    RescuerPersonnelId = table.Column<string>(nullable: true),
+                    CreationDate = table.Column<DateTime>(nullable: false),
+                    LastModified = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SOSRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SOSRequests_Departments_AssignedDepartmentId",
+                        column: x => x.AssignedDepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SOSRequests_Personnels_RescuerPersonnelId",
+                        column: x => x.RescuerPersonnelId,
+                        principalTable: "Personnels",
+                        principalColumn: "PersonnelId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_SOSRequests_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -267,12 +309,12 @@ namespace PersonalSafety.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "2e24b5ef-c59f-407d-ba1b-574afd031716", "5698c263-36d5-42da-98a0-e9a128661cfc", "Admin", "ADMIN" });
+                values: new object[] { "ef2fba56-130b-4ba9-b960-88d02bf5ce76", "bf987213-fd12-4810-8ddf-e77d4ff10653", "Admin", "ADMIN" });
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "c61803b8-6bbd-42bd-9161-8f5620aaba90", "9adf8661-0033-43de-9767-bb8b75230884", "Personnel", "PERSONNEL" });
+                values: new object[] { "59ad7863-b3b8-4770-88ac-daba55cc9493", "7d67d6ff-e1cc-4621-8d43-f250c0e99a66", "Personnel", "PERSONNEL" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -337,6 +379,21 @@ namespace PersonalSafety.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Personnels_DepartmentId",
+                table: "Personnels",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SOSRequests_AssignedDepartmentId",
+                table: "SOSRequests",
+                column: "AssignedDepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SOSRequests_RescuerPersonnelId",
+                table: "SOSRequests",
+                column: "RescuerPersonnelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SOSRequests_UserId",
                 table: "SOSRequests",
                 column: "UserId");
@@ -369,13 +426,16 @@ namespace PersonalSafety.Migrations
                 name: "Events");
 
             migrationBuilder.DropTable(
-                name: "Personnels");
-
-            migrationBuilder.DropTable(
                 name: "SOSRequests");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Personnels");
+
+            migrationBuilder.DropTable(
+                name: "Departments");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

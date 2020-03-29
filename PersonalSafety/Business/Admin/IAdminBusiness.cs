@@ -9,6 +9,6 @@ namespace PersonalSafety.Business
 {
     public interface IAdminBusiness
     {
-        Task<APIResponse<bool>> RegisterPersonnelAsync(RegisterPersonnelViewModel request);
+        Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request);
     }
 }

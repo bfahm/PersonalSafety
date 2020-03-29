@@ -13,12 +13,14 @@ namespace PersonalSafety.Extensions
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IClientRepository _clientRepository;
         private readonly IPersonnelRepository _personnelRepository;
+        private readonly IDepartmentRepository _departmentRepository;
 
-        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository)
+        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository)
         {
             _userManager = userManager;
             _clientRepository = clientRepository;
             _personnelRepository = personnelRepository;
+            _departmentRepository = departmentRepository;
         }
 
         public void SeedUsers()
@@ -43,18 +45,32 @@ namespace PersonalSafety.Extensions
             };
 
             CreateUserAndSetupRole(testUser, "Test@123", null);
+            
             Client client = new Client
             {
                 ClientId = testUser.Id,
                 NationalId = "00000000000000"
             };
             
-            if (_clientRepository.GetAll().Count() == 0)
+            if (!_clientRepository.GetAll().Any())
             {
                 _clientRepository.Add(client);
                 _clientRepository.Save();
             }
-            
+
+            Department policeDpt = new Department
+            {
+                AuthorityType = (int) AuthorityTypesEnum.Police,
+                Longitude = 0.0,
+                Latitude = 0.0
+            };
+
+            if (!_departmentRepository.GetAll().Any())
+            {
+                _departmentRepository.Add(policeDpt);
+                _departmentRepository.Save();
+            }
+
             ApplicationUser personnelUser = new ApplicationUser
             {
                 UserName = "personnel@personnel.com",
@@ -64,13 +80,16 @@ namespace PersonalSafety.Extensions
             };
 
             CreateUserAndSetupRole(personnelUser, "Test@123", "Personnel");
+
             Personnel personnel = new Personnel
             {
                 PersonnelId = personnelUser.Id,
-                AuthorityType = (int)AuthorityTypesEnum.Police
+                Department = policeDpt,
+                IsRescuer = false,
+                IsFirstLogin = false
             };
 
-            if (_personnelRepository.GetAll().Count() == 0)
+            if (!_personnelRepository.GetAll().Any())
             {
                 _personnelRepository.Add(personnel);
                 _personnelRepository.Save();

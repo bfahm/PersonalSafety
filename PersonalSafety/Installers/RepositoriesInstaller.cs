@@ -17,6 +17,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<IClientRepository, ClientRepository>();
             services.AddScoped<IPersonnelRepository, PersonnelRepository>();
             services.AddScoped<ISOSRequestRepository, SOSRequestRepository>();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         }
     }
 }

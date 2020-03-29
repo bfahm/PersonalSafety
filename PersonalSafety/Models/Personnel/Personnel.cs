@@ -11,11 +11,14 @@ namespace PersonalSafety.Models
     {
         [Key, ForeignKey("ApplicationUser")]
         public string PersonnelId { get; set; }
-
-        // Uniqueness enforced in [AppDbContext]
-        [Required]
-        public int AuthorityType { get; set; }
-
         public virtual ApplicationUser ApplicationUser { get; set; }
+
+        [ForeignKey("Department")]
+        public int DepartmentId { get; set; }
+        public virtual Department Department { get; set; }
+
+        public bool IsRescuer { get; set; } // False means he is an agent
+
+        public bool IsFirstLogin { get; set; } = true;
     }
 }

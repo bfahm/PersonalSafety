@@ -10,8 +10,8 @@ using PersonalSafety.Models;
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200311161823_AddCreationAndModificationDateSupport")]
-    partial class AddCreationAndModificationDateSupport
+    [Migration("20200329161607_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -50,15 +50,15 @@ namespace PersonalSafety.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5c622cc9-672c-4e74-97a9-d4bcfb6e17af",
-                            ConcurrencyStamp = "a8f8c800-1e45-4854-b539-a6e9667b1630",
+                            Id = "ef2fba56-130b-4ba9-b960-88d02bf5ce76",
+                            ConcurrencyStamp = "bf987213-fd12-4810-8ddf-e77d4ff10653",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "0ce5e16d-c778-4304-a41d-ca7a7880337c",
-                            ConcurrencyStamp = "905e873b-478e-48da-86bd-c2d22383517a",
+                            Id = "59ad7863-b3b8-4770-88ac-daba55cc9493",
+                            ConcurrencyStamp = "7d67d6ff-e1cc-4621-8d43-f250c0e99a66",
                             Name = "Personnel",
                             NormalizedName = "PERSONNEL"
                         });
@@ -276,6 +276,27 @@ namespace PersonalSafety.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("PersonalSafety.Models.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AuthorityType")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments");
+                });
+
             modelBuilder.Entity("PersonalSafety.Models.EmergencyContact", b =>
                 {
                     b.Property<string>("Id")
@@ -347,10 +368,18 @@ namespace PersonalSafety.Migrations
                     b.Property<string>("PersonnelId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("AuthorityType")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsFirstLogin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRescuer")
+                        .HasColumnType("bit");
+
                     b.HasKey("PersonnelId");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Personnels");
                 });
@@ -361,6 +390,12 @@ namespace PersonalSafety.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AssignedDepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AssignedRescuerId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("AuthorityType")
                         .HasColumnType("int");
@@ -377,6 +412,9 @@ namespace PersonalSafety.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("float");
 
+                    b.Property<string>("RescuerPersonnelId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("State")
                         .HasColumnType("int");
 
@@ -384,6 +422,10 @@ namespace PersonalSafety.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssignedDepartmentId");
+
+                    b.HasIndex("RescuerPersonnelId");
 
                     b.HasIndex("UserId");
 
@@ -466,6 +508,12 @@ namespace PersonalSafety.Migrations
 
             modelBuilder.Entity("PersonalSafety.Models.Personnel", b =>
                 {
+                    b.HasOne("PersonalSafety.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("PersonnelId")
@@ -475,6 +523,16 @@ namespace PersonalSafety.Migrations
 
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>
                 {
+                    b.HasOne("PersonalSafety.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("AssignedDepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonalSafety.Models.Personnel", "Rescuer")
+                        .WithMany()
+                        .HasForeignKey("RescuerPersonnelId");
+
                     b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId");

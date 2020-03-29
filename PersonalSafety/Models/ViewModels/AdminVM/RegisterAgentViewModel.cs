@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Models.ViewModels
 {
-    public class RegisterPersonnelViewModel
+    public class RegisterAgentViewModel
     {
         [Required]
         [Display(Name = "Full Name")]
@@ -22,5 +22,11 @@ namespace PersonalSafety.Models.ViewModels
 
         [Required]
         public int AuthorityType { get; set; }
+
+        [Required]
+        public double DepartmentLongitude { get; set; }
+
+        [Required]
+        public double DepartmentLatitude { get; set; }
     }
 }
