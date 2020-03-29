@@ -13,16 +13,16 @@ using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Personnel")]
-    public class PersonnnelController : ControllerBase
+    public class AgentController : ControllerBase
     {
-        private readonly IPersonnelBusiness _personnelBusiness;
+        private readonly IAgentBusiness _personnelBusiness;
         private readonly ISOSBusiness _sosBusiness;
         private readonly IClientHub _clientHub;
 
-        public PersonnnelController(IPersonnelBusiness personnelBusiness, ISOSBusiness sosBusiness, IClientHub clientHub)
+        public AgentController(IAgentBusiness personnelBusiness, ISOSBusiness sosBusiness, IClientHub clientHub)
         {
             _personnelBusiness = personnelBusiness;
             _sosBusiness = sosBusiness;
@@ -56,6 +56,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
+        [Route("SOS/[action]")]
         public async Task<IActionResult> GetAllAuthorityRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -79,6 +80,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
+        [Route("SOS/[action]")]
         public async Task<IActionResult> GetAuthorityPendingRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -102,6 +104,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
+        [Route("SOS/[action]")]
         public async Task<IActionResult> GetAuthorityAcceptedRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -125,6 +128,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
+        [Route("SOS/[action]")]
         public async Task<IActionResult> GetAuthoritySolvedRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -148,6 +152,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet]
+        [Route("SOS/[action]")]
         public async Task<IActionResult> GetAuthorityCanceledRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -170,6 +175,7 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpPut]
+        [Route("SOS/[action]")]
         public async Task<IActionResult> AcceptSOSRequest([FromQuery] int requestId)
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;

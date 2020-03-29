@@ -16,7 +16,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<IAccountBusiness, AccountBusiness>();
             services.AddScoped<IClientBusiness, ClientBusiness>();
             services.AddScoped<IAdminBusiness, AdminBusiness>();
-            services.AddScoped<IPersonnelBusiness, PersonnelBusiness>();
+            services.AddScoped<IAgentBusiness, AgentBusiness>();
             services.AddScoped<ISOSBusiness, SOSBusiness>();
         }
     }

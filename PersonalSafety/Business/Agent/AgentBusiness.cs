@@ -11,14 +11,14 @@ using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Business
 {
-    public class PersonnelBusiness : IPersonnelBusiness
+    public class AgentBusiness : IAgentBusiness
     {
         private readonly IPersonnelRepository _personnelRepository;
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IClientRepository _clientRepository;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public PersonnelBusiness(IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager)
+        public AgentBusiness(IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager)
         {
             _personnelRepository = personnelRepository;
             _sosRequestRepository = sosRequestRepository;

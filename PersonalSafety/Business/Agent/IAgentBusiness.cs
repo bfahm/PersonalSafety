@@ -9,7 +9,7 @@ using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Business
 {
-    public interface IPersonnelBusiness
+    public interface IAgentBusiness
     {
         Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState);
     }
