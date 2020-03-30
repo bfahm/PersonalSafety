@@ -8,6 +8,7 @@ using PersonalSafety.Business;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Contracts.Enums;
+using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
@@ -22,7 +23,7 @@ namespace PersonalSafety.Controllers.API
         private readonly IClientHub _clientHub;
         private readonly IAgentHub _agentHub;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, IClientHub clientHub, IAgentHub agentHub)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, IClientHub clientHub, IAgentHub agentHub, IRescuerHub rescuerHub)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
@@ -262,13 +263,14 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Canceled, currentlyLoggedInUserId);
 
+            await _agentHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
+            
             // Notify user about the change
             var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
-            await _agentHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
             if (notifierResult)
             {
                 // Unsubscribe user from future notifications
-                int removed = SOSHandler.SOSInfoSet.RemoveWhere(r => r.SOSId == requestId);
+                int removed = TrackerHandler.SOSInfoSet.RemoveWhere(r => r.SOSId == requestId);
 
                 if (removed == 0)
                 {

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Hubs.Services;
 
 namespace PersonalSafety.Installers
 {
@@ -24,10 +25,11 @@ namespace PersonalSafety.Installers
     {
         public static Dictionary<string, string> urls = new Dictionary<string, string>
         {
-            {"ClientHub", "/hubs/Client"},
-            {"AdminHub", "/hubs/Admin"},
-            {"AgentHub", "/hubs/Agent"},
-            {"RealtimeHub", "/hubs/Realtime"}
+            {nameof(ClientHub), "/hubs/Client"},
+            {nameof(AdminHub), "/hubs/Admin"},
+            {nameof(AgentHub), "/hubs/Agent"},
+            {nameof(RescuerHub), "/hubs/Rescuer"},
+            {nameof(RealtimeHub), "/hubs/Realtime"}
         };
 
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
@@ -38,6 +40,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<IMainHub, MainHub>();
             services.AddScoped<IClientHub, ClientHub>();
             services.AddScoped<IAgentHub, AgentHub>();
+            services.AddScoped<IRescuerHub, RescuerHub>();
         }
 
         public static void MapToEndpoints(IEndpointRouteBuilder endpoints)
@@ -46,6 +49,7 @@ namespace PersonalSafety.Installers
             endpoints.MapHub<ClientHub>(urls.FirstOrDefault(u => u.Key == nameof(ClientHub)).Value);
             endpoints.MapHub<AdminHub>(urls.FirstOrDefault(u => u.Key == nameof(AdminHub)).Value);
             endpoints.MapHub<AgentHub>(urls.FirstOrDefault(u => u.Key == nameof(AgentHub)).Value);
+            endpoints.MapHub<RescuerHub>(urls.FirstOrDefault(u => u.Key == nameof(RescuerHub)).Value);
         }
     }
 }

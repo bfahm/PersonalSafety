@@ -15,19 +15,19 @@ namespace PersonalSafety.Hubs
     {
         public Task GetConnectionInfo()
         {
-            var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.ToList());
+            var json = JsonSerializer.Serialize(TrackerHandler.ConnectionInfoSet.ToList());
             return Clients.Caller.SendAsync("AdminGetConnectionInfo", json);
         }
 
         public Task GetConsoleLines()
         {
-            var json = JsonSerializer.Serialize(ConsoleHandler.ConsoleSet.ToList());
+            var json = JsonSerializer.Serialize(TrackerHandler.ConsoleSet.ToList());
             return Clients.Caller.SendAsync("AdminGetConsoleLines", json);
         }
         
         public void ClearConsoleLines()
         {
-            ConsoleHandler.ConsoleSet.Clear();
+            TrackerHandler.ConsoleSet.Clear();
         }
     }
 }

@@ -10,6 +10,7 @@ using PersonalSafety.Contracts;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Contracts.Enums;
+using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
@@ -22,12 +23,14 @@ namespace PersonalSafety.Controllers.API
         private readonly IAgentBusiness _agentBusiness;
         private readonly ISOSBusiness _sosBusiness;
         private readonly IClientHub _clientHub;
+        private readonly IRescuerHub _rescuerHub;
 
-        public AgentController(IAgentBusiness personnelBusiness, ISOSBusiness sosBusiness, IClientHub clientHub)
+        public AgentController(IAgentBusiness agentBusiness, ISOSBusiness sosBusiness, IClientHub clientHub, IRescuerHub rescuerHub)
         {
-            _agentBusiness = personnelBusiness;
+            _agentBusiness = agentBusiness;
             _sosBusiness = sosBusiness;
             _clientHub = clientHub;
+            _rescuerHub = rescuerHub;
         }
 
         [HttpPost]
@@ -199,15 +202,24 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
-        public async Task<IActionResult> AcceptSOSRequest([FromQuery] int requestId)
+        public async Task<IActionResult> AcceptSOSRequest([FromQuery] int requestId, [FromQuery] string rescuerEmail)
         {
-            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
-            var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Accepted, currentlyLoggedInUserId);
+            var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Accepted, currentlyLoggedInUserId, rescuerEmail??"");
 
-            var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
-            if (notifierResult)
+            var clientNotifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
+            if (clientNotifierResult)
             {
+                var rescuerNotifierResult = _rescuerHub.NotifyNewChanges(requestId, rescuerEmail);
+                if (!rescuerNotifierResult)
+                {
+                    _clientHub.NotifyUserSOSState(requestId, (int) StatesTypesEnum.Pending);
+                    response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Pending, currentlyLoggedInUserId);
+                    response.Messages.Add("Failed to notify the rescuer about the change, it appears he is not online.");
+                    response.Messages.Add("Reverting Changes...");
+                    response.Messages.Add("Changes were reverted back to 'Pending'.");
+                }
                 return Ok(response);
             }
 

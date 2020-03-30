@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety.Hubs
 {
@@ -16,13 +17,13 @@ namespace PersonalSafety.Hubs
         public static readonly string connectionInfoChannel = "ConnectionInfoChannel";
         public Task GetMyConnectionInfo()
         {
-            var json = JsonSerializer.Serialize(UserHandler.ConnectionInfoSet.Where(c=>c.ConnectionId == Context.ConnectionId).FirstOrDefault());
+            var json = JsonSerializer.Serialize(TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId));
             return Clients.Caller.SendAsync(connectionInfoChannel, json);
         }
 
         public bool isConnected(string connectionId)
         {
-            return UserHandler.ConnectionInfoSet.Where(c => c.ConnectionId == connectionId).FirstOrDefault() != null;
+            return TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == connectionId) != null;
         }
 
         public override async Task OnConnectedAsync()
@@ -30,15 +31,13 @@ namespace PersonalSafety.Hubs
             ConnectionInfo currentConnection = new ConnectionInfo
             {
                 ConnectionId = Context.ConnectionId,
-                UserId = Context.User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value,
+                UserId = Context.User.Claims.FirstOrDefault(x => x.Type == "id")?.Value,
                 UserEmail = Context.User.FindFirst(ClaimTypes.Email).Value
             };
-            
-            UserHandler.ConnectionInfoSet.Add(currentConnection);
 
-            string consoleLine = currentConnection.UserEmail + " has connected to the server with connection id: " + currentConnection.ConnectionId;
-            ConsoleHandler.ConsoleSet.Add(consoleLine);
-            Console.WriteLine(consoleLine);
+            TrackerHandler.ConnectionInfoSet.Add(currentConnection);
+
+            HubTools.PrintToConsole(currentConnection.UserEmail, currentConnection.ConnectionId, false);
             
             await base.OnConnectedAsync();
         }
@@ -46,25 +45,23 @@ namespace PersonalSafety.Hubs
         public override async Task OnDisconnectedAsync(Exception ex)
         {
             // Remove user from user trackers
-            ConnectionInfo currentDisconnection = UserHandler.ConnectionInfoSet.Where(c => c.ConnectionId == Context.ConnectionId).FirstOrDefault();
+            ConnectionInfo currentDisconnection = TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId);
             if(currentDisconnection != null)
             {
-                UserHandler.ConnectionInfoSet.Remove(currentDisconnection);
+                TrackerHandler.ConnectionInfoSet.Remove(currentDisconnection);
 
                 string consoleLine = currentDisconnection.UserEmail + " has disconnected from the server, he had connection id: " + currentDisconnection.ConnectionId;
-                ConsoleHandler.ConsoleSet.Add(consoleLine);
+                TrackerHandler.ConsoleSet.Add(consoleLine);
                 Console.WriteLine(consoleLine);
             }
 
             // Remove user requests from SOS trackers
-            int currentOngoingSOSes = SOSHandler.SOSInfoSet.Where(c => c.ConnectionId == Context.ConnectionId).Count();
+            int currentOngoingSOSes = TrackerHandler.SOSInfoSet.Count(c => c.ConnectionId == Context.ConnectionId);
             if (currentOngoingSOSes>0)
             {
-                SOSHandler.SOSInfoSet.RemoveWhere(sc => sc.ConnectionId == Context.ConnectionId);
+                TrackerHandler.SOSInfoSet.RemoveWhere(sc => sc.ConnectionId == Context.ConnectionId);
                 
-                string consoleLine = currentDisconnection.UserEmail + " had some SOS requests that where tracked and now dismissed.";
-                ConsoleHandler.ConsoleSet.Add(consoleLine);
-                Console.WriteLine(consoleLine);
+                HubTools.PrintToConsole(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true);
             }
 
             await base.OnDisconnectedAsync(ex);

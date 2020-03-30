@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using Microsoft.AspNetCore.Identity;
+using PersonalSafety.Hubs.Services;
 
 namespace PersonalSafety.Business
 {
@@ -14,14 +15,16 @@ namespace PersonalSafety.Business
     {
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IRescuerHub _rescuerHub;
 
-        public SOSBusiness(ISOSRequestRepository sosRequestRepository, UserManager<ApplicationUser> userManager)
+        public SOSBusiness(ISOSRequestRepository sosRequestRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub)
         {
             _sosRequestRepository = sosRequestRepository;
             _userManager = userManager;
+            _rescuerHub = rescuerHub;
         }
 
-        public async Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId)
+        public async Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId, string rescuerEmail = null)
         {
             APIResponse<bool> response = new APIResponse<bool>();
             SOSRequest sosRequest = _sosRequestRepository.GetById(requestId.ToString());
@@ -48,6 +51,30 @@ namespace PersonalSafety.Business
 
             sosRequest.State = newStatus;
             sosRequest.LastModified = DateTime.Now;
+
+            // If the request was changed to a success state, save the rescuer data
+            if (newStatus == (int) StatesTypesEnum.Accepted || newStatus == (int) StatesTypesEnum.Solved)
+            {
+                var rescuer = await _userManager.FindByEmailAsync(rescuerEmail);
+                if (rescuer == null)
+                {
+                    response.Messages.Add("Error. Failed to notify the provided rescuer. Check the email for typos.");
+                    response.Status = (int)APIResponseCodesEnum.BadRequest;
+                    response.HasErrors = true;
+                    return response;
+                }
+
+                sosRequest.AssignedRescuerId = rescuer.Id;
+            } // else the request was changed to a non-success state, clear any previous rescuer data
+            else
+            {
+                if (sosRequest.AssignedRescuerId != null)
+                {
+                    _rescuerHub.NotifyNewChanges(requestId, _userManager.FindByIdAsync(sosRequest.AssignedRescuerId).Result.Email);
+                    sosRequest.AssignedRescuerId = null;
+                }
+            }
+
             _sosRequestRepository.Update(sosRequest);
             _sosRequestRepository.Save();
 

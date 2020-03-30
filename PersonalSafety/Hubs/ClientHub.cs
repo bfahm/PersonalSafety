@@ -22,7 +22,7 @@ namespace PersonalSafety.Hubs
         /// Returns True if user had a maintained connection with the server, else false
         public bool NotifyUserSOSState(int sosRequestId, int sosRequestState)
         {
-            SOSInfo connectionInformation = SOSHandler.SOSInfoSet.Where(r => r.SOSId == sosRequestId).FirstOrDefault();
+            SOSInfo connectionInformation = TrackerHandler.SOSInfoSet.FirstOrDefault(r => r.SOSId == sosRequestId);
 
             if (connectionInformation != null)
             {
@@ -40,7 +40,7 @@ namespace PersonalSafety.Hubs
             // Send to the client his connectionID whenever he connects through the clienthub
             // Note that GetMyConnectionInfo also works, and also sends its information on the same channel, 
             // but when invoked, the whole connectionInfo object is sent through a JSON string.
-            await Clients.Caller.SendAsync(connectionInfoChannel, UserHandler.ConnectionInfoSet.Where(c => c.ConnectionId == Context.ConnectionId).FirstOrDefault().ConnectionId);
+            await Clients.Caller.SendAsync(connectionInfoChannel, TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.ConnectionId);
         }
     }
 }

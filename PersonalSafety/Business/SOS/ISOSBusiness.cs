@@ -8,6 +8,6 @@ namespace PersonalSafety.Business
 {
     public interface ISOSBusiness
     {
-        Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId);
+        Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId, string rescuerEmail = null);
     }
 }

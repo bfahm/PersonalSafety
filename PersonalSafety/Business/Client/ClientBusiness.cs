@@ -221,7 +221,8 @@ namespace PersonalSafety.Business
                 UserId = userId,
                 AuthorityType = request.AuthorityType,
                 Longitude = request.Longitude,
-                Latitude = request.Latitude
+                Latitude = request.Latitude,
+                AssignedDepartmentId = 1 // TODO: Fix this line when assigining to the nearest dpt
             };
 
             _sosRequestRepository.Add(sosRequest);
@@ -250,7 +251,7 @@ namespace PersonalSafety.Business
                 SOSId = requestId
             };
 
-            SOSHandler.SOSInfoSet.Add(currentRequest);
+            TrackerHandler.SOSInfoSet.Add(currentRequest);
         }
     }
 }
