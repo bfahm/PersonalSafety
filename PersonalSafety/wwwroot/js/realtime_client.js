@@ -30,7 +30,7 @@ function startConnection(token) {
         $("#alert_container_role").addClass("alert-warning");
         $("#samp_role").html(role);
 
-        if (role == "Personnel") {
+        if (role.indexOf("Personnel") !== -1) {
 
             $("#a_scroll_to_docs").click(function () {
                 $('html, body').animate({
@@ -39,7 +39,7 @@ function startConnection(token) {
             });
 
             connection = new signalR.HubConnectionBuilder()
-                .withUrl("/hubs/personnel", {
+                .withUrl("/hubs/agent", {
                     accessTokenFactory: () => token
                 })
                 .build();

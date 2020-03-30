@@ -26,7 +26,7 @@ namespace PersonalSafety.Installers
         {
             {"ClientHub", "/hubs/Client"},
             {"AdminHub", "/hubs/Admin"},
-            {"PersonnelHub", "/hubs/Personnel"},
+            {"AgentHub", "/hubs/Agent"},
             {"RealtimeHub", "/hubs/Realtime"}
         };
 
@@ -37,15 +37,15 @@ namespace PersonalSafety.Installers
             // Register Hubs Here
             services.AddScoped<IMainHub, MainHub>();
             services.AddScoped<IClientHub, ClientHub>();
-            services.AddScoped<IPersonnelHub, PersonnelHub>();
+            services.AddScoped<IAgentHub, AgentHub>();
         }
 
         public static void MapToEndpoints(IEndpointRouteBuilder endpoints)
         {
-            endpoints.MapHub<RealtimeHub>(urls.Where(u => u.Key == nameof(RealtimeHub)).FirstOrDefault().Value);
-            endpoints.MapHub<ClientHub>(urls.Where(u => u.Key == nameof(ClientHub)).FirstOrDefault().Value);
-            endpoints.MapHub<AdminHub>(urls.Where(u => u.Key == nameof(AdminHub)).FirstOrDefault().Value);
-            endpoints.MapHub<PersonnelHub>(urls.Where(u => u.Key == nameof(PersonnelHub)).FirstOrDefault().Value);
+            endpoints.MapHub<RealtimeHub>(urls.FirstOrDefault(u => u.Key == nameof(RealtimeHub)).Value);
+            endpoints.MapHub<ClientHub>(urls.FirstOrDefault(u => u.Key == nameof(ClientHub)).Value);
+            endpoints.MapHub<AdminHub>(urls.FirstOrDefault(u => u.Key == nameof(AdminHub)).Value);
+            endpoints.MapHub<AgentHub>(urls.FirstOrDefault(u => u.Key == nameof(AgentHub)).Value);
         }
     }
 }

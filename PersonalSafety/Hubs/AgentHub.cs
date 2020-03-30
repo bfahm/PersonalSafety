@@ -6,16 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Hubs
 {
-    [Authorize(Roles ="Personnel")]
-    public class PersonnelHub : MainHub, IPersonnelHub
+    [Authorize(Roles =Roles.ROLE_AGENT)]
+    public class AgentHub : MainHub, IAgentHub
     {
-        private readonly IHubContext<PersonnelHub> _hubContext;
-        private readonly string channelName = "PersonnelChannel";
+        private readonly IHubContext<AgentHub> _hubContext;
+        private readonly string channelName = "AgentChannel";
 
-        public PersonnelHub(IHubContext<PersonnelHub> hubContext)
+        public AgentHub(IHubContext<AgentHub> hubContext)
         {
             _hubContext = hubContext;
         }
