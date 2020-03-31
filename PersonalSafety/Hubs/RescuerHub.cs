@@ -42,13 +42,6 @@ namespace PersonalSafety.Hubs
                 return true;
             }
 
-            RescuerConnectionInfo lostConnectionInfo = TrackerHandler.RescuerWithPendingMissionsSet.FirstOrDefault(r => r.UserEmail == rescuerEmail);
-            
-            if (lostConnectionInfo != null)
-            {
-                lostConnectionInfo.CurrentJob = requestId;
-            }
-
             return false;
         }
 
@@ -62,17 +55,7 @@ namespace PersonalSafety.Hubs
             // but when invoked, the whole connectionInfo object is sent through a JSON string.
             await Clients.Caller.SendAsync(connectionInfoChannel, TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId)?.ConnectionId);
 
-            // Find out if the rescuer had disconnected before and is trying to reconnect now
-            RescuerConnectionInfo recurrentConnection = TrackerHandler.RescuerWithPendingMissionsSet.FirstOrDefault(c => c.UserEmail == Context.User.FindFirst(ClaimTypes.Email).Value);
-            if (recurrentConnection != null && recurrentConnection.CurrentJob > 0)
-            {
-                //If so, send him his previous state and remove that state from the tracker.
-                TrackerHandler.RescuerConnectionInfoSet.Remove(recurrentConnection);
-                NotifyNewChanges(recurrentConnection.CurrentJob, Context.ConnectionId);
-                HubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
-            }
-
-            // Track the current connection
+            // Track the current connection in a different Rescuer Hash-list
             RescuerConnectionInfo currentConnection = new RescuerConnectionInfo
             {
                 ConnectionId = Context.ConnectionId,
@@ -80,6 +63,16 @@ namespace PersonalSafety.Hubs
                 DepartmentId = _personnelRepository.GetPersonnelDepartment(Context.User.Claims.FirstOrDefault(x => x.Type == "id")?.Value).Id
             };
             TrackerHandler.RescuerConnectionInfoSet.Add(currentConnection);
+
+            // Find out if the rescuer had disconnected before and is trying to reconnect now
+            RescuerConnectionInfo recurrentConnection = TrackerHandler.RescuerWithPendingMissionsSet.FirstOrDefault(c => c.UserEmail == Context.User.FindFirst(ClaimTypes.Email).Value);
+            if (recurrentConnection != null && recurrentConnection.CurrentJob > 0)
+            {
+                //If so, send him his previous state and remove that state from the tracker.
+                TrackerHandler.RescuerConnectionInfoSet.Remove(recurrentConnection);
+                NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
+                HubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)

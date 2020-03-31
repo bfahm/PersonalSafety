@@ -13,7 +13,11 @@ $(document).ready(function () {
 
     $("#btn_copy_to_clipboard").click(function () {
         copyToClipboard($("#result_connectionId").val());
-        $(this).html("Copied")
+        $(this).html("Copied");
+    });
+
+    $("#btn_clear").click(function () {
+        $(this).val("");
     });
 
     $("#link_logout").click(function () {
@@ -30,10 +34,10 @@ function startConnection(token) {
         $("#alert_container_role").addClass("alert-warning");
         $("#samp_role").html(role);
 
-        if (role.indexOf("Personnel") !== -1) {
+        if (role.indexOf("Agent") !== -1) {
 
             $("#a_scroll_to_docs").click(function () {
-                $('html, body').animate({
+                $("html, body").animate({
                     scrollTop: $("#personnel_docs").offset().top - 100
                 }, 1000);
             });
@@ -44,13 +48,37 @@ function startConnection(token) {
                 })
                 .build();
 
-            connection.on("PersonnelChannel", function (message) {
+            connection.on("AgentChannel", function (message) {
                 var parsedMsg = JSON.parse(message);
                 var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
 
                 $("#result_msg").addClass('pb_color-primary');
                 $("#result_msg").val(outputMsg);
             });
+
+        }
+        else if (role.indexOf("Rescuer") !== -1) {
+
+            // TODO: Add docs for rescuer first then enable
+            //$("#a_scroll_to_docs").click(function () {
+            //    $("html, body").animate({
+            //        scrollTop: $("#personnel_docs").offset().top - 100
+            //    }, 1000);
+            //});
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/rescuer", {
+                    accessTokenFactory: () => token
+                })
+                .build();
+
+            connection.on("RescuerChannel", function (message) {
+                var outputMsg = "There is a change in the state of request: " + message + ".";
+
+                $("#result_msg").addClass('pb_color-primary');
+                $("#result_msg").val(outputMsg);
+            });
+
 
         }
 
