@@ -13,8 +13,11 @@ namespace PersonalSafety.Hubs
     [Authorize(Roles =Roles.ROLE_AGENT)]
     public class AgentHub : MainHub, IAgentHub
     {
+        // Channel naming convention: "[NameOfChannelAccessor][NameOfSubjectOfChannel]Channel"
+        private const string RequestsChannelName = "AgentRequestsChannel";
+        private const string RescuersChannelName = "AgentRescuersChannel";
+
         private readonly IHubContext<AgentHub> _hubContext;
-        private readonly string channelName = "AgentChannel";
 
         public AgentHub(IHubContext<AgentHub> hubContext)
         {
@@ -25,7 +28,12 @@ namespace PersonalSafety.Hubs
         {
             var jsonMsg = JsonSerializer.Serialize(new { requestId = requestId, requestState = ((StatesTypesEnum)requestState).ToString() });
             
-            return _hubContext.Clients.All.SendAsync(channelName, jsonMsg);
+            return _hubContext.Clients.All.SendAsync(RequestsChannelName, jsonMsg);
+        }
+
+        public Task NotifyChangeInRescuers(int departmentId)
+        {
+            return _hubContext.Clients.All.SendAsync(RescuersChannelName);
         }
     }
 }

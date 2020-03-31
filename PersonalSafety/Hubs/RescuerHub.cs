@@ -21,11 +21,13 @@ namespace PersonalSafety.Hubs
         private readonly string channelName = "RescuerChannel";
         private readonly IHubContext<RescuerHub> _hubContext;
         private readonly IPersonnelRepository _personnelRepository;
+        private readonly IAgentHub _agentHub;
 
-        public RescuerHub(IHubContext<RescuerHub> hubContext, IPersonnelRepository personnelRepository)
+        public RescuerHub(IHubContext<RescuerHub> hubContext, IPersonnelRepository personnelRepository, IAgentHub agentHub)
         {
             _hubContext = hubContext;
             _personnelRepository = personnelRepository;
+            _agentHub = agentHub;
         }
 
         public bool NotifyNewChanges(int requestId, string rescuerEmail)
@@ -73,6 +75,9 @@ namespace PersonalSafety.Hubs
                 NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
                 HubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
             }
+
+            // Notify Agent in the same hub that rescuers state has changed.
+            await _agentHub.NotifyChangeInRescuers(currentConnection.DepartmentId);
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
@@ -94,6 +99,9 @@ namespace PersonalSafety.Hubs
                     // Write a summary to the console.
                     HubTools.PrintToConsole(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on.");
                 }
+
+                // Notify Agent in the same hub that rescuers state has changed.
+                await _agentHub.NotifyChangeInRescuers(currentDisconnection.DepartmentId);
             }
         }
     }

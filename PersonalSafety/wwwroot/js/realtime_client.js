@@ -50,9 +50,16 @@ function startConnection(token) {
                 })
                 .build();
 
-            connection.on("AgentChannel", function (message) {
-                var parsedMsg = JSON.parse(message);
-                var outputMsg = "The state of the request with Id " + parsedMsg.requestId + " was changed to " + parsedMsg.requestState + ".";
+            connection.on("AgentRequestsChannel", function (message) {
+                var parsedMessage = JSON.parse(message);
+                var outputMsg = "There is a change in the state of request: " + parsedMessage.requestId + ".";
+
+                $("#result_msg").addClass('pb_color-primary');
+                $("#result_msg").val(outputMsg);
+            });
+
+            connection.on("AgentRescuersChannel", function () {
+                var outputMsg = "Rescuers in your department state has changed.";
 
                 $("#result_msg").addClass('pb_color-primary');
                 $("#result_msg").val(outputMsg);
@@ -151,6 +158,7 @@ function startConnection(token) {
     connection.onclose(function () {
         $("#result_email").val("");
         $("#result_connectionId").val("");
+        $("#result_msg").val("");
 
         $("#hidden_div_till_connected").attr("hidden", true);
         $("#btn_connect").removeClass("btn-success");
@@ -158,6 +166,8 @@ function startConnection(token) {
         $("#btn_connect").prop("disabled", false);
         $("#btn_connect").val("Reconnect");
         $("#ip_token").prop("disabled", false);
+
+        $("#btn_copy_to_clipboard").html("Copy");
 
         $('html, body').animate({
             scrollTop: 0
