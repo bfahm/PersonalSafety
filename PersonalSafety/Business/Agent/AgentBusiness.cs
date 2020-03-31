@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Services;
 
 namespace PersonalSafety.Business
@@ -120,6 +121,28 @@ namespace PersonalSafety.Business
             };
 
             return new APIResponse<DepartmentDetailsViewModel> { Result = dptDetails };
+        }
+
+        public APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId)
+        {
+            var currentAgent = _personnelRepository.GetById(userId);
+            var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
+            return new APIResponse<HashSet<RescuerConnectionInfo>>
+            {
+                Result = TrackerHandler.RescuerConnectionInfoSet,
+                Messages = new List<string> { "Number of current online rescuers in your department is: " + TrackerHandler.RescuerConnectionInfoSet.Count}
+            };
+        }
+
+        public APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentDisconnectedRescuers(string userId)
+        {
+            var currentAgent = _personnelRepository.GetById(userId);
+            var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
+            return new APIResponse<HashSet<RescuerConnectionInfo>>
+            {
+                Result = TrackerHandler.RescuerWithPendingMissionsSet,
+                Messages = new List<string> { "Number of rescuers who went offline in your department is: " + TrackerHandler.RescuerWithPendingMissionsSet.Count }
+            };
         }
     }
 }

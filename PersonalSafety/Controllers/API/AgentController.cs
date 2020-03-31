@@ -56,6 +56,36 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
+        /// Returns a list of online rescuers IN THE SAME DEPARTMENT.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Rescuer/[action]")]
+        public IActionResult GetOnlineRescuers()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response = _agentBusiness.GetDepartmentOnlineRescuers(currentlyLoggedInUserId);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Returns a list of online rescuers who disconnected while being on a job.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Rescuer/[action]")]
+        public IActionResult GetDisconnectedRescuers()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response = _agentBusiness.GetDepartmentDisconnectedRescuers(currentlyLoggedInUserId);
+
+            return Ok(response);
+        }
+
+        /// <summary>
         /// This method returns a list of all Requests that relates to current Personnel Authority.
         /// </summary>
         /// <remarks>

@@ -69,7 +69,7 @@ namespace PersonalSafety.Hubs
             if (recurrentConnection != null && recurrentConnection.CurrentJob > 0)
             {
                 //If so, send him his previous state and remove that state from the tracker.
-                TrackerHandler.RescuerConnectionInfoSet.Remove(recurrentConnection);
+                TrackerHandler.RescuerWithPendingMissionsSet.Remove(recurrentConnection);
                 NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
                 HubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
             }
