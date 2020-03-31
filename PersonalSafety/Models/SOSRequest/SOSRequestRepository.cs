@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Contracts.Enums;
 
 namespace PersonalSafety.Models
 {
@@ -18,6 +19,12 @@ namespace PersonalSafety.Models
         public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType)
         {
            return context.SOSRequests.Where(r => r.AuthorityType == authorityType).OrderBy(r => r.CreationDate).OrderBy(r => r.State); ;
+        }
+
+        public bool UserHasOngoingRequest(string userId)
+        {
+            var sosRequestForGiverClient = context.SOSRequests.Where(s => s.UserId == userId).ToList();
+            return sosRequestForGiverClient.Any(s => s.State == (int) StatesTypesEnum.Pending || s.State == (int) StatesTypesEnum.Accepted);
         }
 
         // Filter them depending on their state

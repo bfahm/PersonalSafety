@@ -15,52 +15,40 @@ namespace PersonalSafety.Hubs
     public class MainHub : Hub, IMainHub
     {
         public static readonly string connectionInfoChannel = "ConnectionInfoChannel";
-        public Task GetMyConnectionInfo()
-        {
-            var json = JsonSerializer.Serialize(TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId));
-            return Clients.Caller.SendAsync(connectionInfoChannel, json);
-        }
-
+        
         public bool isConnected(string connectionId)
         {
-            return TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == connectionId) != null;
+            return TrackerHandler.AllConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == connectionId) != null;
         }
 
+        
         public override async Task OnConnectedAsync()
         {
-            ConnectionInfo currentConnection = new ConnectionInfo
+            // Save connection info in the tracker
+            ClientConnectionInfo currentConnection = new ClientConnectionInfo
             {
                 ConnectionId = Context.ConnectionId,
                 UserId = Context.User.Claims.FirstOrDefault(x => x.Type == "id")?.Value,
                 UserEmail = Context.User.FindFirst(ClaimTypes.Email).Value
             };
 
-            TrackerHandler.ConnectionInfoSet.Add(currentConnection);
+            TrackerHandler.AllConnectionInfoSet.Add(currentConnection);
 
+            // Print to the console
             HubTools.PrintToConsole(currentConnection.UserEmail, currentConnection.ConnectionId, false);
+
+            // Automatically send client data to him after connection.
+            await Clients.Caller.SendAsync(connectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
             
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            // Remove user from user trackers
-            ConnectionInfo currentDisconnection = TrackerHandler.ConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId);
-            if(currentDisconnection != null)
-            {
-                TrackerHandler.ConnectionInfoSet.Remove(currentDisconnection);
+            var currentDisconnection = TrackerHandler.ClientConnectionInfoSet.FirstOrDefault(sc => sc.ConnectionId == Context.ConnectionId);
 
-                string consoleLine = currentDisconnection.UserEmail + " has disconnected from the server, he had connection id: " + currentDisconnection.ConnectionId;
-                TrackerHandler.ConsoleSet.Add(consoleLine);
-                Console.WriteLine(consoleLine);
-            }
-
-            // Remove user requests from SOS trackers
-            int currentOngoingSOSes = TrackerHandler.SOSInfoSet.Count(c => c.ConnectionId == Context.ConnectionId);
-            if (currentOngoingSOSes>0)
+            if (currentDisconnection != null)
             {
-                TrackerHandler.SOSInfoSet.RemoveWhere(sc => sc.ConnectionId == Context.ConnectionId);
-                
                 HubTools.PrintToConsole(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true);
             }
 

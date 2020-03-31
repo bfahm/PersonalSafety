@@ -238,25 +238,6 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Accepted, currentlyLoggedInUserId, rescuerEmail??"");
 
-            var clientNotifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Accepted);
-            if (clientNotifierResult)
-            {
-                var rescuerNotifierResult = _rescuerHub.NotifyNewChanges(requestId, rescuerEmail);
-                if (!rescuerNotifierResult)
-                {
-                    _clientHub.NotifyUserSOSState(requestId, (int) StatesTypesEnum.Pending);
-                    response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Pending, currentlyLoggedInUserId);
-                    response.Messages.Add("Failed to notify the rescuer about the change, it appears he is not online.");
-                    response.Messages.Add("Reverting Changes...");
-                    response.Messages.Add("Changes were reverted back to 'Pending'.");
-                }
-                return Ok(response);
-            }
-
-            response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Orphaned, currentlyLoggedInUserId);
-            response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
-            response.Messages.Add("Reverting Changes...");
-            response.Messages.Add("Changes were reverted back to 'Orphaned'.");
             return Ok(response);
         }
     }

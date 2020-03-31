@@ -26,6 +26,11 @@ $(document).ready(function () {
         connection = null;
         startConnection(token);
     });
+
+    $("#link_disconnect").click(function () {
+        connection.stop();
+        connection = null;
+    });
 });
 
 function startConnection(token) {
@@ -52,7 +57,7 @@ function startConnection(token) {
 
             connection.on("AgentRequestsChannel", function (message) {
                 var parsedMessage = JSON.parse(message);
-                var outputMsg = "There is a change in the state of request: " + parsedMessage.requestId + ".";
+                var outputMsg = "A request of Id: " + parsedMessage.requestId + " state was changed to " + parsedMessage.requestState +".";
 
                 $("#result_msg").addClass('pb_color-primary');
                 $("#result_msg").val(outputMsg);
@@ -126,13 +131,9 @@ function startConnection(token) {
     }
 
     
-    connection.on("ConnectionInfoChannel", function (message) {
-        var parsedMessage = JSON.parse(message);
-        var email = parsedMessage.UserEmail;
-        var connectionId = parsedMessage.ConnectionId;
-
-        $("#result_email").val(email.toString());
-        $("#result_connectionId").val(connectionId.toString());
+    connection.on("ConnectionInfoChannel", function (connectionId, clientEmail) {
+        $("#result_email").val(clientEmail);
+        $("#result_connectionId").val(connectionId);
 
         $("#hidden_div_till_connected").removeAttr('hidden');
         $("#btn_connect").removeClass('btn-primary');
@@ -148,11 +149,7 @@ function startConnection(token) {
         }, 500);
     });
 
-    connection.start().then(function () {
-        connection.invoke("GetMyConnectionInfo").catch(function (err) {
-            return console.error(err.toString());
-        });
-    }).catch(function (err) {
+    connection.start().catch(function (err) {
         return console.error(err.toString());
     });
 

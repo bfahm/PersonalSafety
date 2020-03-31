@@ -8,5 +8,6 @@ namespace PersonalSafety.Hubs.Services
     public interface IRescuerHub
     {
         bool NotifyNewChanges(int requestId, string rescuerEmail);
+        void MakeRescuerIdle(string rescuerEmail);
     }
 }

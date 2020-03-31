@@ -39,13 +39,11 @@ namespace PersonalSafety.Models
             
         }
 
-        // Needs testing, commented to take caution.
-        //public void Remove(string id)
-        //{
-        //    T item = GetById(id);
-        //    context.Set<T>().Remove(item);
-        //    context.SaveChanges();
-        //}
+        public void RemoveById(string id)
+        {
+            T item = GetById(id);
+            context.Set<T>().Remove(item);
+        }
 
         public T Update(T item)
         {

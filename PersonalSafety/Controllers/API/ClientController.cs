@@ -234,12 +234,6 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _clientBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
 
-            if (!response.HasErrors)
-            {
-                _clientHub.NotifyUserSOSState(response.Result.RequestId, (int)StatesTypesEnum.Pending);
-                await _agentHub.NotifyNewChanges(response.Result.RequestId, (int)StatesTypesEnum.Pending);
-            }
-            
             return Ok(response);
         }
 
@@ -263,31 +257,7 @@ namespace PersonalSafety.Controllers.API
 
             var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Canceled, currentlyLoggedInUserId);
 
-            await _agentHub.NotifyNewChanges(requestId, (int)StatesTypesEnum.Canceled);
-            
-            // Notify user about the change
-            var notifierResult = _clientHub.NotifyUserSOSState(requestId, (int)StatesTypesEnum.Canceled);
-            if (notifierResult)
-            {
-                // Unsubscribe user from future notifications
-                int removed = TrackerHandler.SOSInfoSet.RemoveWhere(r => r.SOSId == requestId);
-
-                if (removed == 0)
-                {
-                    response.Messages.Add("Failed to remove user from the tracker, it appears that the request was corrupt.");
-                }
-                return Ok(response);
-            }
-
-            
-            var fallback_response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Orphaned, currentlyLoggedInUserId);
-            fallback_response.Messages.Add("Orphan request detected.");
-            fallback_response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
-
-            return Ok(fallback_response);
-
-
-
+            return Ok(response);
         }
     }
 }

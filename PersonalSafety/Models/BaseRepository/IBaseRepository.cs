@@ -11,7 +11,7 @@ namespace PersonalSafety.Models
         IEnumerable<T> GetAll();
         bool Add(T item);
         T Update(T item);
-        //void Remove(string Id);
+        void RemoveById(string Id);
         int Save();
     }
 }

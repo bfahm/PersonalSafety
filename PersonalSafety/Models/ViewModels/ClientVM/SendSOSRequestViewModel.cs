@@ -14,7 +14,5 @@ namespace PersonalSafety.Models.ViewModels
         public double Longitude { get; set; }
         [Required]
         public double Latitude { get; set; }
-        [Required]
-        public string ConnectionId { get; set; }
     }
 }

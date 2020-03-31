@@ -15,7 +15,7 @@ namespace PersonalSafety.Hubs
     {
         public Task GetConnectionInfo()
         {
-            var json = JsonSerializer.Serialize(TrackerHandler.ConnectionInfoSet.ToList());
+            var json = JsonSerializer.Serialize(TrackerHandler.AllConnectionInfoSet);
             return Clients.Caller.SendAsync("AdminGetConnectionInfo", json);
         }
 

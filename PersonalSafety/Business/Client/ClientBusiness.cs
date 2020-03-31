@@ -7,9 +7,11 @@ using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
+using PersonalSafety.Hubs.Services;
 
 namespace PersonalSafety.Business
 {
@@ -19,21 +21,23 @@ namespace PersonalSafety.Business
         private readonly IEmergencyContactRepository _emergencyContactRepository;
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMainHub _mainHub;
         private readonly IFacebookAuthService _facebookAuthService;
         private readonly IJwtAuthService _jwtAuthService;
         private readonly IRegistrationService _registrationService;
+        private readonly IAgentHub _agentHub;
+        private readonly IClientHub _clientHub;
 
-        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, ISOSRequestRepository sosRequestRepository, UserManager<ApplicationUser> userManager, IMainHub mainHub, IFacebookAuthService facebookAuthService, IJwtAuthService jwtAuthService, IRegistrationService registrationService)
+        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, ISOSRequestRepository sosRequestRepository, UserManager<ApplicationUser> userManager, IFacebookAuthService facebookAuthService, IJwtAuthService jwtAuthService, IRegistrationService registrationService, IAgentHub agentHub, IClientHub clientHub)
         {
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
             _sosRequestRepository = sosRequestRepository;
             _userManager = userManager;
-            _mainHub = mainHub;
             _facebookAuthService = facebookAuthService;
             _jwtAuthService = jwtAuthService;
             _registrationService = registrationService;
+            _agentHub = agentHub;
+            _clientHub = clientHub;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -200,17 +204,17 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            if (!_mainHub.isConnected(request.ConnectionId))
-            {
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.SignalRError;
-                response.Messages.Add("The provided connection id is not valid anymore, establish a new connection and try again.");
-                return response;
-            }
-
             if(!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
             {
                 response.Messages.Add("You provided a wrong department type, please try again.");
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            if (_sosRequestRepository.UserHasOngoingRequest(userId))
+            {
+                response.Messages.Add("You currently have an ongoing request, cancel it first to be able to send a new request.");
                 response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 response.HasErrors = true;
                 return response;
@@ -228,7 +232,27 @@ namespace PersonalSafety.Business
             _sosRequestRepository.Add(sosRequest);
             _sosRequestRepository.Save();
 
-            AddToTracker(request.ConnectionId, await _userManager.FindByIdAsync(userId), sosRequest.Id);
+            ApplicationUser userAccount = await _userManager.FindByIdAsync(userId);
+            var trackingResult = _clientHub.TrackSOSIdForClient(userAccount.Email, sosRequest.Id);
+
+            if (!trackingResult)
+            {
+                _clientHub.RemoveClientFromTrackers(sosRequest.Id);
+
+                // Was not able to reach the user:
+                // revert changes:
+                _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
+                _sosRequestRepository.Save();
+
+                response.Status = (int)APIResponseCodesEnum.SignalRError;
+                response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
+                return response;
+            }
+
+            _clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
+            await _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending);
+
+            
 
             response.Result = new SendSOSResponseViewModel { 
                 RequestId = sosRequest.Id,
@@ -241,17 +265,5 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        private void AddToTracker(string connectionId, ApplicationUser user, int requestId)
-        {
-            SOSInfo currentRequest = new SOSInfo
-            {
-                ConnectionId = connectionId,
-                UserId = user.Id,
-                UserEmail = user.Email,
-                SOSId = requestId
-            };
-
-            TrackerHandler.SOSInfoSet.Add(currentRequest);
-        }
     }
 }

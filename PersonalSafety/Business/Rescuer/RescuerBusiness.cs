@@ -17,16 +17,14 @@ namespace PersonalSafety.Business
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IClientRepository _clientRepository;
-        private readonly IClientHub _clientHub;
-        private readonly IAgentHub _agentHub;
+        private readonly ISOSBusiness _sosBusiness;
 
-        public RescuerBusiness(UserManager<ApplicationUser> userManager, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, IClientHub clientHub, IAgentHub agentHub)
+        public RescuerBusiness(UserManager<ApplicationUser> userManager, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, ISOSBusiness sosBusiness)
         {
             _userManager = userManager;
             _sosRequestRepository = sosRequestRepository;
             _clientRepository = clientRepository;
-            _clientHub = clientHub;
-            _agentHub = agentHub;
+            _sosBusiness = sosBusiness;
         }
 
         public async Task<APIResponse<GetSOSRequestViewModel>> GetSOSRequestDetailsAsync(string userId, int requestId)
@@ -73,8 +71,6 @@ namespace PersonalSafety.Business
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            SOSRequest sosRequest = _sosRequestRepository.GetById(requestId.ToString());
-
             var validationResult = ValidateAccessToRequest(userId, requestId);
             if (validationResult != null)
             {
@@ -83,35 +79,15 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            // Mark Rescuer as Idle again in his Realtime State
             ApplicationUser rescuerAccount = await _userManager.FindByIdAsync(userId);
+             
+            response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Solved, userId, rescuerAccount.Email);
 
-            var currentConnection =
-                TrackerHandler.RescuerConnectionInfoSet.FirstOrDefault(r => r.UserEmail == rescuerAccount.Email);
-
-            if (currentConnection == null)
+            if (!response.HasErrors)
             {
-                response.Result = false;
-                response.HasErrors = true;
-                response.Messages.Add("Invalid attempt! Realtime connection is not established.");
-                response.Status = (int) APIResponseCodesEnum.SignalRError;
-                return response;
+                response.Messages.Add("Success. You are now idling.");
             }
 
-            currentConnection.CurrentJob = 0;
-
-            // Update the state of the request
-            sosRequest.State = (int) StatesTypesEnum.Solved;
-            _sosRequestRepository.Update(sosRequest);
-            _sosRequestRepository.Save();
-
-            // Notify the Client and the Agent
-            _clientHub.NotifyUserSOSState(sosRequest.Id, sosRequest.State);
-            await _agentHub.NotifyNewChanges(sosRequest.Id, sosRequest.State);
-
-            response.Result = true;
-            response.Messages.Add("Success. You are now idling.");
-            response.Messages.Add("SOS Request was marked as 'Solved'");
             return response;
         }
 
@@ -124,7 +100,7 @@ namespace PersonalSafety.Business
                 return new APIResponseData((int)APIResponseCodesEnum.NotFound, new List<string> { "The requested SOS Request could not be found. Make sure you are using the correct Id." });
             }
 
-            if (sosRequest.State != (int)StatesTypesEnum.Accepted)
+            if (sosRequest.State != (int)StatesTypesEnum.Accepted && sosRequest.State != (int)StatesTypesEnum.Solved)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest, new List<string> { "This SOS Request was not accepted yet by your manager." });
             }

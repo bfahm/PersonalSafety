@@ -9,5 +9,6 @@ namespace PersonalSafety.Models
     {
         IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int state);
         IEnumerable<SOSRequest> GetRelevantRequests(int authorityType);
+        bool UserHasOngoingRequest(string userId);
     }
 }
