@@ -34,7 +34,13 @@ $(document).ready(function () {
 });
 
 function startConnection(token) {
-    var role = parseJwt(token).role;
+    var role;
+    try {
+        role = parseJwt(token).role;
+    } catch(ex){
+        $("#ip_token").val("Problem parsing the token.");
+    }
+    
     console.log(parseJwt(token));
     if (role != null) {
         $("#alert_container_role").removeClass("alert-success");
@@ -150,6 +156,7 @@ function startConnection(token) {
     });
 
     connection.start().catch(function (err) {
+        $("#ip_token").val("Wrong or Expired Token.");
         return console.error(err.toString());
     });
 
