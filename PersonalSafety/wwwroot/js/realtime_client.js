@@ -3,10 +3,11 @@ import { copyToClipboard } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
+var token;
 
 $(document).ready(function () {
     $("#btn_connect").click(function () {
-        var token = $("#ip_token").val();
+        token = $("#ip_token").val();
 
         startConnection(token);
     });
@@ -17,12 +18,13 @@ $(document).ready(function () {
     });
 
     $("#btn_clear").click(function () {
-        $(this).val("");
+        $("#result_msg").val("");
     });
 
-    $("#link_logout").click(function () {
+    $("#link_reconnect").click(function () {
         connection.stop();
-        location.reload();
+        connection = null;
+        startConnection(token);
     });
 });
 
@@ -126,6 +128,7 @@ function startConnection(token) {
 
         $("#hidden_div_till_connected").removeAttr('hidden');
         $("#btn_connect").removeClass('btn-primary');
+        $("#btn_connect").removeClass("btn-danger");
         $("#btn_connect").removeClass('btn-shadow-milon');
         $("#btn_connect").addClass('btn-success');
         $("#btn_connect").prop('disabled', true);
@@ -143,5 +146,21 @@ function startConnection(token) {
         });
     }).catch(function (err) {
         return console.error(err.toString());
+    });
+
+    connection.onclose(function () {
+        $("#result_email").val("");
+        $("#result_connectionId").val("");
+
+        $("#hidden_div_till_connected").attr("hidden", true);
+        $("#btn_connect").removeClass("btn-success");
+        $("#btn_connect").addClass("btn-danger");
+        $("#btn_connect").prop("disabled", false);
+        $("#btn_connect").val("Reconnect");
+        $("#ip_token").prop("disabled", false);
+
+        $('html, body').animate({
+            scrollTop: 0
+        }, 500);
     });
 }
