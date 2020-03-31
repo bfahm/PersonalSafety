@@ -112,7 +112,8 @@ function startConnection(token) {
             var outputMsg = "The state of the request with Id " + requestId + " was changed to " + requestState + ".";
 
             var isAccepted = requestState == "Accepted";
-            if (isAccepted) {
+            var isSolved = requestState == "Solved";
+            if (isAccepted || isSolved) {
                 $("#result_msg").removeClass('pb_color-primary');
                 $("#result_msg").addClass('text-success');
             } else {
