@@ -24,6 +24,7 @@ namespace PersonalSafety.Hubs.Helpers
 
         private static void PrintFactorizedString(string factorizedText)
         {
+            factorizedText = DateTime.UtcNow.ToLongTimeString() + " " +  DateTime.UtcNow.ToShortDateString() + " | " + factorizedText;
             TrackerHandler.ConsoleSet.Add(factorizedText);
             Console.WriteLine(factorizedText);
         }

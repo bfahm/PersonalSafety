@@ -204,4 +204,12 @@ function startConnection(token) {
     }).catch(function (err) {
         return console.error(err.toString());
     });
+
+    connection.onclose(function () {
+        $('html, body').animate({
+            scrollTop: 0
+        }, 500);
+
+        $("#alert_container_disconnected").removeAttr('hidden');
+    });
 }

@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="col-md-1"></div>
-            <div id="login_form" class="col-md-5">
+            <div id="login_form" class="col-md-6">
                 <div class="bg-white rounded pb_form_v1">
                     <h2 class="mb-4 mt-0 text-center">Login</h2>
 
@@ -50,13 +50,23 @@
                     </div>
                 </div>
             </div>
-            <div id="logged_in_notifier" class="col-md-5" hidden>
+            <div id="logged_in_notifier" class="col-md-6" hidden>
                 <div class="bg-white rounded pb_form_v1">
                     <h2 class="mb-4 mt-0 text-center">Logged in as:</h2>
 
                     <div class="row justify-content-center">
-                        <samp id="current_email">fkdsjfskdf</samp>
+                        <samp id="current_email"></samp>
                     </div>
+
+                    <br />
+
+                    <div id="alert_container_disconnected" class="alert alert-danger alert-dismissible fade show" role="alert" hidden>
+                        <a id="a_refresh" class="text-dark" style="text-decoration:none; cursor: pointer;">Connection to server dropped. Refresh now.</a>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
                     <br />
                     <div class="row justify-content-center">
                         <a id="link_logout" href="#" class="text-danger">Logout</a>
