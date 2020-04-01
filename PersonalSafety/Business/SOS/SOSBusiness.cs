@@ -101,7 +101,8 @@ namespace PersonalSafety.Business
             await _agentHub.NotifyNewChanges(requestId, newStatus);
 
             // Finally: Notify the Rescuer with any changes if he were supposed to be notified
-            if (!string.IsNullOrEmpty(rescuerEmail) || newStatus == (int)StatesTypesEnum.Canceled)
+            // No need to re notify the rescuer if he had just accepted the request himself (and to escape unintended bugs within trackers)
+            if ((!string.IsNullOrEmpty(rescuerEmail) || newStatus == (int)StatesTypesEnum.Canceled) && newStatus != (int)StatesTypesEnum.Solved)
             {
                 // WARNING: Smelly code incoming --
                 /* Explanation:

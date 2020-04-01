@@ -127,6 +127,11 @@ function startConnection(token) {
             if (isAccepted || isSolved) {
                 $("#result_msg").removeClass('pb_color-primary');
                 $("#result_msg").addClass('text-success');
+
+                if (isSolved) {
+                    $("#alert_container_client_solved").attr("hidden", false);
+                }
+
             } else {
                 $("#result_msg").removeClass('text-success');
                 $("#result_msg").addClass('pb_color-primary');
@@ -173,6 +178,8 @@ function startConnection(token) {
         $("#ip_token").prop("disabled", false);
 
         $("#btn_copy_to_clipboard").html("Copy");
+
+        $("#alert_container_client_solved").attr("hidden", true);
 
         $('html, body').animate({
             scrollTop: 0

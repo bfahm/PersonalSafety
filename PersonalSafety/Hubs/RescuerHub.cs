@@ -110,6 +110,8 @@ namespace PersonalSafety.Hubs
                 // Notify Agent in the same hub that rescuers state has changed.
                 await _agentHub.NotifyChangeInRescuers(currentDisconnection.DepartmentId);
             }
+
+            await base.OnDisconnectedAsync(ex);
         }
     }
 }

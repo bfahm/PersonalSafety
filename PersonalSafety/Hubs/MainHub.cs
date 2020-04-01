@@ -45,7 +45,7 @@ namespace PersonalSafety.Hubs
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            var currentDisconnection = TrackerHandler.ClientConnectionInfoSet.FirstOrDefault(sc => sc.ConnectionId == Context.ConnectionId);
+            var currentDisconnection = TrackerHandler.AllConnectionInfoSet.FirstOrDefault(sc => sc.ConnectionId == Context.ConnectionId);
 
             if (currentDisconnection != null)
             {

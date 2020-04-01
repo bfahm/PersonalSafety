@@ -246,6 +246,7 @@ namespace PersonalSafety.Business
 
                 response.Status = (int)APIResponseCodesEnum.SignalRError;
                 response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
+                response.Messages.Add("Your request was deleted.");
                 return response;
             }
 
