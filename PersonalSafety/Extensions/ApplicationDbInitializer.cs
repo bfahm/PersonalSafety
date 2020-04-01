@@ -26,15 +26,21 @@ namespace PersonalSafety.Extensions
 
         public void SeedUsers()
         {
+            #region Create Admin
+
             ApplicationUser adminUser = new ApplicationUser
             {
                 UserName = "admin@admin.com",
                 Email = "admin@admin.com",
-                FullName = "Adminstrator",
+                FullName = "Administrator",
                 EmailConfirmed = true
             };
 
             CreateUserAndSetupRole(adminUser, "Admin@123", "Admin");
+
+            #endregion
+
+            #region Create General User
 
             ApplicationUser testUser = new ApplicationUser
             {
@@ -59,6 +65,10 @@ namespace PersonalSafety.Extensions
                 _clientRepository.Save();
             }
 
+            #endregion
+
+            #region Create Police Department
+
             Department policeDpt = new Department
             {
                 AuthorityType = (int) AuthorityTypesEnum.Police,
@@ -72,7 +82,11 @@ namespace PersonalSafety.Extensions
                 _departmentRepository.Save();
             }
 
-            ApplicationUser personnelUser = new ApplicationUser
+            #endregion
+
+            #region Create Police Agent
+
+            ApplicationUser policeAgentUser = new ApplicationUser
             {
                 UserName = "agent@test.com",
                 Email = "agent@test.com",
@@ -80,20 +94,49 @@ namespace PersonalSafety.Extensions
                 EmailConfirmed = true
             };
 
-            CreateUserAndSetupRole(personnelUser, "Test@123", Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
+            CreateUserAndSetupRole(policeAgentUser, "Test@123", Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
 
-            Personnel personnel = new Personnel
+            Personnel policeAgent = new Personnel
             {
-                PersonnelId = personnelUser.Id,
+                PersonnelId = policeAgentUser.Id,
                 Department = policeDpt,
                 IsRescuer = false
             };
 
-            if (!_personnelRepository.GetAll().Any())
+            if (!_personnelRepository.GetAll().Where(p => p.IsRescuer == false).Any())
             {
-                _personnelRepository.Add(personnel);
+                _personnelRepository.Add(policeAgent);
                 _personnelRepository.Save();
             }
+
+            #endregion
+
+            #region Create Police Agent
+
+            ApplicationUser rescuer1User = new ApplicationUser
+            {
+                UserName = "res1@test.com",
+                Email = "res1@test.com",
+                FullName = "Police Rescuer",
+                EmailConfirmed = true
+            };
+
+            CreateUserAndSetupRole(rescuer1User, "Test@123", Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
+
+            Personnel rescuer1 = new Personnel
+            {
+                PersonnelId = rescuer1User.Id,
+                Department = policeDpt,
+                IsRescuer = true
+            };
+
+            if (!_personnelRepository.GetAll().Where(p => p.IsRescuer == true).Any())
+            {
+                _personnelRepository.Add(rescuer1);
+                _personnelRepository.Save();
+            }
+
+            #endregion
         }
 
         private void CreateUserAndSetupRole(ApplicationUser user, string password, params string[] roles)
