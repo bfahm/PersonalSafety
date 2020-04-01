@@ -17,5 +17,6 @@ namespace PersonalSafety.Business
         APIResponse<DepartmentDetailsViewModel> GetDepartmentDetails(string userId);
         APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId);
         APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentDisconnectedRescuers(string userId);
+        Task<APIResponse<bool>> ResetSOSRequest(int requestId);
     }
 }

@@ -240,5 +240,14 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(response);
         }
+
+        [HttpPut]
+        [Route("SOS/[action]")]
+        public async Task<IActionResult> ResetSOSRequest([FromQuery] int requestId)
+        {
+            var response = await _agentBusiness.ResetSOSRequest(requestId);
+
+            return Ok(response);
+        }
     }
 }

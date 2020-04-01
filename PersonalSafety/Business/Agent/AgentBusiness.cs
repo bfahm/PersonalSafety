@@ -144,5 +144,79 @@ namespace PersonalSafety.Business
                 Messages = new List<string> { "Number of rescuers who went offline in your department is: " + TrackerHandler.RescuerWithPendingMissionsSet.Count }
             };
         }
+
+        /// <remarks>
+        /// - Reset Request to Pending
+        /// - Remove any Assigned Rescuers from SOSRequest Table
+        /// - Make any Assigned Rescuers Idle - by finding them from database
+        /// - Make any Assigned Rescuers Idle - by finding them from trackers
+        /// - Fix Client tracker by:
+        ///     * If he exist in a tracker (found by email) -> Assign the requestId back to him
+        ///     * Else: pass
+        ///
+        /// NOTE: This method should be used for troubleshooting, so SOSBusiness (containing tracking logic) is not used here,
+        ///         and the database is accessed directly.
+        /// </remarks>
+        public async Task<APIResponse<bool>> ResetSOSRequest(int requestId)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var sosRequest = _sosRequestRepository.GetById(requestId.ToString());
+            if (sosRequest == null)
+            {
+                response.Status = (int) APIResponseCodesEnum.NotFound;
+                response.Messages.Add("SOSRequest not found. Check for typos in the provided Id");
+                response.HasErrors = true;
+                return response;
+            }
+
+            sosRequest.State = (int) StatesTypesEnum.Pending;
+            response.Messages.Add("Request was reset to pending.");
+            
+            sosRequest.AssignedRescuerId = null;
+            response.Messages.Add("Removed any Assigned Rescuers from the SOSRequest Table.");
+
+            _sosRequestRepository.Update(sosRequest);
+            _sosRequestRepository.Save();
+
+            // Reset rescuer trackers
+            var sosRequestAssignedRescuer = await _userManager.FindByIdAsync(sosRequest.AssignedRescuerId);
+            var rescuerConnectionInfo = TrackerHandler.RescuerConnectionInfoSet.FirstOrDefault(r =>
+                r.UserEmail == sosRequestAssignedRescuer?.Email || r.CurrentJob == requestId);
+
+            if (rescuerConnectionInfo != null)
+            {
+                rescuerConnectionInfo.CurrentJob = 0;
+                response.Messages.Add("Rescuer of email: " + sosRequestAssignedRescuer.Email + "tracking information was reset to 'Idling'.");
+            }
+            else
+            {
+                response.Messages.Add("No rescuers related to this SOSRequest were tracked.");
+            }
+
+            // Reassign user to trackers
+            var sosRequestOwner = await _userManager.FindByIdAsync(sosRequest.UserId);
+            var clientConnectionInfo = TrackerHandler.ClientConnectionInfoSet.FirstOrDefault(c =>
+                c.UserEmail == sosRequestOwner?.Email);
+            if (clientConnectionInfo != null)
+            {
+                response.Messages.Add("Reattached Client to trackers.");
+                clientConnectionInfo.SOSId = requestId;
+            }
+            else
+            {
+                response.Messages.Add("Could not reach client by email.");
+
+                sosRequest.State = (int)StatesTypesEnum.Orphaned;
+                
+                _sosRequestRepository.Update(sosRequest);
+                _sosRequestRepository.Save();
+
+                response.Messages.Add("SOSRequest was reverted back to 'Orphaned'.");
+            }
+
+            response.Result = true;
+            return response;
+        }
     }
 }

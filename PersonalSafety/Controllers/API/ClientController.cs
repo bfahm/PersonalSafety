@@ -20,15 +20,11 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IClientBusiness _clientBusiness;
         private readonly ISOSBusiness _sosBusiness;
-        private readonly IClientHub _clientHub;
-        private readonly IAgentHub _agentHub;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, IClientHub clientHub, IAgentHub agentHub, IRescuerHub rescuerHub)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
-            _clientHub = clientHub;
-            _agentHub = agentHub;
         }
 
         /// <summary>
@@ -232,7 +228,7 @@ namespace PersonalSafety.Controllers.API
             //? means : If value is not null, retrieve it
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _clientBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
+            var response = await _sosBusiness.SendSOSRequestAsync(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }
@@ -256,6 +252,17 @@ namespace PersonalSafety.Controllers.API
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
             var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Canceled, currentlyLoggedInUserId);
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("SOS/[action]")]
+        public async Task<IActionResult> CancelPendingRequests()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response = await _sosBusiness.CancelPendingRequests(currentlyLoggedInUserId);
 
             return Ok(response);
         }

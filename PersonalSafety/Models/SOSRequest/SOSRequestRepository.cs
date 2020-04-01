@@ -23,8 +23,13 @@ namespace PersonalSafety.Models
 
         public bool UserHasOngoingRequest(string userId)
         {
-            var sosRequestForGiverClient = context.SOSRequests.Where(s => s.UserId == userId).ToList();
-            return sosRequestForGiverClient.Any(s => s.State == (int) StatesTypesEnum.Pending || s.State == (int) StatesTypesEnum.Accepted);
+            return GetOngoingRequest(userId).Any();
+        }
+
+        public IEnumerable<SOSRequest> GetOngoingRequest(string userId)
+        {
+            var sosRequestForGivenClient = context.SOSRequests.Where(s => s.UserId == userId).ToList();
+            return sosRequestForGivenClient.Where(s => s.State == (int)StatesTypesEnum.Pending || s.State == (int)StatesTypesEnum.Accepted);
         }
 
         // Filter them depending on their state

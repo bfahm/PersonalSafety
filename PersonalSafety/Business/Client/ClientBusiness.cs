@@ -19,25 +19,19 @@ namespace PersonalSafety.Business
     {
         private readonly IClientRepository _clientRepository;
         private readonly IEmergencyContactRepository _emergencyContactRepository;
-        private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFacebookAuthService _facebookAuthService;
         private readonly IJwtAuthService _jwtAuthService;
         private readonly IRegistrationService _registrationService;
-        private readonly IAgentHub _agentHub;
-        private readonly IClientHub _clientHub;
 
-        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, ISOSRequestRepository sosRequestRepository, UserManager<ApplicationUser> userManager, IFacebookAuthService facebookAuthService, IJwtAuthService jwtAuthService, IRegistrationService registrationService, IAgentHub agentHub, IClientHub clientHub)
+        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, UserManager<ApplicationUser> userManager, IFacebookAuthService facebookAuthService, IJwtAuthService jwtAuthService, IRegistrationService registrationService)
         {
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
-            _sosRequestRepository = sosRequestRepository;
             _userManager = userManager;
             _facebookAuthService = facebookAuthService;
             _jwtAuthService = jwtAuthService;
             _registrationService = registrationService;
-            _agentHub = agentHub;
-            _clientHub = clientHub;
         }
 
         public async Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request)
@@ -190,81 +184,5 @@ namespace PersonalSafety.Business
             response.Messages.Add("Current total emergency contacts: " + _emergencyContactRepository.GetByUserId(userId).Count());
             return response;
         }
-
-        public async Task<APIResponse<SendSOSResponseViewModel>> SendSOSRequestAsync(string userId, SendSOSRequestViewModel request)
-        {
-            APIResponse<SendSOSResponseViewModel> response = new APIResponse<SendSOSResponseViewModel>();
-
-            Client user = _clientRepository.GetById(userId);
-            if (user == null)
-            {
-                response.Messages.Add("User not authorized.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.Unauthorized;
-                return response;
-            }
-
-            if(!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
-            {
-                response.Messages.Add("You provided a wrong department type, please try again.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
-            }
-
-            if (_sosRequestRepository.UserHasOngoingRequest(userId))
-            {
-                response.Messages.Add("You currently have an ongoing request, cancel it first to be able to send a new request.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
-            }
-
-            SOSRequest sosRequest = new SOSRequest
-            {
-                UserId = userId,
-                AuthorityType = request.AuthorityType,
-                Longitude = request.Longitude,
-                Latitude = request.Latitude,
-                AssignedDepartmentId = 1 // TODO: Fix this line when assigining to the nearest dpt
-            };
-
-            _sosRequestRepository.Add(sosRequest);
-            _sosRequestRepository.Save();
-
-            ApplicationUser userAccount = await _userManager.FindByIdAsync(userId);
-            var trackingResult = _clientHub.TrackSOSIdForClient(userAccount.Email, sosRequest.Id);
-
-            if (!trackingResult)
-            {
-                _clientHub.RemoveClientFromTrackers(sosRequest.Id);
-
-                // Was not able to reach the user:
-                // revert changes:
-                _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
-                _sosRequestRepository.Save();
-
-                response.Status = (int)APIResponseCodesEnum.SignalRError;
-                response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
-                response.Messages.Add("Your request was deleted.");
-                return response;
-            }
-
-            _clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
-            await _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending);
-
-            
-
-            response.Result = new SendSOSResponseViewModel { 
-                RequestId = sosRequest.Id,
-                RequestStateId = sosRequest.State,
-                RequestStateName = ((StatesTypesEnum)sosRequest.State).ToString(),
-            };
-
-            response.Messages.Add("Your request was sent successfully.");
-            
-            return response;
-        }
-
     }
 }
