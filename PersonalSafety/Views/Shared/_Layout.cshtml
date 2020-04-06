@@ -28,6 +28,24 @@
     @await Html.PartialAsync("_Favicons")
 </head>
 <body data-spy="scroll" data-target="#pb-navbar" data-offset="200" class="bg-light">
+
+    <!-- Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false" href="#">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLongTitle">Updates Available</h5>
+                </div>
+                <div class="modal-body">
+                    Update the solution through the Github link below.
+                </div>
+                <div class="modal-footer">
+                    <a href="https://github.com/bfahm/PersonalSafety/releases" type="button" class="btn btn-primary">Proceed</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar navbar-expand-lg navbar-dark pb_navbar pb_scrolled-light" id="pb-navbar">
         <div class="container">
             <a class="navbar-brand" href="index">Personal Safety</a>
@@ -82,6 +100,8 @@
     </footer>
     <div id="pb_loader" class="fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"></circle><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#FF6584"></circle></svg></div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
     <script src="~/assets/js/jquery.min.js"></script>
     <script src="~/assets/js/popper.min.js"></script>
     <script src="~/assets/js/bootstrap.min.js"></script>
@@ -91,15 +111,14 @@
     <script src="~/assets/js/jquery.easing.1.3.js"></script>
     <script src="~/assets/js/main.js"></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     @RenderSection("Scripts", false/*required*/)
 
     <script src="~/lib/signalr.js"></script>
 
     @*Disable autocomplete in all the website*@
-    <script>
-        $(':input').attr("autocomplete", "off");
-    </script>
-</body>
+    <script>$(':input').attr("autocomplete", "off");</script>
 
-</html>
+    <script src="~/js/site.js" type="module"></script>
+</body >
+
+</html >

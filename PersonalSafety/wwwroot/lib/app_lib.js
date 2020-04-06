@@ -61,6 +61,15 @@ export function copyToClipboard(text) {
     });
 }
 
+export function checkForQuery(field) {
+    var url = window.location.href;
+    if (url.indexOf('?' + field + '=') != -1)
+        return true;
+    else if (url.indexOf('&' + field + '=') != -1)
+        return true;
+    return false
+}
+
 /*Cookie Related: */
 export function setCookie(name, value, hours) {
     var expires = "";

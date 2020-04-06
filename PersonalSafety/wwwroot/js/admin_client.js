@@ -1,5 +1,4 @@
 ﻿import { parseJwt } from "../lib/app_lib.js";
-import { syntaxHighlight } from "../lib/app_lib.js";
 import { animateProgressBar } from "../lib/app_lib.js";
 import { setCookie } from "../lib/app_lib.js";
 import { getCookie } from "../lib/app_lib.js";

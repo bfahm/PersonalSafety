@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Extensions;
 
 namespace PersonalSafety.Installers
 {
@@ -15,8 +16,13 @@ namespace PersonalSafety.Installers
             // Required for API functionality
             services.AddControllers();
 
+            // Registering Extensions
+            services.AddScoped<GithubUpdateCheckerFilter>();
+
             // Needed to display the home page "view"
-            services.AddMvc().AddSessionStateTempDataProvider();
+            services.AddMvc().AddMvcOptions(options => {
+                options.Filters.AddService(typeof(GithubUpdateCheckerFilter));
+            }).AddSessionStateTempDataProvider();
             services.AddSession();
 
             // Registering APP Settings
