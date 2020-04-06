@@ -256,6 +256,13 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// Cancel any request that's waiting an outcome.
+        /// </summary>
+        /// <remarks>
+        /// ### Functionality
+        /// Searches for any pending request and cancels it. This unlocks the ability send new requests for clients.
+        /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
         public async Task<IActionResult> CancelPendingRequests()
