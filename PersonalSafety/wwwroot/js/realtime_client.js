@@ -4,6 +4,7 @@ import { copyToClipboard } from "../lib/app_lib.js";
 
 var connection;
 var token;
+var scrollTo = "";
 
 $(document).ready(function () {
     $("#btn_connect").click(function () {
@@ -31,6 +32,13 @@ $(document).ready(function () {
         connection.stop();
         connection = null;
     });
+
+    $("#a_scroll_to_docs").click(function () {
+        $("html, body").animate({
+            // Remember to update the variable for different entities.
+            scrollTop: $(`#${scrollTo}`).offset().top - 100
+        }, 1000);
+    });
 });
 
 function startConnection(token) {
@@ -49,11 +57,7 @@ function startConnection(token) {
 
         if (role.indexOf("Agent") !== -1) {
 
-            $("#a_scroll_to_docs").click(function () {
-                $("html, body").animate({
-                    scrollTop: $("#personnel_docs").offset().top - 100
-                }, 1000);
-            });
+            scrollTo = "personnel_docs";
 
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/agent", {
@@ -79,12 +83,7 @@ function startConnection(token) {
         }
         else if (role.indexOf("Rescuer") !== -1) {
 
-            // TODO: Add docs for rescuer first then enable
-            //$("#a_scroll_to_docs").click(function () {
-            //    $("html, body").animate({
-            //        scrollTop: $("#personnel_docs").offset().top - 100
-            //    }, 1000);
-            //});
+            scrollTo = "rescuer_docs";
 
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/rescuer", {
@@ -104,11 +103,8 @@ function startConnection(token) {
 
     } else {
         $("#samp_role").html("GeneralUser");
-        $("#a_scroll_to_docs").click(function () {
-            $('html, body').animate({
-                scrollTop: $("#client_docs").offset().top -100
-            }, 1000);
-        });
+        
+        scrollTo = "client_docs";
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl("/hubs/client", {

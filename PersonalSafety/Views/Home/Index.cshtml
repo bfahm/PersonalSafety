@@ -39,60 +39,65 @@
                   <ul class="list-group text-sans-serif">
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <a href="~/swagger" target="_blank" style="text-decoration:none">Facebook Login Endpoints</a>
-                              <p>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</p>
-                              <p>Available methods are <samp>/Client/Registration/LoginWithFacebook</samp> for exsisting clients and <samp>/Client/Registration/RegisterWithFacebook</samp> for new clients.</p>
+                              <p class="text-primary"><strong>v1.0-alpha Changes that might break implementation</strong></p>
+                              <ul>
+                                  <li><samp>RegisterPersonnel</samp> &#8594 <samp>RegisterAgent</samp></li>
+                                  <li><samp>/api/Personnnel/•••</samp> &#8594 <samp>/api/Agent/SOS/•••</samp></li>
+                                  <li><samp>/hubs/Personnel</samp> &#8594 <samp>/hubs/Agent</samp></li>
+                                  <li><samp>PersonnelChannel</samp> &#8594 <samp>AgentRequestsChannel</samp></li>
+                                  <li><samp>ConnectionId</samp> is not needed anymore while sending new SOSRequests</li>
+                                  <li><samp>GetMyConnectionInfo()</samp> realtime function was removed. Connection info is now sent automatically after establishing connections. Check full realtime documentation <a href="/RealtimeClient">here</a></li>
+                                  <li>User now can only send <strong>one request per connection</strong>. More info <a href="https://trello.com/c/wmj8MGTC">here</a>.</li>
+                                  <li>New First Login functionality for Rescuers and Agents. More info at <samp>api/Account/Login</samp> documentation.</li>
+                              </ul>
+                          </div>
+                          <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
+                      </li>
+
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <div>
+                              <a href="~/Admin" style="text-decoration: none">Administrator Portal</a>
+                              <p>Simple page to quickly view current SignalR connections to the server, review hub logs, access to this page needs and Administrator privileges though.</p>
+                              <p>Admin can now reset all system trackers for local troubleshooting.</p>
                           </div>
                           <span class="badge badge-success badge-pill">NEW!</span>
                       </li>
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
                           <div>
-                              <a href="~/FacebookLoginTool" style="text-decoration:none">Facebook Login Tool</a>
-                              <p>Quickly try the new Facebook Login API Endpoints by generating an access token from this tool.</p>
-                          </div>
-                          <span class="badge badge-success badge-pill">NEW!</span>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/swagger" target="_blank" style="text-decoration:none">Complete Profile</a>
-                              <p>Clients can now update their birthday to be used in retrieving their SOS Requests</p>
-                          </div>
-                          <span class="badge badge-warning badge-pill">Important</span>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/RealtimeClient" style="text-decoration:none">Realtime Client</a>
-                              <p>As a <b>Client</b>, sending SOS requests requires a valid <b>ongoing realtime</b> connection with the server, verified and maintained via a <samp>ConnectionId</samp> which is generated from <a href="~/RealtimeClient" target="_blank">here</a> after supplying a valid <samp>token</samp>. <br /> This <samp>ConnectionId</samp> helps the server in tracking the request state changes, where it can notify who's subscribed with relevant changes. <br />In a nutshell, this <b>Realtime</b> tool acts as a Swagger-like service to test the current connection with the server, and receive relevant messages upon state changes.</p>
-                          </div>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/Admin" style="text-decoration:none">Adminstrator Portal</a>
-                              <p>Simple page to quickly view current SignalR connections to the server. Access to this page needs and Adminstrator privileges though. <br /> Also note that the page supports saving user token in cookies, be aware that tokens expire every 2 hours and so does these cookies.</p>
-                          </div>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/swagger" target="_blank" style="text-decoration:none">Current Endpoints</a>
+                              <a href="~/swagger" target="_blank" style="text-decoration: none">Current Endpoints</a>
                               <ul>
                                   <li>Account management endpoint at <samp>api/Account</samp></li>
+                                  <li>Admin endpoint at <samp>api/Admin</samp></li>
+                                  <li>Agent endpoint for managing his Department <samp>api/Agent/Department</samp></li>
+                                  <li>Agent endpoint for managing rescuers in his department <samp>api/Agent/Rescuer</samp></li>
+                                  <li>Agent endpoint for managing SOS Requests <samp>api/Agent/SOS</samp></li>
                                   <li>Clients endpoint for completing registration at <samp>api/Client/Registration</samp></li>
                                   <li>Clients endpoint for SOS actions at <samp>api/Client/SOS</samp></li>
-                                  <li>Personnel endpoint at <samp>api/Personnel</samp></li>
-                                  <li>Admin endpoint at <samp>api/Admin</samp></li>
+                                  <li>Rescuer endpoint at <samp>api/Rescuer</samp></li>
+
                               </ul>
+                          </div>
+                      </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <div>
+                              <a style="text-decoration: none; color: darkgrey">Facebook Login</a>
+                              <p>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</p>
+                              <p>Quickly try the new Facebook Login API Endpoints by generating an access token from this tool.</p>
                           </div>
                       </li>
 
                       <!--Old Changes that were removed-->
 
                       <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a style="text-decoration:none; color:darkgrey"><strike>User Endpoint</strike></a>
+                          <a style="text-decoration: none; color: darkgrey"><strike>Personnel Endpoint</strike></a>
+                          <span class="badge badge-light badge-pill">REMOVED</span>
+                      </li>
+
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <a style="text-decoration: none; color: darkgrey"><strike>User Endpoint</strike></a>
                           <span class="badge badge-light badge-pill">REMOVED</span>
                       </li>
                   </ul>
