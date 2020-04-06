@@ -21,7 +21,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:5566"
+      "applicationUrl": "http://localhost:5000"
     },
     "Watch": {
       "commandName": "Executable",
@@ -29,7 +29,7 @@
       "workingDirectory": "$(ProjectDir)",
       "commandLineArgs": "watch run",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:5566/",
+      "launchUrl": "http://localhost:5000/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

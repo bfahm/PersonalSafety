@@ -44,7 +44,7 @@ namespace PersonalSafety
             {
                 hostBuilder.ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseUrls("http://*:5566")
+                    webBuilder.UseUrls("http://*:5000")
                     .UseContentRoot(Directory.GetCurrentDirectory())
                     .UseIISIntegration()
                     .UseStartup<Startup>();
