@@ -41,6 +41,11 @@ $(document).ready(function () {
         eraseCookie("token");
         location.reload();
     });
+
+    //Logout Button Action
+    $("#a_refresh").click(function () {
+        location.reload();
+    });
 });
 
 function loginViaAjax(email, password) {
@@ -196,6 +201,15 @@ function startConnection(token) {
                 return console.error(err.toString());
             });
             connection.invoke("GetConsoleLines").catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+
+        $("#btn_reset_trackers").click(function () {
+            connection.invoke("ResetTrackers").catch(function (err) {
+                return console.error(err.toString());
+            });
+            connection.invoke("GetConnectionInfo").catch(function (err) {
                 return console.error(err.toString());
             });
         });

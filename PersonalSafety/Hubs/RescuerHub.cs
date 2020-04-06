@@ -62,6 +62,25 @@ namespace PersonalSafety.Hubs
             }
         }
 
+        public bool IsIdle(string rescuerEmail)
+        {
+            var returnResult = true;
+
+            RescuerConnectionInfo rescuerConnection = TrackerHandler.RescuerConnectionInfoSet.FirstOrDefault(r => r.UserEmail == rescuerEmail);
+            if (rescuerConnection != null && rescuerConnection.CurrentJob != 0)
+            {
+                returnResult = false;
+            }
+
+            RescuerConnectionInfo rescuerOfflineState = TrackerHandler.RescuerWithPendingMissionsSet.FirstOrDefault(r => r.UserEmail == rescuerEmail);
+            if (rescuerOfflineState != null && rescuerOfflineState.CurrentJob != 0)
+            {
+                returnResult = false;
+            }
+
+            return returnResult;
+        }
+
         public override async Task OnConnectedAsync()
         {
             // Track the current connection in a different Rescuer Hash-list

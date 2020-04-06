@@ -27,7 +27,12 @@ namespace PersonalSafety.Hubs
         
         public void ClearConsoleLines()
         {
-            TrackerHandler.ConsoleSet.Clear();
+            TrackerHandler.InitializeConsoleLog();
+        }
+
+        public void ResetTrackers()
+        {
+            TrackerHandler.InitializeTrackers();
         }
     }
 }

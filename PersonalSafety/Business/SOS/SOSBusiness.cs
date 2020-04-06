@@ -152,6 +152,14 @@ namespace PersonalSafety.Business
                     return response;
                 }
 
+                if (!_rescuerHub.IsIdle(rescuer.Email))
+                {
+                    response.Messages.Add("Error. Current rescuer is on a mission and is not Idle.");
+                    response.Status = (int)APIResponseCodesEnum.BadRequest;
+                    response.HasErrors = true;
+                    return response;
+                }
+
                 sosRequest.AssignedRescuerId = rescuer.Id;
 
                 if (newStatus == (int) StatesTypesEnum.Solved)

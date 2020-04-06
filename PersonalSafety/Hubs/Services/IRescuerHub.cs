@@ -9,5 +9,6 @@ namespace PersonalSafety.Hubs.Services
     {
         bool NotifyNewChanges(int requestId, string rescuerEmail);
         void MakeRescuerIdle(string rescuerEmail);
+        bool IsIdle(string rescuerEmail);
     }
 }

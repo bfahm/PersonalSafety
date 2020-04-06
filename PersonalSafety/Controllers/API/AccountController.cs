@@ -44,13 +44,46 @@ namespace PersonalSafety.Controllers.API
         /// ------------------
         /// 
         /// **IMPORTANT:** User must verify his email before proceeding.
+        ///
+        /// ------------------
+        ///
+        /// ## First Login Situations
+        /// The following applies to these types of users:
+        ///  - **Agents** registered via **Admins**
+        ///  - **Rescuers** registered via **Agents**
+        ///
+        /// These types of users are assigned a password by their managers, hence, this password should be changed upon first login attempt.
+        /// 
+        /// Upon the first login attempt, these users will receive a token starting with something like `CfDJ8prn3lv)83c+c •••`, in contrary, normal login tokens starts with `ey •••`.
+        /// This token represents a **password reset** token. Additionally, the status of the return object is `"status": -2`. The code -2 represents an issue regarding user's authentication.
+        ///
+        /// **IMPORTANT: ** This token will not be accepted as a `Bearer` token to enable usage of any of the services provided the system, in other words, this token does not represent a "Logged In" status.
+        ///
+        /// #### Flow
+        /// - Save these information to be used later in another method:
+        ///     - Email that user provided to attempt to login
+        ///     - Password Reset Token that was received instead of the expected `Bearer` token.
+        /// - Navigate the user to a page where he could reset his password containing
+        ///     - New Password Field
+        ///     - Confirm Password Field
+        /// - Use these data to fill the password reset object of `/ResetPassword` method
+        /// - Confirm and wait for password reset confirmation
+        /// - Redirect the user back to the login page where he can provide his email and his **new password**
+        /// - Confirm that the status of the return object is `"status": 0` representing no issues in the process of logging in.
+        /// - Confirm that the result of the return object starts with `ey•••` representing that the token is a `Bearer` token.
+        ///
+        /// ------------------
         /// 
         /// ## Possible Result Codes in case of Errors:
         /// #### **[401]**: Unauthorized
         /// Email and Password combination does not match
         /// 
+        /// #### **[-2]**: Identity Error
+        /// Occurs if the user should reset his password to continue
+        /// 
         /// #### **[-4]**: Not Confirmed
         /// Password combination is valid but the user did not verify his email.
+        ///
         /// </remarks>
         [HttpPost]
         [SwaggerRequestExample(typeof(LoginRequestViewModel), typeof(LoginNormalUserExample))]

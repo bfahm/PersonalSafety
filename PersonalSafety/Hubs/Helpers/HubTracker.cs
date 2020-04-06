@@ -7,12 +7,30 @@ namespace PersonalSafety.Hubs.HubTracker
 {
     public static class TrackerHandler
     {
-        public static HashSet<string> ConsoleSet = new HashSet<string>();
-        public static HashSet<ClientConnectionInfo> ClientConnectionInfoSet = new HashSet<ClientConnectionInfo>();
-        public static HashSet<RescuerConnectionInfo> RescuerConnectionInfoSet = new HashSet<RescuerConnectionInfo>();
-        public static HashSet<RescuerConnectionInfo> RescuerWithPendingMissionsSet = new HashSet<RescuerConnectionInfo>();
-        public static HashSet<ConnectionInfo> AllConnectionInfoSet = new HashSet<ConnectionInfo>();
+        public static HashSet<string> ConsoleSet;
+        public static HashSet<ClientConnectionInfo> ClientConnectionInfoSet;
+        public static HashSet<RescuerConnectionInfo> RescuerConnectionInfoSet;
+        public static HashSet<RescuerConnectionInfo> RescuerWithPendingMissionsSet;
+        public static HashSet<ConnectionInfo> AllConnectionInfoSet;
         
+        static TrackerHandler()
+        {
+            InitializeConsoleLog();
+            InitializeTrackers();
+        }
+
+        public static void InitializeConsoleLog()
+        {
+            ConsoleSet = new HashSet<string>();
+        }
+
+        public static void InitializeTrackers()
+        {
+            ClientConnectionInfoSet = new HashSet<ClientConnectionInfo>();
+            RescuerConnectionInfoSet = new HashSet<RescuerConnectionInfo>();
+            RescuerWithPendingMissionsSet = new HashSet<RescuerConnectionInfo>();
+            AllConnectionInfoSet = new HashSet<ConnectionInfo>();
+        }
     }
 
     // Tracker Classes (Kind of entities to be tracked)

@@ -179,7 +179,10 @@ namespace PersonalSafety.Business
             if (rescuerConnectionInfo != null)
             {
                 rescuerConnectionInfo.CurrentJob = 0;
-                response.Messages.Add("Rescuer of email: " + sosRequestAssignedRescuer.Email + "tracking information was reset to 'Idling'.");
+                if (sosRequestAssignedRescuer != null)
+                {
+                    response.Messages.Add("Rescuer of email: " + sosRequestAssignedRescuer.Email + "tracking information was reset to 'Idling'.");
+                }
             }
             else
             {

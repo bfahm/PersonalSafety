@@ -266,10 +266,16 @@ namespace PersonalSafety.Controllers.API
         /// # **`AuthenticatedRequest`**
         /// 
         /// ## Main Functionality
-        /// Gives a Personnel the ability to accept a request using its id.
+        /// Mark a request as Accepted and assign it to one of the online rescuers.
         /// 
         /// ## Possible Result Codes in case of Errors:
-        /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
+        ///
+        /// #### **[400]**: Bad Request
+        ///
+        /// - Provided rescuer is not online.
+        /// - Provided rescuer is already on a mission (not idle).
+        /// #### **[401]**: Unauthorized
+        /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
