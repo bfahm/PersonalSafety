@@ -67,6 +67,13 @@ namespace PersonalSafety.Controllers.API
         /// - Password
         ///
         /// The rescuer is automatically assigned to the same department of the agent registering him, and is assigned the same authority type too.
+        ///
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-1]**: Invalid Request
+        /// - User exists and has registered before
+        /// 
+        /// #### **[-2]**: Identity Error
+        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
         /// </remarks>
         [HttpPost]
         [Route("Rescuer/[action]")]
@@ -289,6 +296,9 @@ namespace PersonalSafety.Controllers.API
         ///     * If he exist in a tracker (found by email) -> Assign the requestId back to him
         ///     * Else: pass
         ///
+        /// ## Possible Result Codes in case of Errors:
+        /// This method doesn't return any errors per se, although it returns a list of messages that represents the outcome of each attempt in the above functionality.
+        /// 
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
