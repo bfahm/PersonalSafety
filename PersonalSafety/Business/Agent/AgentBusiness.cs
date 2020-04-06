@@ -88,7 +88,7 @@ namespace PersonalSafety.Business
             {
                 Email = rescuer.Email,
                 UserName = rescuer.Email,
-                FullName = rescuer.Email,
+                FullName = rescuer.FirstName + " " + rescuer.LastName,
                 EmailConfirmed = true,
                 ForceChangePassword = true
             };
@@ -146,16 +146,8 @@ namespace PersonalSafety.Business
         }
 
         /// <remarks>
-        /// - Reset Request to Pending
-        /// - Remove any Assigned Rescuers from SOSRequest Table
-        /// - Make any Assigned Rescuers Idle - by finding them from database
-        /// - Make any Assigned Rescuers Idle - by finding them from trackers
-        /// - Fix Client tracker by:
-        ///     * If he exist in a tracker (found by email) -> Assign the requestId back to him
-        ///     * Else: pass
-        ///
-        /// NOTE: This method should be used for troubleshooting, so SOSBusiness (containing tracking logic) is not used here,
-        ///         and the database is accessed directly.
+        /// This method should be used for troubleshooting, so SOSBusiness (containing tracking logic) is not used here,
+        /// and the database is accessed directly.
         /// </remarks>
         public async Task<APIResponse<bool>> ResetSOSRequest(int requestId)
         {

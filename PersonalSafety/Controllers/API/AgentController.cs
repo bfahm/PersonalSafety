@@ -33,6 +33,41 @@ namespace PersonalSafety.Controllers.API
             _rescuerHub = rescuerHub;
         }
 
+        /// <summary>
+        /// Retrieve details about the department of the current Agent
+        /// </summary>
+        /// <remarks>
+        /// ### Functionality
+        /// Retrieve basic data about the agent's data, including but not limited to:
+        /// - Department Location
+        /// - Department Authority type
+        /// - Department Workers (Rescuers and Agents)
+        /// </remarks>
+        [HttpGet]
+        [Route("Department/[action]")]
+        public IActionResult GetDepartmentDetails()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = _agentBusiness.GetDepartmentDetails(currentlyLoggedInUserId);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Registers a new rescuer and adds him to the current department.
+        /// </summary>
+        /// <remarks>
+        /// ### Functionality
+        ///
+        /// Registers a new rescuer with basic data:
+        ///
+        /// - His Name
+        /// - Email
+        /// - Password
+        ///
+        /// The rescuer is automatically assigned to the same department of the agent registering him, and is assigned the same authority type too.
+        /// </remarks>
         [HttpPost]
         [Route("Rescuer/[action]")]
         public async Task<IActionResult> RegisterRescuer(RegisterRescuerViewModel request)
@@ -44,21 +79,16 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
-        [HttpGet]
-        [Route("Rescuer/[action]")]
-        public IActionResult GetDepartmentDetails()
-        {
-            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
-
-            var response = _agentBusiness.GetDepartmentDetails(currentlyLoggedInUserId);
-
-            return Ok(response);
-        }
-
         /// <summary>
-        /// Returns a list of online rescuers IN THE SAME DEPARTMENT.
+        /// Returns a list of online rescuers in the current department.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// - **Online Rescuers:** Rescuers who are currently having a valid connection with the system's realtime hub.
+        /// - Returned information also include the current job that is assigned to the user.
+        ///     - Current Job is represented in the form of the `ID` of the SOSRequest.
+        ///     - If the `ID = 0` then the rescuer is currently **Idling**
+        ///     - If the `ID = x` then the rescuer is currently assigned the SOSRequest of `Id = x`
+        /// </remarks>
         [HttpGet]
         [Route("Rescuer/[action]")]
         public IActionResult GetOnlineRescuers()
@@ -73,7 +103,11 @@ namespace PersonalSafety.Controllers.API
         /// <summary>
         /// Returns a list of online rescuers who disconnected while being on a job.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// - **Disconnected Rescuers:** Rescuers who were assigned a Job, but got **temporarily disconnected** from the system's realtime hub
+        /// - Returned information also include the  job that was assigned to the user in the form of the `ID` of the SOSRequest.
+        /// - **IMPORTANT NOTE:** Disconnected Rescuers **are not** offline rescuers.
+        /// </remarks>
         [HttpGet]
         [Route("Rescuer/[action]")]
         public IActionResult GetDisconnectedRescuers()
@@ -241,6 +275,21 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// Resets a request to its initial state (Pending)
+        /// </summary>
+        /// <remarks>
+        /// ### Functionality:
+        /// 
+        /// - Reset Request to Pending
+        /// - Remove any Assigned Rescuers from SOSRequest Table
+        /// - Make any Assigned Rescuers Idle - by finding them from database
+        /// - Make any Assigned Rescuers Idle - by finding them from trackers
+        /// - Fix Client tracker by:
+        ///     * If he exist in a tracker (found by email) -> Assign the requestId back to him
+        ///     * Else: pass
+        ///
+        /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
         public async Task<IActionResult> ResetSOSRequest([FromQuery] int requestId)

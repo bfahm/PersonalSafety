@@ -8,6 +8,8 @@ namespace PersonalSafety.Models.ViewModels
 {
     public class RegisterRescuerViewModel
     {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         [EmailAddress]
         public string Email { get; set; }
         public string Password { get; set; }
