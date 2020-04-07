@@ -11,6 +11,7 @@ namespace PersonalSafety.Models.ViewModels
         public int RequestId { get; set; }
 
         //User Data
+        public string UserFullName { get; set; }
         public string UserEmail { get; set; }
         public string UserPhoneNumber { get; set; }
         public string UserNationalId { get; set; }

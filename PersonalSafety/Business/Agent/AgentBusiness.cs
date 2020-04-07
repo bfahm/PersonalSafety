@@ -115,6 +115,7 @@ namespace PersonalSafety.Business
                 {
                     RequestId = request.Id,
 
+                    UserFullName = requestOwner_Account.FullName,
                     UserEmail = requestOwner_Account.Email,
                     UserPhoneNumber = requestOwner_Account.PhoneNumber,
                     UserNationalId = requestOwner_Client.NationalId,
