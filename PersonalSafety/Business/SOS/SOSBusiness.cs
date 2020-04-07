@@ -7,11 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Razor.Language.Extensions;
-using Microsoft.AspNetCore.Razor.Language.Intermediate;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
 
@@ -190,7 +186,7 @@ namespace PersonalSafety.Business
             await _agentHub.NotifyNewChanges(requestId, newStatus);
 
             // Finally: Notify the Rescuer with any changes if he were supposed to be notified
-            // No need to re notify the rescuer if he had just accepted the request himself (and to escape unintended bugs within trackers)
+            // No need to re notify the rescuer if he had just solved the request himself (and to escape unintended bugs within trackers)
             if ((!string.IsNullOrEmpty(rescuerEmail) || newStatus == (int)StatesTypesEnum.Canceled) && newStatus != (int)StatesTypesEnum.Solved)
             {
                 // WARNING: Smelly code incoming --
@@ -294,7 +290,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var sosCorrectStateCheckResult = CheckIfSOSIsInState(sosRequest, (int)StatesTypesEnum.Pending);
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Pending, false);
             if (sosCorrectStateCheckResult != null)
             {
                 response.WrapResponseData(sosCorrectStateCheckResult);
@@ -362,6 +358,61 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public async Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId)
+        {
+            const int newState = (int)StatesTypesEnum.Canceled;
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullSOSCheckResult = CheckForNullSOS(requestId, out SOSRequest sosRequest);
+            if (nullSOSCheckResult != null)
+            {
+                response.WrapResponseData(nullSOSCheckResult);
+                return response;
+            }
+
+            var authorizedUserCheck = CheckHaveAccessToSOS(sosRequest, clientUserId);
+            if (authorizedUserCheck != null)
+            {
+                response.WrapResponseData(authorizedUserCheck);
+                return response;
+            }
+
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Solved, true);
+            if (sosCorrectStateCheckResult != null)
+            {
+                response.WrapResponseData(sosCorrectStateCheckResult);
+                return response;
+            }
+
+            // First: Try Notify the Rescuer and make him idle, no need to break the execution if rescuer was offline at the time of sending
+            // the notification, he will be release and made idle again once he's online.
+            var assignedRescuer = await _userManager.FindByIdAsync(sosRequest.AssignedRescuerId ?? "");
+            var rescuerNotificationResult = TryNotifyRescuer(requestId, assignedRescuer?.Email);
+            if (rescuerNotificationResult != null)
+            {
+                response.WrapResponseData(rescuerNotificationResult);
+                response.Messages.Add("Either there was no rescuer assigned to this request yet, or he was currently offline.");
+            }
+            _rescuerHub.MakeRescuerIdle(assignedRescuer?.Email);
+
+            // Then: Try Notify the Client, no need to break the execution if rescuer was offline at the time of notifying
+            var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
+            if (clientNotificationResult != null)
+            {
+                response.WrapResponseData(clientNotificationResult);
+            }
+
+            // Finally: Try Notify the agent of the update. (No check needed for now)
+            TryNotifyAgent(requestId, newState);
+
+            UpdateSOSInline(ref sosRequest, newState, null);
+            SaveChangesToRepository(ref sosRequest);
+
+            response.WrapResponseData(FinalizedWithSuccessState(requestId, newState));
+            response.Status = (int) APIResponseCodesEnum.Ok;
+            response.Result = true;
+            return response;
+        }
 
 
         private async void TryNotifyAgent(int requestId, int newStatus)
@@ -369,6 +420,7 @@ namespace PersonalSafety.Business
             // TODO: add here checks related to specifying agent by department
             await _agentHub.NotifyNewChanges(requestId, newStatus);
         }
+
 
         private APIResponseData TryNotifyRescuer(int requestId, string rescuerEmail)
         {
@@ -437,19 +489,37 @@ namespace PersonalSafety.Business
             return null;
         }
 
-        private APIResponseData CheckIfSOSIsInState(SOSRequest sosRequest, int state)
+        private APIResponseData CheckSOSState(SOSRequest sosRequest, int state, bool isInTheState)
         {
-            if (sosRequest.State != state)
+            if(!isInTheState && sosRequest.State != state)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
                         {"Error. The SOS Request you are trying to modify is not in the "+ (StatesTypesEnum)state +" state."});
+
+            }
+            
+            if (isInTheState && sosRequest.State == state)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                    new List<string>()
+                        {"Error. The SOS Request you are trying to modify is in the "+ (StatesTypesEnum)state +" state."});
             }
 
             return null;
         }
 
+        private APIResponseData CheckHaveAccessToSOS(SOSRequest sosRequest, string clientUserId)
+        {
+            if (sosRequest.UserId != clientUserId)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
+                    new List<string>()
+                        {"You are not authorized to modify this SOS Request."});
+            }
 
+            return null;
+        }
 
 
         private APIResponseData FinalizedWithSuccessState(int requestId, int newState)

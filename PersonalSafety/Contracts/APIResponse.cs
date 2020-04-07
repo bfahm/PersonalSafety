@@ -23,7 +23,7 @@ namespace PersonalSafety.Contracts
         {
             Status = data.Status;
             HasErrors = data.HasErrors;
-            Messages = data.Messages;
+            Messages.AddRange(data.Messages);
         }
     }
 

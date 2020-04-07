@@ -251,7 +251,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Canceled, currentlyLoggedInUserId);
+            var response = await _sosBusiness.CancelSOSRequestAsync(requestId, currentlyLoggedInUserId);
 
             return Ok(response);
         }

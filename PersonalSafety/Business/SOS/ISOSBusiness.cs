@@ -13,5 +13,6 @@ namespace PersonalSafety.Business
         Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId, string rescuerEmail = null);
         Task<APIResponse<bool>> CancelPendingRequests(string userId);
         APIResponse<bool> AcceptSOSRequest(int requestId, string rescuerEmail);
+        Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId);
     }
 }
