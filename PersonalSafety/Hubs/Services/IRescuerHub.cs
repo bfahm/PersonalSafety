@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Hubs.Services
 {
-    public interface IRescuerHub
+    public interface IRescuerHub : IMainHub
     {
         bool NotifyNewChanges(int requestId, string rescuerEmail);
         void MakeRescuerIdle(string rescuerEmail);

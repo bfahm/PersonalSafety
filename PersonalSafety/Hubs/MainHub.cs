@@ -16,9 +16,9 @@ namespace PersonalSafety.Hubs
     {
         public static readonly string connectionInfoChannel = "ConnectionInfoChannel";
         
-        public bool isConnected(string connectionId)
+        public bool isConnected(string userId)
         {
-            return TrackerHandler.AllConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == connectionId) != null;
+            return TrackerHandler.AllConnectionInfoSet.FirstOrDefault(c => c.UserId == userId) != null;
         }
 
         

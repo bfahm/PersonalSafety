@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PersonalSafety.Hubs;
@@ -279,6 +280,200 @@ namespace PersonalSafety.Business
 
             response.Messages.Add("You just canceled " + ongoingRequests.Count() + " requests.");
             return response;
+        }
+
+        public APIResponse<bool> AcceptSOSRequest(int requestId, string rescuerEmail)
+        {
+            const int newState = (int) StatesTypesEnum.Accepted;
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullSOSCheckResult = CheckForNullSOS(requestId, out SOSRequest sosRequest);
+            if (nullSOSCheckResult != null)
+            {
+                response.WrapResponseData(nullSOSCheckResult);
+                return response;
+            }
+
+            var sosCorrectStateCheckResult = CheckIfSOSIsInState(sosRequest, (int)StatesTypesEnum.Pending);
+            if (sosCorrectStateCheckResult != null)
+            {
+                response.WrapResponseData(sosCorrectStateCheckResult);
+                return response;
+            }
+
+            var nullRescuerCheckResult = CheckForNullRescuer(rescuerEmail, out ApplicationUser rescuer);
+            if (nullRescuerCheckResult != null)
+            {
+                response.WrapResponseData(nullRescuerCheckResult);
+                return response;
+            }
+
+            var rescuerOnMissionCheckResult = CheckIfRescuerIsOnMission(rescuerEmail);
+            if (rescuerOnMissionCheckResult != null)
+            {
+                response.WrapResponseData(rescuerOnMissionCheckResult);
+                return response;
+            }
+
+
+            // Make sure that both the client and the rescuer are online before :
+            var isClientConnected = _clientHub.isConnected(sosRequest.UserId);
+            var isRescuerConnected = _rescuerHub.isConnected(rescuer.Id);
+            if (!(isClientConnected && isRescuerConnected))
+            {
+                response.Status = (int) APIResponseCodesEnum.SignalRError;
+                if (!isClientConnected)
+                {
+                    response.Messages.Add("Failed to reach the owner client, changes were not saved.");
+                }
+
+                if (!isRescuerConnected)
+                {
+                    response.Messages.Add("Failed to reach the chosen rescuer, changes were not saved.");
+                }
+
+                return response;
+            }
+
+            // First: Try Notify the Rescuer, there shouldn't be error unless there is a logical error - bug
+            var rescuerNotificationResult = TryNotifyRescuer(requestId, rescuerEmail);
+            if (rescuerNotificationResult != null)
+            {
+                response.WrapResponseData(rescuerNotificationResult);
+                return response;
+            }
+
+            // Then: Try Notify the Client, there shouldn't be error unless there is a logical error - bug
+            var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
+            if (clientNotificationResult != null)
+            {
+                response.WrapResponseData(clientNotificationResult);
+                return response;
+            }
+
+            // Finally: Try Notify the agent of the update. (No check needed for now)
+            TryNotifyAgent(requestId, newState);
+
+            UpdateSOSInline(ref sosRequest, newState, rescuer.Id);
+            SaveChangesToRepository(ref sosRequest);
+
+            response.WrapResponseData(FinalizedWithSuccessState(requestId, newState));
+            response.Result = true;
+            return response;
+        }
+
+
+
+        private async void TryNotifyAgent(int requestId, int newStatus)
+        {
+            // TODO: add here checks related to specifying agent by department
+            await _agentHub.NotifyNewChanges(requestId, newStatus);
+        }
+
+        private APIResponseData TryNotifyRescuer(int requestId, string rescuerEmail)
+        {
+            var notifierResult = _rescuerHub.NotifyNewChanges(requestId, rescuerEmail);
+
+            if (!notifierResult)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.SignalRError,
+                    new List<string>()
+                        {"An error occured while trying to reach this rescuer."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData TryNotifyOwnerClient(int requestId, int newStatus)
+        {
+            var notifierResult = _clientHub.NotifyUserSOSState(requestId, newStatus);
+            
+            if (!notifierResult)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.SignalRError,
+                    new List<string>()
+                        {"An error occured while trying to reach the owner client."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckIfRescuerIsOnMission(string rescuerEmail)
+        {
+            if (!_rescuerHub.IsIdle(rescuerEmail))
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                    new List<string>()
+                        {"Error. Current rescuer is on a mission."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForNullRescuer(string rescuerEmail, out ApplicationUser rescuer)
+        {
+            rescuer = _userManager.FindByEmailAsync(rescuerEmail).Result;
+            if (rescuer == null)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.NotFound,
+                    new List<string>()
+                        {"Error. No Rescuer was found with the provided Email. Check the email for typos."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForNullSOS(int requestId, out SOSRequest sosRequest)
+        {
+            sosRequest = _sosRequestRepository.GetById(requestId.ToString());
+
+            if (sosRequest == null)
+            {
+                return new APIResponseData((int) APIResponseCodesEnum.NotFound,
+                    new List<string>()
+                        {"The SOS Request you are trying to modify was not found, did you mistype the ID?"});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckIfSOSIsInState(SOSRequest sosRequest, int state)
+        {
+            if (sosRequest.State != state)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                    new List<string>()
+                        {"Error. The SOS Request you are trying to modify is not in the "+ (StatesTypesEnum)state +" state."});
+            }
+
+            return null;
+        }
+
+
+
+
+        private APIResponseData FinalizedWithSuccessState(int requestId, int newState)
+        {
+            var messages = new List<string>
+            {
+                "Success!",
+                "SOS Request of Id: " + requestId + " was " + ((StatesTypesEnum)newState) + "."
+            };
+            return new APIResponseData((int)APIResponseCodesEnum.Ok, messages);
+        }
+
+        
+        private void UpdateSOSInline(ref SOSRequest sosRequest, int newState, string rescuerId)
+        {
+            sosRequest.State = newState;
+            sosRequest.AssignedRescuerId = rescuerId;
+            sosRequest.LastModified = DateTime.Now;
+        }
+
+        private void SaveChangesToRepository(ref SOSRequest sosRequest)
+        {
+            _sosRequestRepository.Update(sosRequest);
+            _sosRequestRepository.Save();
         }
     }
 }

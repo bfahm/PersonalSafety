@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Hosting;
 using PersonalSafety.Controllers.API;
 using PersonalSafety.Options;
 using PersonalSafety.Services;
@@ -13,18 +15,23 @@ namespace PersonalSafety.Extensions
     {
         private readonly AppSettings _appSettings;
         private readonly IGithubUpdateService _githubUpdateService;
+        private readonly IWebHostEnvironment _environment;
         private const string CookieLastCheckedKey = "update_service_last_checked";
         private const string CookieIsUpdatedKey = "update_service_is_updated";
         private const string QueryNeedsUpdate = "needsUpdate";
 
-        public GithubUpdateCheckerFilter(AppSettings appSettings, IGithubUpdateService githubUpdateService)
+        public GithubUpdateCheckerFilter(AppSettings appSettings, IGithubUpdateService githubUpdateService, IWebHostEnvironment env)
         {
             _appSettings = appSettings;
             _githubUpdateService = githubUpdateService;
+            _environment = env;
         }
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
+            // Escape the logic if in development environment.
+            if (_environment.IsDevelopment()) return;
+
             DateTime.TryParse(context.HttpContext.Request.Cookies[CookieLastCheckedKey], out var cookieLastCheckedValue);
             bool.TryParse(context.HttpContext.Request.Cookies[CookieIsUpdatedKey], out var cookieIsUpdatedValue);
             var containsNeedsUpdateQuery = context.HttpContext.Request.Query.ContainsKey(QueryNeedsUpdate);

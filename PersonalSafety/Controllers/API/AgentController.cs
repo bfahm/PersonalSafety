@@ -279,11 +279,9 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
-        public async Task<IActionResult> AcceptSOSRequest([FromQuery] int requestId, [FromQuery] string rescuerEmail)
+        public IActionResult AcceptSOSRequest([FromQuery] int requestId, [FromQuery] string rescuerEmail)
         {
-            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
-
-            var response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Accepted, currentlyLoggedInUserId, rescuerEmail??"");
+            var response = _sosBusiness.AcceptSOSRequest(requestId, rescuerEmail??"");
 
             return Ok(response);
         }
