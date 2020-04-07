@@ -93,11 +93,11 @@ namespace PersonalSafety.Hubs
             TrackerHandler.RescuerConnectionInfoSet.Add(currentConnection);
 
             // Find out if the rescuer had disconnected before and is trying to reconnect now
-            RescuerConnectionInfo recurrentConnection = TrackerHandler.RescuerWithPendingMissionsSet.FirstOrDefault(c => c.UserEmail == Context.User.FindFirst(ClaimTypes.Email).Value);
+            RescuerConnectionInfo recurrentConnection = TrackerHandler.RescuerWithPendingMissionsSet.OrderByDescending(c => c.CurrentJob).FirstOrDefault(c => c.UserEmail == Context.User.FindFirst(ClaimTypes.Email).Value);
             if (recurrentConnection != null && recurrentConnection.CurrentJob > 0)
             {
                 //If so, send him his previous state and remove that state from the tracker.
-                TrackerHandler.RescuerWithPendingMissionsSet.Remove(recurrentConnection);
+                TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(c=>c.UserEmail == recurrentConnection.UserEmail);
                 NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
                 HubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
             }

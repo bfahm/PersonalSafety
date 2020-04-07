@@ -10,6 +10,5 @@ namespace PersonalSafety.Business
     public interface IRescuerBusiness
     {
         Task<APIResponse<GetSOSRequestViewModel>> GetSOSRequestDetailsAsync(string userId, int requestId);
-        Task<APIResponse<bool>> SolveSOSRequestAsync(string userId, int requestId);
     }
 }

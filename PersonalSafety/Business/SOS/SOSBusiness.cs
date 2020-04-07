@@ -32,6 +32,7 @@ namespace PersonalSafety.Business
             _clientHub = clientHub;
         }
 
+        #region Main Methods
 
         public async Task<APIResponse<SendSOSResponseViewModel>> SendSOSRequestAsync(string userId, SendSOSRequestViewModel request)
         {
@@ -106,175 +107,6 @@ namespace PersonalSafety.Business
 
             response.Messages.Add("Your request was sent successfully.");
 
-            return response;
-        }
-
-        public async Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId, string rescuerEmail = null)
-        {
-            APIResponse<bool> response = new APIResponse<bool>();
-            SOSRequest sosRequest = _sosRequestRepository.GetById(requestId.ToString());
-
-            if (sosRequest == null)
-            {
-                response.Messages.Add("The SOS Request you are trying to modify was not found, did you mistype the ID?");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.NotFound;
-                return response;
-            }
-
-            // If user is not a personnel (meaning he's a client), he must only modify his own requests.
-            if(!await _userManager.IsInRoleAsync(await _userManager.FindByIdAsync(issuerId), Roles.ROLE_PERSONNEL))
-            {
-                if(sosRequest.UserId != issuerId)
-                {
-                    response.Messages.Add("You are not authorized to modify this SOS Request.");
-                    response.HasErrors = true;
-                    response.Status = (int)APIResponseCodesEnum.Unauthorized;
-                    return response;
-                }
-            }
-
-            sosRequest.State = newStatus;
-            sosRequest.LastModified = DateTime.Now;
-
-            // If the request was changed to a success state, save the rescuer data
-            if (newStatus == (int) StatesTypesEnum.Accepted || newStatus == (int) StatesTypesEnum.Solved)
-            {
-                var rescuer = await _userManager.FindByEmailAsync(rescuerEmail);
-                if (rescuer == null)
-                {
-                    response.Messages.Add("Error. Failed to notify the provided rescuer. Check the email for typos.");
-                    response.Status = (int)APIResponseCodesEnum.BadRequest;
-                    response.HasErrors = true;
-                    return response;
-                }
-
-                if (!_rescuerHub.IsIdle(rescuer.Email))
-                {
-                    response.Messages.Add("Error. Current rescuer is on a mission and is not Idle.");
-                    response.Status = (int)APIResponseCodesEnum.BadRequest;
-                    response.HasErrors = true;
-                    return response;
-                }
-
-                sosRequest.AssignedRescuerId = rescuer.Id;
-
-                if (newStatus == (int) StatesTypesEnum.Solved)
-                {
-                    _rescuerHub.MakeRescuerIdle(rescuerEmail);
-                }
-            }
-            
-
-            // First: Notify the Client
-            var notifierResult = _clientHub.NotifyUserSOSState(requestId, newStatus);
-            // If notifier failed to reach user (he was offline)..
-            // No need to revert the request if the user went offline, and the request was SOLVED
-            if (!notifierResult && newStatus != (int)StatesTypesEnum.Solved)
-            {
-                response.Messages.Add("Failed to notify the user about the change, it appears he lost the connection.");
-                response.Messages.Add("Request state was reverted to: 'Orphaned'");
-                sosRequest.State = (int)StatesTypesEnum.Orphaned;
-
-                _sosRequestRepository.Update(sosRequest);
-                _sosRequestRepository.Save();
-
-                return response;
-            }
-
-            // Then: Notify the agent of the update.
-            await _agentHub.NotifyNewChanges(requestId, newStatus);
-
-            // Finally: Notify the Rescuer with any changes if he were supposed to be notified
-            // No need to re notify the rescuer if he had just solved the request himself (and to escape unintended bugs within trackers)
-            if ((!string.IsNullOrEmpty(rescuerEmail) || newStatus == (int)StatesTypesEnum.Canceled) && newStatus != (int)StatesTypesEnum.Solved)
-            {
-                // WARNING: Smelly code incoming --
-                /* Explanation:
-                    This code block is accessed in the case of user canceling the request
-                        If so: parameter rescuerEmail would be null, and we will try to fetch the rescuer email from the database (SOSRequest table)
-                    OR
-                    Any other rescuer-related logic (hence parameter rescuerEmail shouldn't be null)
-                        If so: use the parameter rescuerEmail
-                 */
-
-                
-                if (newStatus == (int) StatesTypesEnum.Canceled)
-                {
-                    if (sosRequest.AssignedRescuerId != null)
-                    {
-                        rescuerEmail = _userManager.FindByIdAsync(sosRequest?.AssignedRescuerId).Result.Email;
-                        sosRequest.AssignedRescuerId = null;
-                    }
-
-                    _rescuerHub.MakeRescuerIdle(rescuerEmail);
-                } // if the state was not: Canceled, rescuerEmail field should be the one in the function parameter
-
-                var rescuerNotifierResult = _rescuerHub.NotifyNewChanges(requestId, rescuerEmail);
-
-                if (newStatus == (int) StatesTypesEnum.Canceled)
-                {
-                    // If user is trying to cancel, no need to check if the rescuer is still online.
-                    goto done;
-                }
-                
-                if (!rescuerNotifierResult)
-                {
-                    response.Status = (int) APIResponseCodesEnum.SignalRError;
-                    response.Messages.Add("Failed to notify the rescuer about the change, it appears he is not online.");
-                    response.Messages.Add("Reverting Changes...");
-                    response.Messages.Add("Changes were reverted back to 'Pending'.");
-
-                    sosRequest.State = (int) StatesTypesEnum.Pending;
-
-                    _sosRequestRepository.Update(sosRequest);
-                    _sosRequestRepository.Save();
-
-                    return response;
-                }
-                
-            }
-
-            done:
-            _sosRequestRepository.Update(sosRequest);
-            _sosRequestRepository.Save();
-
-            // Remove the client from the trackers at terminating states
-            if (sosRequest.State == (int) StatesTypesEnum.Solved ||
-                sosRequest.State == (int) StatesTypesEnum.Canceled ||
-                sosRequest.State == (int) StatesTypesEnum.Orphaned)
-            {
-                _clientHub.RemoveClientFromTrackers(requestId);
-            }
-
-            response.Messages.Add("Success!");
-            response.Messages.Add("SOS Request of Id: " + requestId + " was modified.");
-            response.HasErrors = false;
-            return response;
-        }
-
-        public async Task<APIResponse<bool>> CancelPendingRequests(string userId)
-        {
-            APIResponse<bool> response = new APIResponse<bool>();
-
-            var ongoingRequests = _sosRequestRepository.GetOngoingRequest(userId).ToList();
-
-            if (!ongoingRequests.Any())
-            {
-                response.Messages.Add("You did not have any pending requests.");
-                return response;
-            }
-
-            foreach (var request in ongoingRequests)
-            {
-                var updateResult = await UpdateSOSRequestAsync(request.Id, (int) StatesTypesEnum.Canceled, userId);
-                if (updateResult.HasErrors)
-                {
-                    return updateResult;
-                }
-            }
-
-            response.Messages.Add("You just canceled " + ongoingRequests.Count() + " requests.");
             return response;
         }
 
@@ -370,7 +202,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var authorizedUserCheck = CheckHaveAccessToSOS(sosRequest, clientUserId);
+            var authorizedUserCheck = CheckClientHaveAccessToSOS(sosRequest, clientUserId);
             if (authorizedUserCheck != null)
             {
                 response.WrapResponseData(authorizedUserCheck);
@@ -415,6 +247,85 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public async Task<APIResponse<bool>> CancelPendingRequestsAsync(string userId)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var ongoingRequests = _sosRequestRepository.GetOngoingRequest(userId).ToList();
+
+            if (!ongoingRequests.Any())
+            {
+                response.Messages.Add("You did not have any pending requests.");
+                return response;
+            }
+
+            foreach (var request in ongoingRequests)
+            {
+                var updateResult = await CancelSOSRequestAsync(request.Id, userId);
+                if (updateResult.HasErrors)
+                {
+                    return updateResult;
+                }
+            }
+
+            response.Messages.Add("You just canceled " + ongoingRequests.Count() + " requests.");
+            return response;
+        }
+
+        public async Task<APIResponse<bool>> SolveSOSRequestAsync(int requestId, string rescuerUserId)
+        {
+            const int newState = (int)StatesTypesEnum.Solved;
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullSOSCheckResult = CheckForNullSOS(requestId, out SOSRequest sosRequest);
+            if (nullSOSCheckResult != null)
+            {
+                response.WrapResponseData(nullSOSCheckResult);
+                return response;
+            }
+            
+            var authorizedUserCheck = CheckRescuerHaveAccessToSOS(sosRequest, rescuerUserId);
+            if (authorizedUserCheck != null)
+            {
+                response.WrapResponseData(authorizedUserCheck);
+                return response;
+            }
+
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Accepted, false);
+            if (sosCorrectStateCheckResult != null)
+            {
+                response.WrapResponseData(sosCorrectStateCheckResult);
+                return response;
+            }
+
+            // First: Release rescuer and make him idle again.
+            var assignedRescuer = await _userManager.FindByIdAsync(sosRequest.AssignedRescuerId ?? "");
+            _rescuerHub.MakeRescuerIdle(assignedRescuer?.Email);
+
+            // Then: Try Notify the Client and remove from trackers, no need to break the execution if rescuer was offline at the time of notifying
+            var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
+            if (clientNotificationResult != null)
+            {
+                response.WrapResponseData(clientNotificationResult);
+            }
+            _clientHub.RemoveClientFromTrackers(requestId);
+
+            // Finally: Try Notify the agent of the update. (No check needed for now)
+            TryNotifyAgent(requestId, newState);
+
+            UpdateSOSInline(ref sosRequest, newState, sosRequest.AssignedRescuerId);
+            SaveChangesToRepository(ref sosRequest);
+
+            response.WrapResponseData(FinalizedWithSuccessState(requestId, newState));
+            response.Messages.Add("Success. You are now idling.");
+            response.Status = (int)APIResponseCodesEnum.Ok;
+            response.Result = true;
+            return response;
+        }
+
+        #endregion
+
+        #region Private Helper Methods
 
         private async void TryNotifyAgent(int requestId, int newStatus)
         {
@@ -510,13 +421,25 @@ namespace PersonalSafety.Business
             return null;
         }
 
-        private APIResponseData CheckHaveAccessToSOS(SOSRequest sosRequest, string clientUserId)
+        private APIResponseData CheckClientHaveAccessToSOS(SOSRequest sosRequest, string clientUserId)
         {
             if (sosRequest.UserId != clientUserId)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
                     new List<string>()
                         {"You are not authorized to modify this SOS Request."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckRescuerHaveAccessToSOS(SOSRequest sosRequest, string rescuerUserId)
+        {
+            if (sosRequest.AssignedRescuerId != rescuerUserId)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
+                    new List<string>()
+                        {"You were not assigned to this request."});
             }
 
             return null;
@@ -546,5 +469,7 @@ namespace PersonalSafety.Business
             _sosRequestRepository.Update(sosRequest);
             _sosRequestRepository.Save();
         }
+
+        #endregion
     }
 }

@@ -16,10 +16,12 @@ namespace PersonalSafety.Controllers.API
     public class RescuerController : ControllerBase
     {
         private readonly IRescuerBusiness _rescuerBusiness;
+        private readonly ISOSBusiness _sosBusiness;
 
-        public RescuerController(IRescuerBusiness rescuerBusiness)
+        public RescuerController(IRescuerBusiness rescuerBusiness, ISOSBusiness sosBusiness)
         {
             _rescuerBusiness = rescuerBusiness;
+            _sosBusiness = sosBusiness;
         }
 
         /// <summary>
@@ -67,7 +69,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
-            var response = await _rescuerBusiness.SolveSOSRequestAsync(currentlyLoggedInUserId, requestId);
+            var response = await _sosBusiness.SolveSOSRequestAsync(requestId, currentlyLoggedInUserId);
 
             return Ok(response);
         }

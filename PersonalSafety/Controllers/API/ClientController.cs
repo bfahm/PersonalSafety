@@ -243,13 +243,13 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// ## Possible Result Codes in case of Errors:
         /// #### **[404]**: Notfound
-        /// Could happen if the provided Id does not match an exsisting request.
+        /// Could happen if the provided Id does not match an existing request.
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
         public async Task<IActionResult> CancelSOSRequest([FromQuery] int requestId)
         {
-            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
             var response = await _sosBusiness.CancelSOSRequestAsync(requestId, currentlyLoggedInUserId);
 
@@ -269,7 +269,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
-            var response = await _sosBusiness.CancelPendingRequests(currentlyLoggedInUserId);
+            var response = await _sosBusiness.CancelPendingRequestsAsync(currentlyLoggedInUserId);
 
             return Ok(response);
         }

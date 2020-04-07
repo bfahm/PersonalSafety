@@ -67,30 +67,6 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> SolveSOSRequestAsync(string userId, int requestId)
-        {
-            APIResponse<bool> response = new APIResponse<bool>();
-
-            var validationResult = ValidateAccessToRequest(userId, requestId);
-            if (validationResult != null)
-            {
-                response.Result = false;
-                response.WrapResponseData(validationResult);
-                return response;
-            }
-
-            ApplicationUser rescuerAccount = await _userManager.FindByIdAsync(userId);
-             
-            response = await _sosBusiness.UpdateSOSRequestAsync(requestId, (int)StatesTypesEnum.Solved, userId, rescuerAccount.Email);
-
-            if (!response.HasErrors)
-            {
-                response.Messages.Add("Success. You are now idling.");
-            }
-
-            return response;
-        }
-
         private APIResponseData ValidateAccessToRequest(string userId, int requestId)
         {
             SOSRequest sosRequest = _sosRequestRepository.GetById(requestId.ToString());
@@ -100,7 +76,7 @@ namespace PersonalSafety.Business
                 return new APIResponseData((int)APIResponseCodesEnum.NotFound, new List<string> { "The requested SOS Request could not be found. Make sure you are using the correct Id." });
             }
 
-            if (sosRequest.State != (int)StatesTypesEnum.Accepted && sosRequest.State != (int)StatesTypesEnum.Solved)
+            if (sosRequest.State != (int)StatesTypesEnum.Accepted)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest, new List<string> { "This SOS Request was not accepted yet by your manager." });
             }

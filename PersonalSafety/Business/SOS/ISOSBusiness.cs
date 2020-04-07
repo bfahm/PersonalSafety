@@ -10,9 +10,9 @@ namespace PersonalSafety.Business
     public interface ISOSBusiness
     {
         Task<APIResponse<SendSOSResponseViewModel>> SendSOSRequestAsync(string userId, SendSOSRequestViewModel request);
-        Task<APIResponse<bool>> UpdateSOSRequestAsync(int requestId, int newStatus, string issuerId, string rescuerEmail = null);
-        Task<APIResponse<bool>> CancelPendingRequests(string userId);
         APIResponse<bool> AcceptSOSRequest(int requestId, string rescuerEmail);
         Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId);
+        Task<APIResponse<bool>> CancelPendingRequestsAsync(string userId);
+        Task<APIResponse<bool>> SolveSOSRequestAsync(int requestId, string rescuerUserId);
     }
 }
