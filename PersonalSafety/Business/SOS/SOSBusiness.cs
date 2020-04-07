@@ -395,12 +395,13 @@ namespace PersonalSafety.Business
             }
             _rescuerHub.MakeRescuerIdle(assignedRescuer?.Email);
 
-            // Then: Try Notify the Client, no need to break the execution if rescuer was offline at the time of notifying
+            // Then: Try Notify the Client and remove from trackers, no need to break the execution if rescuer was offline at the time of notifying
             var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
             if (clientNotificationResult != null)
             {
                 response.WrapResponseData(clientNotificationResult);
             }
+            _clientHub.RemoveClientFromTrackers(requestId);
 
             // Finally: Try Notify the agent of the update. (No check needed for now)
             TryNotifyAgent(requestId, newState);
