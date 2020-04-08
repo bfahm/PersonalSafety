@@ -23,6 +23,13 @@
       },
       "applicationUrl": "http://localhost:5000"
     },
+    "PersonalSafety LocalProduction": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "applicationUrl": "http://localhost:5000"
+    },
     "Watch": {
       "commandName": "Executable",
       "executablePath": "dotnet.exe",

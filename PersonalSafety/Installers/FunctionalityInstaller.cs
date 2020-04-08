@@ -17,11 +17,11 @@ namespace PersonalSafety.Installers
             services.AddControllers();
 
             // Registering Extensions
-            services.AddScoped<GithubUpdateCheckerFilter>();
+            //services.AddScoped<GithubUpdateCheckerFilter>();
 
             // Needed to display the home page "view"
             services.AddMvc().AddMvcOptions(options => {
-                options.Filters.AddService(typeof(GithubUpdateCheckerFilter));
+                //options.Filters.AddService(typeof(GithubUpdateCheckerFilter));
             }).AddSessionStateTempDataProvider();
             services.AddSession();
 
