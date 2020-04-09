@@ -30,13 +30,6 @@ namespace PersonalSafety.Models
             builder.Entity<Client>()
                    .HasIndex(u => u.NationalId)
                    .IsUnique();
-
-            //-----------------------------------
-            //Seed database initially with basic roles
-            foreach (var role in Contracts.Roles.GetRoles())
-            {
-                builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = role, NormalizedName = role.ToUpper() });
-            }
         }
 
         public DbSet<ApplicationUser> UserInfos { get; set; }

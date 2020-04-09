@@ -12,13 +12,15 @@ namespace PersonalSafety.Extensions
     public class ApplicationDbInitializer
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IClientRepository _clientRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IDepartmentRepository _departmentRepository;
 
-        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository)
+        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _clientRepository = clientRepository;
             _personnelRepository = personnelRepository;
             _departmentRepository = departmentRepository;
@@ -26,6 +28,10 @@ namespace PersonalSafety.Extensions
 
         public void SeedUsers()
         {
+            #region CreateRoles
+            CreateRoles();
+            #endregion
+
             #region Create Admin
 
             ApplicationUser adminUser = new ApplicationUser
@@ -67,20 +73,11 @@ namespace PersonalSafety.Extensions
 
             #endregion
 
-            #region Create Police Department
+            #region Create Departments
 
-            Department policeDpt = new Department
-            {
-                AuthorityType = (int) AuthorityTypesEnum.Police,
-                Longitude = 0.0,
-                Latitude = 0.0
-            };
-
-            if (!_departmentRepository.GetAll().Any())
-            {
-                _departmentRepository.Add(policeDpt);
-                _departmentRepository.Save();
-            }
+            CreateDepartments();
+            var tantaPoliceDepartment = _departmentRepository.GetAll().FirstOrDefault(d =>
+                d.AuthorityType == (int) AuthorityTypesEnum.Police && d.City == (int) CitiesEnum.Tanta);
 
             #endregion
 
@@ -99,7 +96,7 @@ namespace PersonalSafety.Extensions
             Personnel policeAgent = new Personnel
             {
                 PersonnelId = policeAgentUser.Id,
-                Department = policeDpt,
+                DepartmentId = tantaPoliceDepartment.Id,
                 IsRescuer = false
             };
 
@@ -126,7 +123,7 @@ namespace PersonalSafety.Extensions
             Personnel rescuer1 = new Personnel
             {
                 PersonnelId = rescuer1User.Id,
-                Department = policeDpt,
+                DepartmentId = tantaPoliceDepartment.Id,
                 IsRescuer = true
             };
 
@@ -154,6 +151,72 @@ namespace PersonalSafety.Extensions
                 }
             }
 
+        }
+
+        private void CreateRoles()
+        {
+            if (!_roleManager.Roles.Any())
+            {
+                foreach (var role in Roles.GetRoles())
+                {
+                    IdentityRole identityRole = new IdentityRole(role);
+                    var identityResult = _roleManager.CreateAsync(identityRole).Result;
+                }
+            }
+        }
+
+        private void CreateDepartments()
+        {
+            if (!_departmentRepository.GetAll().Any())
+            {
+                List<double> locations = new List<double>()
+                {
+                    {30.785576},                // Tanta        Police      Long
+                    {30.997374},                // Tanta        Police      Lat
+                    {30.055563},                // Cairo        Police      Long
+                    {31.219640},                // Cairo        Police      Lat
+                    {31.242536},                // Alexandria   Police      Long
+                    {31.804148},                // Alexandria   Police      Lat
+                    {30.785576},                // Tanta        Tow (Same as Police)    Long
+                    {30.997374},                // Tanta        Tow (Same as Police)    Lat
+                    {30.055563},                // Cairo        Tow (Same as Police)    Long
+                    {31.219640 },               // Cairo        Tow (Same as Police)    Lat
+                    {31.242536},                // Alexandria   Tow (Same as Police)    Long
+                    {31.804148 },               // Alexandria   Tow (Same as Police)    Lat
+                    {30.785660},                // Tanta        FireFighting            Long
+                    {30.989420 },               // Tanta        FireFighting            Lat
+                    {30.033687},                // Cairo        FireFighting            Long
+                    {31.201933 },               // Cairo        FireFighting            Lat
+                    {31.210805},                // Alexandria   FireFighting            Long
+                    {29.916305 },               // Alexandria   FireFighting            Lat
+                    {30.807549},                // Tanta        Ambulance            Long
+                    {30.998694 },               // Tanta        Ambulance            Lat
+                    {30.053779},                // Cairo        Ambulance            Long
+                    {31.238588 },               // Cairo        Ambulance            Lat
+                    {31.213648},                // Alexandria   Ambulance            Long
+                    {29.950524 }                // Alexandria   Ambulance            Lat
+                };
+
+
+                int counter = 0;
+                foreach (var city in Enum.GetValues(typeof(CitiesEnum)))
+                {
+                    foreach (var authorityType in Enum.GetValues(typeof(AuthorityTypesEnum)))
+                    {
+                        _departmentRepository.Add(new Department()
+                        {
+                            City = (int)city,
+                            AuthorityType = (int)authorityType,
+                            Longitude = locations[counter],
+                            Latitude = locations[counter+1],
+                        });
+
+                        counter += 2;
+                    }
+                }
+
+                _departmentRepository.Save();
+            }
         }
     }
 }
