@@ -67,5 +67,13 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(authResponse);
         }
+
+        [HttpGet]
+        public IActionResult GetDepartments()
+        {
+            var authResponse = _adminBusiness.GetDepartments();
+
+            return Ok(authResponse);
+        }
     }
 }

@@ -23,10 +23,12 @@ namespace PersonalSafety.Models.ViewModels
         [Required]
         public int AuthorityType { get; set; }
 
-        [Required]
+        public int ExistingDepartmentId { get; set; }
+
+        public int DepartmentCity { get; set; }
+
         public double DepartmentLongitude { get; set; }
 
-        [Required]
         public double DepartmentLatitude { get; set; }
     }
 }
