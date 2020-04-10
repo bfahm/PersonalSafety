@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Services.Location;
 
 namespace PersonalSafety.Installers
 {
@@ -17,6 +18,7 @@ namespace PersonalSafety.Installers
             services.AddSingleton<IGithubUpdateService, GithubUpdateService>();
             services.AddScoped<IJwtAuthService, JwtAuthService>();
             services.AddScoped<IRegistrationService, RegistrationService>();
+            services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IEmailService, EmailService>();
         }
     }

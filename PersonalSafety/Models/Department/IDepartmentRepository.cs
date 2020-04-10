@@ -7,5 +7,6 @@ namespace PersonalSafety.Models
 {
     public interface IDepartmentRepository : IBaseRepository<Department>
     {
+        IEnumerable<Department> GetDepartmentsByAuthority(int authorityType);
     }
 }

@@ -13,5 +13,10 @@ namespace PersonalSafety.Models
         {
             this.context = context;
         }
+
+        public IEnumerable<Department> GetDepartmentsByAuthority(int authorityType)
+        {
+            return context.Departments.Where(d => d.AuthorityType == authorityType);
+        }
     }
 }

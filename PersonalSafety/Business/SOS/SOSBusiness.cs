@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Services.Location;
 
 namespace PersonalSafety.Business
 {
@@ -21,8 +22,9 @@ namespace PersonalSafety.Business
         private readonly IRescuerHub _rescuerHub;
         private readonly IAgentHub _agentHub;
         private readonly IClientHub _clientHub;
+        private readonly ILocationService _locationService;
 
-        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub)
+        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService)
         {
             _sosRequestRepository = sosRequestRepository;
             _clientRepository = clientRepository;
@@ -30,6 +32,7 @@ namespace PersonalSafety.Business
             _rescuerHub = rescuerHub;
             _agentHub = agentHub;
             _clientHub = clientHub;
+            _locationService = locationService;
         }
 
         #region Main Methods
@@ -63,13 +66,16 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            var nearestDepartment = _locationService.GetNearestDepartment(new Location(request.Longitude, request.Latitude),
+                request.AuthorityType);
+
             SOSRequest sosRequest = new SOSRequest
             {
                 UserId = userId,
                 AuthorityType = request.AuthorityType,
                 Longitude = request.Longitude,
                 Latitude = request.Latitude,
-                AssignedDepartmentId = 1 // TODO: Fix this line when assigining to the nearest dpt
+                AssignedDepartmentId = nearestDepartment.Id
             };
 
             _sosRequestRepository.Add(sosRequest);

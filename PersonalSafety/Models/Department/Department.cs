@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalSafety.Contracts.Enums;
 
 namespace PersonalSafety.Models
 {
@@ -19,5 +20,10 @@ namespace PersonalSafety.Models
 
         public double Longitude { get; set; }
         public double Latitude { get; set; }
+
+        public override string ToString()
+        {
+            return "dpt_" + Id + "_" + (CitiesEnum) City + "_" + (AuthorityTypesEnum) AuthorityType;
+        }
     }
 }
