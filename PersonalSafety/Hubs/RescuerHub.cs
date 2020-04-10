@@ -103,7 +103,7 @@ namespace PersonalSafety.Hubs
             }
 
             // Notify Agent in the same hub that rescuers state has changed.
-            await _agentHub.NotifyChangeInRescuers(currentConnection.DepartmentId);
+            _agentHub.NotifyChangeInRescuers(currentConnection.DepartmentId);
 
             // Call the base class in the final step, to allow it for connection info retrieval.
             await base.OnConnectedAsync();
@@ -127,7 +127,7 @@ namespace PersonalSafety.Hubs
                 }
 
                 // Notify Agent in the same hub that rescuers state has changed.
-                await _agentHub.NotifyChangeInRescuers(currentDisconnection.DepartmentId);
+                _agentHub.NotifyChangeInRescuers(currentDisconnection.DepartmentId);
             }
 
             await base.OnDisconnectedAsync(ex);

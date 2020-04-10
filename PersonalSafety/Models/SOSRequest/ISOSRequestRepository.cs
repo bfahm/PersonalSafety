@@ -7,8 +7,8 @@ namespace PersonalSafety.Models
 {
     public interface ISOSRequestRepository : IBaseRepository<SOSRequest>
     {
-        IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int state);
-        IEnumerable<SOSRequest> GetRelevantRequests(int authorityType);
+        IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int dptId);
+        IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int dptId, int state);
         bool UserHasOngoingRequest(string userId);
         IEnumerable<SOSRequest> GetOngoingRequest(string userId);
     }

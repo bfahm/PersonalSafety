@@ -73,37 +73,44 @@ namespace PersonalSafety.Business
             return await _registrationService.RegisterNewUserAsync(newUser, rescuer.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
         }
 
-        public APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId)
+        public APIResponse<List<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId)
         {
-            var currentAgent = _personnelRepository.GetById(userId);
             var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
-            return new APIResponse<HashSet<RescuerConnectionInfo>>
+            var result = TrackerHandler.RescuerConnectionInfoSet.Where(r => r.DepartmentId == currentAgentDepartment.Id)
+                .ToList();
+
+            return new APIResponse<List<RescuerConnectionInfo>>
             {
-                Result = TrackerHandler.RescuerConnectionInfoSet,
-                Messages = new List<string> { "Number of current online rescuers in your department is: " + TrackerHandler.RescuerConnectionInfoSet.Count }
+                Result = result,
+                Messages = new List<string> { "Number of current online rescuers in your department is: " + result.Count()}
             };
         }
 
-        public APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentDisconnectedRescuers(string userId)
+        public APIResponse<List<RescuerConnectionInfo>> GetDepartmentDisconnectedRescuers(string userId)
         {
-            var currentAgent = _personnelRepository.GetById(userId);
             var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
-            return new APIResponse<HashSet<RescuerConnectionInfo>>
+
+            var result = TrackerHandler.RescuerWithPendingMissionsSet.Where(r => r.DepartmentId == currentAgentDepartment.Id)
+                .ToList();
+
+            return new APIResponse<List<RescuerConnectionInfo>>
             {
-                Result = TrackerHandler.RescuerWithPendingMissionsSet,
-                Messages = new List<string> { "Number of rescuers who went offline in your department is: " + TrackerHandler.RescuerWithPendingMissionsSet.Count }
+                Result = result,
+                Messages = new List<string> { "Number of rescuers who went offline in your department is: " + result.Count }
             };
         }
 
         public async Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState)
         {
-            // Get current personnel authority type
+            // Get current agent authority type
             int authorityTypeInt = _personnelRepository.GetPersonnelAuthorityTypeInt(userId);
+            // Get current agent department
+            var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
 
             // Find SOS Requests related to the request
 
-            IEnumerable<SOSRequest> requests = (requestState != null) ? _sosRequestRepository.GetRelevantRequests(authorityTypeInt, (int)requestState)
-                                                : _sosRequestRepository.GetRelevantRequests(authorityTypeInt);
+            IEnumerable<SOSRequest> requests = (requestState != null) ? _sosRequestRepository.GetRelevantRequests(authorityTypeInt, currentAgentDepartment.Id, (int)requestState)
+                                                : _sosRequestRepository.GetRelevantRequests(authorityTypeInt, currentAgentDepartment.Id);
 
             List<GetSOSRequestViewModel> responseViewModel = new List<GetSOSRequestViewModel>();
 

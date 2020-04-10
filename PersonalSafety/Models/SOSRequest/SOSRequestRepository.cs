@@ -16,9 +16,27 @@ namespace PersonalSafety.Models
         }
 
         // Get all requests for the current personnel
-        public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType)
+        public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int dptId)
         {
-           return context.SOSRequests.Where(r => r.AuthorityType == authorityType).OrderBy(r => r.CreationDate).OrderBy(r => r.State); ;
+            var requests = context.SOSRequests.Where(r => r.AuthorityType == authorityType && r.AssignedDepartmentId == dptId).AsEnumerable();
+            OrderRequests(ref requests);
+
+            return requests;
+        }
+
+        // Filter them depending on their state
+        public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int dptId, int state)
+        {
+            var requests = context.SOSRequests.Where(r =>
+                r.AuthorityType == authorityType && r.AssignedDepartmentId == dptId && r.State == state).AsEnumerable();
+            OrderRequests(ref requests);
+
+            return requests;
+        }
+
+        private void OrderRequests(ref IEnumerable<SOSRequest> requests)
+        {
+            requests.OrderBy(r => r.CreationDate).ThenBy(r => r.State);
         }
 
         public bool UserHasOngoingRequest(string userId)
@@ -30,12 +48,6 @@ namespace PersonalSafety.Models
         {
             var sosRequestForGivenClient = context.SOSRequests.Where(s => s.UserId == userId).ToList();
             return sosRequestForGivenClient.Where(s => s.State == (int)StatesTypesEnum.Pending || s.State == (int)StatesTypesEnum.Accepted);
-        }
-
-        // Filter them depending on their state
-        public IEnumerable<SOSRequest> GetRelevantRequests(int authorityType, int state)
-        {
-           return context.SOSRequests.Where(r => r.AuthorityType == authorityType).Where(r => r.State == state).OrderBy(r => r.CreationDate).OrderBy(r => r.State); ;
         }
     }
 }

@@ -100,7 +100,7 @@ namespace PersonalSafety.Business
             }
 
             _clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
-            await _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending);
+            _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequest.AssignedDepartmentId);
 
 
 
@@ -186,7 +186,7 @@ namespace PersonalSafety.Business
             }
 
             // Finally: Try Notify the agent of the update. (No check needed for now)
-            TryNotifyAgent(requestId, newState);
+            TryNotifyAgent(ref sosRequest, newState);
 
             UpdateSOSInline(ref sosRequest, newState, rescuer.Id);
             SaveChangesToRepository(ref sosRequest);
@@ -242,7 +242,7 @@ namespace PersonalSafety.Business
             _clientHub.RemoveClientFromTrackers(requestId);
 
             // Finally: Try Notify the agent of the update. (No check needed for now)
-            TryNotifyAgent(requestId, newState);
+            TryNotifyAgent(ref sosRequest, newState);
 
             UpdateSOSInline(ref sosRequest, newState, null);
             SaveChangesToRepository(ref sosRequest);
@@ -317,7 +317,7 @@ namespace PersonalSafety.Business
             _clientHub.RemoveClientFromTrackers(requestId);
 
             // Finally: Try Notify the agent of the update. (No check needed for now)
-            TryNotifyAgent(requestId, newState);
+            TryNotifyAgent(ref sosRequest, newState);
 
             UpdateSOSInline(ref sosRequest, newState, sosRequest.AssignedRescuerId);
             SaveChangesToRepository(ref sosRequest);
@@ -333,10 +333,10 @@ namespace PersonalSafety.Business
 
         #region Private Helper Methods
 
-        private async void TryNotifyAgent(int requestId, int newStatus)
+        private void TryNotifyAgent(ref SOSRequest sosRequest, int newStatus)
         {
             // TODO: add here checks related to specifying agent by department
-            await _agentHub.NotifyNewChanges(requestId, newStatus);
+            _agentHub.NotifyNewChanges(sosRequest.Id, newStatus, sosRequest.AssignedDepartmentId);
         }
 
 

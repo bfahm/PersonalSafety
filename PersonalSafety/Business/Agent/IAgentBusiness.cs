@@ -15,8 +15,8 @@ namespace PersonalSafety.Business
         Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState);
         Task<APIResponse<bool>> RegisterRescuersAsync(string userId, RegisterRescuerViewModel accounts);
         APIResponse<DepartmentDetailsViewModel> GetDepartmentDetails(string userId);
-        APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId);
-        APIResponse<HashSet<RescuerConnectionInfo>> GetDepartmentDisconnectedRescuers(string userId);
+        APIResponse<List<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId);
+        APIResponse<List<RescuerConnectionInfo>> GetDepartmentDisconnectedRescuers(string userId);
         Task<APIResponse<bool>> ResetSOSRequest(int requestId);
     }
 }

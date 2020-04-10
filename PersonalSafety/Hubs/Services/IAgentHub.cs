@@ -7,7 +7,7 @@ namespace PersonalSafety.Hubs
 {
     public interface IAgentHub
     {
-        Task NotifyNewChanges(int requestId, int requestState);
-        Task NotifyChangeInRescuers(int departmentId);
+        void NotifyNewChanges(int requestId, int requestState, int departmentId);
+        void NotifyChangeInRescuers(int departmentId);
     }
 }

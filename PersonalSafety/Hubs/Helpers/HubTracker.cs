@@ -9,6 +9,7 @@ namespace PersonalSafety.Hubs.HubTracker
     {
         public static HashSet<string> ConsoleSet;
         public static HashSet<ClientConnectionInfo> ClientConnectionInfoSet;
+        public static HashSet<AgentConnectionInfo> AgentConnectionInfoSet;
         public static HashSet<RescuerConnectionInfo> RescuerConnectionInfoSet;
         public static HashSet<RescuerConnectionInfo> RescuerWithPendingMissionsSet;
         public static HashSet<ConnectionInfo> AllConnectionInfoSet;
@@ -27,6 +28,7 @@ namespace PersonalSafety.Hubs.HubTracker
         public static void InitializeTrackers()
         {
             ClientConnectionInfoSet = new HashSet<ClientConnectionInfo>();
+            AgentConnectionInfoSet = new HashSet<AgentConnectionInfo>();
             RescuerConnectionInfoSet = new HashSet<RescuerConnectionInfo>();
             RescuerWithPendingMissionsSet = new HashSet<RescuerConnectionInfo>();
             AllConnectionInfoSet = new HashSet<ConnectionInfo>();
@@ -51,5 +53,10 @@ namespace PersonalSafety.Hubs.HubTracker
     {
         public int DepartmentId { get; set; }
         public int CurrentJob { get; set; }
+    }
+
+    public class AgentConnectionInfo : ConnectionInfo
+    {
+        public int DepartmentId { get; set; }
     }
 }
