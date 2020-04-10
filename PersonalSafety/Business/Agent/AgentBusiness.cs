@@ -200,15 +200,11 @@ namespace PersonalSafety.Business
                 clientConnectionInfo.SOSId = requestId;
             }
             else
-            {
-                response.Messages.Add("Could not reach client by email.");
-
-                sosRequest.State = (int)StatesTypesEnum.Orphaned;
-                
-                _sosRequestRepository.Update(sosRequest);
+            { 
+                _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
                 _sosRequestRepository.Save();
-
-                response.Messages.Add("SOSRequest was reverted back to 'Orphaned'.");
+                
+                response.Messages.Add("Could not reach client by email, request was deleted.");
             }
 
             response.Result = true;

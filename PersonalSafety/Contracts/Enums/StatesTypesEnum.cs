@@ -11,7 +11,6 @@ namespace PersonalSafety.Contracts.Enums
         Pending,
         Accepted,
         Solved,
-        Canceled,
-        Orphaned
+        Canceled
     }
 }
