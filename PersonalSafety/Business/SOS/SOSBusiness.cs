@@ -86,7 +86,7 @@ namespace PersonalSafety.Business
 
             if (!trackingResult)
             {
-                _clientHub.RemoveClientFromTrackers(sosRequest.Id);
+                _clientHub.RemoveClientFromTrackers(userId);
 
                 // Was not able to reach the user:
                 // revert changes:
@@ -239,7 +239,7 @@ namespace PersonalSafety.Business
             {
                 response.WrapResponseData(clientNotificationResult);
             }
-            _clientHub.RemoveClientFromTrackers(requestId);
+            _clientHub.RemoveClientFromTrackers(clientUserId);
 
             // Finally: Try Notify the agent of the update. (No check needed for now)
             TryNotifyAgent(ref sosRequest, newState);
@@ -314,7 +314,7 @@ namespace PersonalSafety.Business
             {
                 response.WrapResponseData(clientNotificationResult);
             }
-            _clientHub.RemoveClientFromTrackers(requestId);
+            _clientHub.RemoveClientFromTrackers(sosRequest.UserId);
 
             // Finally: Try Notify the agent of the update. (No check needed for now)
             TryNotifyAgent(ref sosRequest, newState);

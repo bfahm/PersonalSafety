@@ -49,7 +49,7 @@ namespace PersonalSafety.Hubs
 
             if (currentDisconnection != null)
             {
-                TrackerHandler.AllConnectionInfoSet.Remove(currentDisconnection);
+                TrackerHandler.AllConnectionInfoSet.RemoveWhere(c=> c.UserEmail == currentDisconnection.UserEmail);
                 HubTools.PrintToConsole(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true);
             }
 

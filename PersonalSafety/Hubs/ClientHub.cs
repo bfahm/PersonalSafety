@@ -35,9 +35,9 @@ namespace PersonalSafety.Hubs
             return true;
         }
 
-        public void RemoveClientFromTrackers(int sosRequestId)
+        public void RemoveClientFromTrackers(string userId)
         {
-            TrackerHandler.ClientConnectionInfoSet.RemoveWhere(sc => sc.SOSId == sosRequestId);
+            TrackerHandler.ClientConnectionInfoSet.RemoveWhere(sc => sc.UserId == userId);
         }
 
         /// Returns True if user had a maintained connection with the server, else false

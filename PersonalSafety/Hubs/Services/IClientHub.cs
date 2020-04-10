@@ -9,6 +9,6 @@ namespace PersonalSafety.Hubs
     {
         bool NotifyUserSOSState(int sosRequestId, int sosRequestState);
         bool TrackSOSIdForClient(string clientEmail, int sosRequestId);
-        void RemoveClientFromTrackers(int sosRequestId);
+        void RemoveClientFromTrackers(string userId);
     }
 }

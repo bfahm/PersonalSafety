@@ -115,7 +115,7 @@ namespace PersonalSafety.Hubs
             RescuerConnectionInfo currentDisconnection = TrackerHandler.RescuerConnectionInfoSet.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId);
             if (currentDisconnection != null)
             {
-                TrackerHandler.RescuerConnectionInfoSet.Remove(currentDisconnection);
+                TrackerHandler.RescuerConnectionInfoSet.RemoveWhere(c=>c.UserEmail == currentDisconnection.UserEmail);
 
                 // Check if user who disconnected had an ongoing mission
                 if (currentDisconnection.CurrentJob > 0)
