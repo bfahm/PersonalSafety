@@ -34,7 +34,11 @@ namespace PersonalSafety.Installers
 
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSignalR();
+            services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.MinValue;
+            });
 
             // Register Hubs Here
             services.AddScoped<IMainHub, MainHub>();

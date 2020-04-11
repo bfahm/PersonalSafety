@@ -20,10 +20,9 @@ namespace PersonalSafety.Models.ViewModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Required]
-        public int AuthorityType { get; set; }
-
         public int ExistingDepartmentId { get; set; }
+
+        public int AuthorityType { get; set; }
 
         public int DepartmentCity { get; set; }
 

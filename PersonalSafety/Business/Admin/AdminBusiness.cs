@@ -55,16 +55,6 @@ namespace PersonalSafety.Business
 
         public async Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request)
         {
-            // Check if provided authority type is valid
-            if (!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
-            {
-                APIResponse<bool> response = new APIResponse<bool>();
-                response.Messages.Add("User must be assigned to a valid department.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
-            }
-
             Department department;
 
             if (request.ExistingDepartmentId != 0)
@@ -73,6 +63,16 @@ namespace PersonalSafety.Business
             }
             else
             {
+                // Check if provided authority type is valid
+                if (!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
+                {
+                    APIResponse<bool> response = new APIResponse<bool>();
+                    response.Messages.Add("Department must be assigned to a valid authority type.");
+                    response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                    response.HasErrors = true;
+                    return response;
+                }
+
                 // Create department to put the agent in:
                 department = new Department
                 {

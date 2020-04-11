@@ -22,7 +22,13 @@
                             </div>
 
                             <div class="form-group">
-                                <input id="btn_connect" type="button" class="btn btn-primary btn-lg btn-block pb_btn-pill  btn-shadow-milon" value="Connect">
+                                <a id="btn_connect" class="text-light btn btn-primary btn-lg btn-block pb_btn-pill btn-shadow-milon"
+                                   style="text-decoration: none; border:none">
+                                    <span id="btn_connect_label">Connect</span>
+                                    <div id="btn_connect_animation" class="spinner-border" style="width: 1.5rem; height: 1.5rem"role="status" hidden>
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </a>
                             </div>
                         </div>
 

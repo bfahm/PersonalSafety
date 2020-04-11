@@ -10,7 +10,12 @@ $(document).ready(function () {
     $("#btn_connect").click(function () {
         token = $("#ip_token").val();
 
-        startConnection(token);
+        toggleSpinnerAnimation(true);
+
+        setTimeout(function () {
+            startConnection(token);
+        }, 2000);
+
     });
 
     $("#btn_copy_to_clipboard").click(function () {
@@ -45,8 +50,11 @@ function startConnection(token) {
     var role;
     try {
         role = parseJwt(token).role;
-    } catch(ex){
-        $("#ip_token").val("Problem parsing the token.");
+    } catch (ex) {
+        toggleSpinnerAnimation(false);
+
+        $("#ip_token").val("");
+        $("#ip_token").attr("placeholder", "Problem parsing the token");
     }
     
     console.log(parseJwt(token));
@@ -147,9 +155,13 @@ function startConnection(token) {
         $("#btn_connect").removeClass("btn-danger");
         $("#btn_connect").removeClass('btn-shadow-milon');
         $("#btn_connect").addClass('btn-success');
-        $("#btn_connect").prop('disabled', true);
-        $("#btn_connect").val('Connected');
+        $("#btn_connect").addClass('disabled');
+        $("#btn_connect_label").html('Connected');
         $("#ip_token").prop('disabled', true);
+
+        toggleSpinnerAnimation(false);
+
+        $("#ip_token").attr("placeholder", "Type your verified token here");
 
         $('html, body').animate({
             scrollTop: $("#start_of_form").offset().top - 20
@@ -157,7 +169,10 @@ function startConnection(token) {
     });
 
     connection.start().catch(function (err) {
-        $("#ip_token").val("Wrong or Expired Token.");
+        $("#ip_token").val("");
+        $("#ip_token").attr("placeholder", "Wrong or Expired Token");
+
+        toggleSpinnerAnimation(false);
         return console.error(err.toString());
     });
 
@@ -169,8 +184,8 @@ function startConnection(token) {
         $("#hidden_div_till_connected").attr("hidden", true);
         $("#btn_connect").removeClass("btn-success");
         $("#btn_connect").addClass("btn-danger");
-        $("#btn_connect").prop("disabled", false);
-        $("#btn_connect").val("Reconnect");
+        $("#btn_connect").removeClass("disabled");
+        $("#btn_connect_label").html("Reconnect");
         $("#ip_token").prop("disabled", false);
 
         $("#btn_copy_to_clipboard").html("Copy");
@@ -181,4 +196,15 @@ function startConnection(token) {
             scrollTop: 0
         }, 500);
     });
+}
+
+function toggleSpinnerAnimation(startAnimation)
+{
+    if (startAnimation) {
+        $("#btn_connect_label").attr("hidden", true);
+        $("#btn_connect_animation").removeAttr("hidden");
+    } else {
+        $("#btn_connect_label").removeAttr("hidden");
+        $("#btn_connect_animation").attr("hidden", true);
+    }
 }

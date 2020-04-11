@@ -23,6 +23,28 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
+        /// Retrieve full information about registered departments
+        /// </summary>
+        /// <remarks>
+        /// ## Main Functionality
+        /// Allows administrators to retrieve information about every department available in the system, including:
+        /// - **Id**: Id of the department
+        /// - **Location**: Longs and Lats
+        /// - **City**: City Id and Name
+        /// - **Authority**: Authority Id and Name
+        /// - **Agents**: Emails of registered agents in the department
+        /// - **Rescuers**: Emails of registered rescuers in the department
+        /// 
+        /// </remarks>
+        [HttpGet]
+        public IActionResult GetDepartments()
+        {
+            var authResponse = _adminBusiness.GetDepartments();
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
         /// Create a new personnel to access web interface services.
         /// </summary>
         /// <remarks>
@@ -30,26 +52,56 @@ namespace PersonalSafety.Controllers.API
         /// Creates new personnel account for different departments.
         /// 
         /// 
-        /// **IMPORTANT:** Only **ADMINS** are alowed to use this method and not other **personnel**.
+        /// **IMPORTANT:** Only **ADMINS** are allowed to use this method and not other **personnel**.
         /// 
         /// 
-        /// All the JSON object values **are** required and must follow these rules:
+        /// All these JSON object values **are** required and must follow these rules:
         /// 
         /// - **Email** : must be unique and not used before, additionally it must follow the correct email structure
         /// - **Password** : must be complex, contain number, symbols, Capital and Small letters
         /// - **FullName** : Must be non null
-        /// - **AuthorityType**: is an integer and can take any of the following values and **CANNOT** be a 0 value
+        ///
+        /// ### Assignment To Department
+        /// Registration of the agent must be through assigning him to an already registered department or a new one.
+        /// Providing a department id for the field `ExistingDepartmentId` will assign the agent to that department and no need to provide these fields:
+        /// - "departmentCity"
+        /// - "departmentLongitude"
+        /// - "departmentLatitude"
+        /// - "authorityType"
+        ///
+        ///  
+        /// Note that**AuthorityType** is an integer and can take any of the following values and **CANNOT** be a 0 value
         ///     - Police : 1
         ///     - Ambulance : 2
         ///     - Firefighting : 3
         ///     - TowTruck : 4
-        /// 
-        /// After a valid attempt, this function also **automatically** sends a verification email to be used in `/api/Account/ConfirmMail` directly.
-        /// **IMPORTANT:** User does not have access to any of the system's functionality till he actually verify his email.
+        ///
+        /// #### Example of Registering a new Agent and assigning him to an existing department
+        /// ```
+        /// {
+        ///     "fullName": "John Doe",
+        ///     "email": "john@test.com",
+        ///     "password": "fjKdl1P-mD",
+        ///     "existingDepartmentId": 14
+        /// }
+        /// ```
+        ///
+        /// #### Example of Registering a new Agent and a new Department in the same request
+        /// ```
+        /// {
+        ///     "fullName": "John Doe",
+        ///     "email": "john@test.com",
+        ///     "password": "fjKdl1P-mD",
+        ///     "departmentCity": 0
+        ///     "departmentLongitude": 30.123456012
+        ///     "departmentLatitude": 30.123456012
+        ///     "authorityType": 1
+        /// }
+        /// ```
         /// 
         /// ## Possible Result Codes in case of Errors:
         /// #### **[-1]**: Invalid Request
-        /// - User exsists and has registered before
+        /// - User exists and has registered before
         /// - Invalid AuthorityType
         /// 
         /// #### **[-2]**: Identity Error
@@ -64,14 +116,6 @@ namespace PersonalSafety.Controllers.API
             {
                 return BadRequest(authResponse);
             }
-
-            return Ok(authResponse);
-        }
-
-        [HttpGet]
-        public IActionResult GetDepartments()
-        {
-            var authResponse = _adminBusiness.GetDepartments();
 
             return Ok(authResponse);
         }
