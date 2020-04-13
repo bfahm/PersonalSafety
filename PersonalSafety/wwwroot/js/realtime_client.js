@@ -12,10 +12,7 @@ $(document).ready(function () {
 
         toggleSpinnerAnimation(true);
 
-        setTimeout(function () {
-            startConnection(token);
-        }, 2000);
-
+        startConnection(token);
     });
 
     $("#btn_copy_to_clipboard").click(function () {
