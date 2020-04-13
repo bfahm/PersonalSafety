@@ -13,7 +13,9 @@ using PersonalSafety.Examples;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using Microsoft.Net.Http.Headers;
 using PersonalSafety.Contracts;
+using PersonalSafety.Models.ViewModels.AccountVM;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -90,6 +92,21 @@ namespace PersonalSafety.Controllers.API
         public async Task<IActionResult> Login([FromBody] LoginRequestViewModel request)
         {
             var authResponse = await _accountBusiness.LoginAsync(request);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequestViewModel request)
+        {
+            var token = Request.Headers[HeaderNames.Authorization].ToString().Split(" ")[1];
+
+            var authResponse = await _accountBusiness.RefreshTokenAsync(request);
 
             if (authResponse.HasErrors)
             {
@@ -302,27 +319,13 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> ValidateToken([FromQuery] string email)
+        public async Task<IActionResult> ValidateToken()
         {
+            var token = Request.Headers[HeaderNames.Authorization].ToString().Split(" ")[1];
 
-            if (email != null)
-            {
-                string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            var response = await _accountBusiness.ValidateTokenAsync(token);
 
-                var response = await _accountBusiness.ValidateUserAsync(currentlyLoggedInUserId, email);
-
-                return Ok(response);
-            }
-            else
-            {
-                return BadRequest(new APIResponse<bool>
-                {
-                    Status = (int)APIResponseCodesEnum.BadRequest,
-                    HasErrors = true,
-                    Result = false,
-                    Messages = new List<string> { "Email field cannot be empty." }
-                });
-            }
+            return Ok(response);
         }
     }
 }

@@ -8,6 +8,7 @@ namespace PersonalSafety.Options
     public class JwtSettings
     {
         public string Secret { get; set; }
-        public int JwtExpireInHours { get; set; }
+        public TimeSpan TokenLifetime { get; set; }
+        public int RefreshTokenExpireAfterMonths { get; set; }
     }
 }

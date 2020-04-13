@@ -16,7 +16,7 @@ namespace PersonalSafety.Installers
             // Register Services Here
             services.AddSingleton<IFacebookAuthService, FacebookAuthService>();
             services.AddSingleton<IGithubUpdateService, GithubUpdateService>();
-            services.AddScoped<IJwtAuthService, JwtAuthService>();
+            services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IRegistrationService, RegistrationService>();
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IEmailService, EmailService>();

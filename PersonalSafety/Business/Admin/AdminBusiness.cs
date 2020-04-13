@@ -55,18 +55,25 @@ namespace PersonalSafety.Business
 
         public async Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request)
         {
+            APIResponse<bool> response = new APIResponse<bool>();
             Department department;
 
             if (request.ExistingDepartmentId != 0)
             {
                 department = _departmentRepository.GetById(request.ExistingDepartmentId.ToString());
+                if (department == null)
+                {
+                    response.Messages.Add("The department id you provided was not found.");
+                    response.Status = (int)APIResponseCodesEnum.NotFound;
+                    response.HasErrors = true;
+                    return response;
+                }
             }
             else
             {
                 // Check if provided authority type is valid
                 if (!Enum.IsDefined(typeof(AuthorityTypesEnum), request.AuthorityType))
                 {
-                    APIResponse<bool> response = new APIResponse<bool>();
                     response.Messages.Add("Department must be assigned to a valid authority type.");
                     response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                     response.HasErrors = true;
