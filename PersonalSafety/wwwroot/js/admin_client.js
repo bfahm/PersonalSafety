@@ -7,19 +7,30 @@ import { eraseCookie } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
-var token = '';
-
 
 $(document).ready(function () {
 
     //Log use in directly if he has a valid token
     var currentToken = getCookie("token");
+    var currentRefreshToken = getCookie("refreshToken");
     var currentEmail = getCookie("email");
+
     if (currentToken != null) {
-        token = currentToken;
-        replaceElementsForLoggedInUser(token, currentEmail);
+        isLoggedIn(currentToken, function(result) {
+            if (result) {
+                replaceElementsForLoggedInUser(currentToken, currentEmail);
+            } else {
+                refreshTokenViaAjax(currentToken, currentRefreshToken, function(newToken) {
+                    replaceElementsForLoggedInUser(newToken, currentEmail);
+                });
+            }
+        });
     }
 
+    initializeButtons();
+});
+
+function initializeButtons() {
     //Allow for enter keypress to submit entries
     $('#input_password, #input_email').keypress(function (e) {
         if (e.keyCode == 13)
@@ -36,17 +47,16 @@ $(document).ready(function () {
 
     //Logout Button Action
     $("#link_logout").click(function () {
-        eraseCookie("email");
-        eraseCookie("token");
-        location.reload();
+        logoutUser();
     });
 
     //Logout Button Action
     $("#a_refresh").click(function () {
         location.reload();
     });
-});
+}
 
+// Logs user in, successful state updates the UI
 function loginViaAjax(email, password) {
 
     $.ajax({
@@ -60,23 +70,24 @@ function loginViaAjax(email, password) {
         contentType: "application/json",
         success: function (result) {
             // Parse JWT to check if user roles are valid
-            var parsedJwt = parseJwt(result.result);
+            var jwtTokenResult = result.result.authenticationDetails.token;
+            var refreshTokenResult = result.result.authenticationDetails.refreshToken;
+            var parsedJwt = parseJwt(jwtTokenResult);
 
             // Extract user data from token
             var role = parsedJwt.role;
             var email = parsedJwt.email;
 
             // If user is admin, let him through
-            if (role == "Admin") {
-                 //save token to global scope for later usages
-                token = result.result;
-
+            if (role === "Admin") {
+                 
                 //save user login state to cookie
-                setCookie("email", email, 2);
-                setCookie("token", token, 2);
+                setCookie("email", email, 4320);
+                setCookie("token", jwtTokenResult, 4320);
+                setCookie("refreshToken", refreshTokenResult, 4320);
 
                 //login animations and element swaps
-                replaceElementsForLoggedInUser(token, email);
+                replaceElementsForLoggedInUser(jwtTokenResult, email);
 
                 setTimeout(function () {
                     $([document.documentElement, document.body]).animate({
@@ -93,7 +104,62 @@ function loginViaAjax(email, password) {
             console.log('Error in Operation');
             console.log(result);
         }
-    })
+    });
+}
+
+function isLoggedIn(token, callback) {
+
+    $.ajax({
+        url: 'api/account/ValidateToken',
+        type: 'GET',
+        headers: {
+            "Authorization": "Bearer " + token
+        },
+        success: function(result) {
+            console.log(result);
+            callback(true);
+        },
+        error: function(result) {
+            console.error(result);
+            callback(false);
+        }
+    });
+}
+
+function logoutUser() {
+    eraseCookie("email");
+    eraseCookie("token");
+    eraseCookie("refreshToken");
+    location.reload();
+}
+
+function refreshTokenViaAjax(token, refreshToken, callback) {
+
+    $.ajax({
+        url: 'api/account/refreshToken',
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify({
+            "token": token,
+            "refreshToken": refreshToken
+        }),
+        contentType: "application/json",
+        success: function(result) {
+            // Parse JWT to check if user roles are valid
+            var jwtTokenResult = result.result.token;
+            var refreshTokenResult = result.result.refreshToken;
+
+            //save user login state to cookie
+            setCookie("token", jwtTokenResult, 4320);
+            setCookie("refreshToken", refreshTokenResult, 4320);
+
+            callback(jwtTokenResult);
+        },
+        error: function(result) {
+            console.log(result);
+            logoutUser();
+        }
+    });
 }
 
 function loadConnectionsTable(parsedJson) {

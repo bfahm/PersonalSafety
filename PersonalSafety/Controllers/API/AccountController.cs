@@ -103,9 +103,7 @@ namespace PersonalSafety.Controllers.API
 
         [HttpPost]
         public async Task<IActionResult> RefreshToken(RefreshTokenRequestViewModel request)
-        {
-            var token = Request.Headers[HeaderNames.Authorization].ToString().Split(" ")[1];
-
+        { 
             var authResponse = await _accountBusiness.RefreshTokenAsync(request);
 
             if (authResponse.HasErrors)
