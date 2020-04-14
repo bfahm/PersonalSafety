@@ -25,13 +25,15 @@ namespace PersonalSafety.Business
         private readonly AppSettings _appSettings;
         private readonly ILoginService _loginService;
         private readonly IEmailService _emailService;
+        private readonly IPersonnelRepository _personnelRepository;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, ILoginService loginService, IEmailService emailService)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, ILoginService loginService, IEmailService emailService, IPersonnelRepository personnelRepository)
         {
             _userManager = userManager;
             _appSettings = appSettings;
             _loginService = loginService;
             _emailService = emailService;
+            _personnelRepository = personnelRepository;
         }
 
         public async Task<APIResponse<LoginResponseViewModel>> LoginAsync(LoginRequestViewModel request)
@@ -54,6 +56,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            response.Messages = new List<string>(); // Reset messages since user had the correct combination.
             bool userHasConfirmedHisEmail = await _userManager.IsEmailConfirmedAsync(user);
 
             if (!userHasConfirmedHisEmail)
@@ -92,12 +95,19 @@ namespace PersonalSafety.Business
             accountDetailsViewModel.Email = user.Email;
             accountDetailsViewModel.FullName = user.FullName;
             accountDetailsViewModel.Roles = await _userManager.GetRolesAsync(user);
+
+            if (accountDetailsViewModel.Roles.Any())
+            {
+                response.Messages.Add("If you are a working entity, retrieve more data about your account through the endpoint below:");
+                response.Messages.Add("api/Account/Personnel/GetBasicInfo");
+            }
+            
             responseViewModel.AccountDetails = accountDetailsViewModel;
 
             response.Result = responseViewModel;
             response.Status = 0;
             response.HasErrors = false;
-            response.Messages = new List<string> {"Success! You are now logged in."};
+            response.Messages.Add("Success! You are now logged in.");
 
             return response;
         }
@@ -309,6 +319,21 @@ namespace PersonalSafety.Business
             response.Messages.Add("Your token is valid and did not expire.");
             response.Messages.Add("Currently logged in user email is: " + user.Email);
             
+            return response;
+        }
+
+        // Only allowed to be used by personnel..
+        public APIResponse<AccountBasicInfoViewModel> GetBasicInfo(string userId)
+        {
+            APIResponse<AccountBasicInfoViewModel> response = new APIResponse<AccountBasicInfoViewModel>();
+
+            AccountBasicInfoViewModel viewModel = new AccountBasicInfoViewModel
+            {
+                AuthorityTypeName = _personnelRepository.GetPersonnelAuthorityTypeString(userId),
+                DepartmentName = _personnelRepository.GetPersonnelDepartment(userId)?.ToString()
+            };
+
+            response.Result = viewModel;
             return response;
         }
 

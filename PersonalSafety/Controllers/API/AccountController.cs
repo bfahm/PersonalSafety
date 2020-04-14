@@ -291,14 +291,12 @@ namespace PersonalSafety.Controllers.API
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordViewModel request)
         {
-            //? means : If value is not null, retrieve it
-            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
             var response = await _accountBusiness.ChangePasswordAsync(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }
-
 
         /// <summary>
         /// Helper method for checking authenticity
@@ -322,6 +320,18 @@ namespace PersonalSafety.Controllers.API
             var token = Request.Headers[HeaderNames.Authorization].ToString().Split(" ")[1];
 
             var response = await _accountBusiness.ValidateTokenAsync(token);
+
+            return Ok(response);
+        }
+
+        [Route("api/[controller]/Personnel/[action]")]
+        [HttpGet]
+        [Authorize(Roles = Roles.ROLE_PERSONNEL)]
+        public IActionResult GetBasicInfo()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response = _accountBusiness.GetBasicInfo(currentlyLoggedInUserId);
 
             return Ok(response);
         }
