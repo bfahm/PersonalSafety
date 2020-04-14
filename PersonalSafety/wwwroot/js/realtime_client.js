@@ -27,6 +27,7 @@ $(document).ready(function () {
     $("#link_reconnect").click(function () {
         connection.stop();
         connection = null;
+        toggleSpinnerAnimation(true);
         startConnection(token);
     });
 

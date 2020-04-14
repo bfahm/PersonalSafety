@@ -3,6 +3,7 @@ using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
@@ -28,9 +29,7 @@ namespace PersonalSafety.Extensions
 
         public void SeedUsers()
         {
-            #region CreateRoles
             CreateRoles();
-            #endregion
 
             #region Create Admin
 
@@ -59,14 +58,14 @@ namespace PersonalSafety.Extensions
 
             CreateUserAndSetupRole(testUser, "Test@123", null);
             
-            Client client = new Client
-            {
-                ClientId = testUser.Id,
-                NationalId = "00000000000000"
-            };
-            
             if (!_clientRepository.GetAll().Any())
             {
+                Client client = new Client
+                {
+                    ClientId = testUser.Id,
+                    NationalId = "00000000000000"
+                };
+
                 _clientRepository.Add(client);
                 _clientRepository.Save();
             }
@@ -78,6 +77,7 @@ namespace PersonalSafety.Extensions
             CreateDepartments();
             var tantaPoliceDepartment = _departmentRepository.GetAll().FirstOrDefault(d =>
                 d.AuthorityType == (int) AuthorityTypesEnum.Police && d.City == (int) CitiesEnum.Tanta);
+            Debug.Assert(tantaPoliceDepartment != null, nameof(tantaPoliceDepartment) + " != null");
 
             #endregion
 
@@ -93,15 +93,15 @@ namespace PersonalSafety.Extensions
 
             CreateUserAndSetupRole(policeAgentUser, "Test@123", Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
 
-            Personnel policeAgent = new Personnel
+            if (_personnelRepository.GetAll().All(p => p.IsRescuer))
             {
-                PersonnelId = policeAgentUser.Id,
-                DepartmentId = tantaPoliceDepartment.Id,
-                IsRescuer = false
-            };
+                Personnel policeAgent = new Personnel
+                {
+                    PersonnelId = policeAgentUser.Id,
+                    DepartmentId = tantaPoliceDepartment.Id,
+                    IsRescuer = false
+                };
 
-            if (!_personnelRepository.GetAll().Where(p => p.IsRescuer == false).Any())
-            {
                 _personnelRepository.Add(policeAgent);
                 _personnelRepository.Save();
             }
@@ -120,15 +120,16 @@ namespace PersonalSafety.Extensions
 
             CreateUserAndSetupRole(rescuer1User, "Test@123", Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
 
-            Personnel rescuer1 = new Personnel
+            
+            if (_personnelRepository.GetAll().All(p => !p.IsRescuer))
             {
-                PersonnelId = rescuer1User.Id,
-                DepartmentId = tantaPoliceDepartment.Id,
-                IsRescuer = true
-            };
+                Personnel rescuer1 = new Personnel
+                {
+                    PersonnelId = rescuer1User.Id,
+                    DepartmentId = tantaPoliceDepartment.Id,
+                    IsRescuer = true
+                };
 
-            if (!_personnelRepository.GetAll().Where(p => p.IsRescuer == true).Any())
-            {
                 _personnelRepository.Add(rescuer1);
                 _personnelRepository.Save();
             }

@@ -10,5 +10,6 @@ namespace PersonalSafety.Models.ViewModels
         public int RequestId { get; set; }
         public int RequestStateId { get; set; }
         public string RequestStateName { get; set; }
+        public string AssignedDepartment { get; set; }
     }
 }

@@ -306,9 +306,9 @@ namespace PersonalSafety.Controllers.API
         /// </remarks>
         [HttpPut]
         [Route("SOS/[action]")]
-        public async Task<IActionResult> ResetSOSRequest([FromQuery] int requestId)
+        public IActionResult ResetSOSRequest([FromQuery] int requestId)
         {
-            var response = await _agentBusiness.ResetSOSRequest(requestId);
+            var response = _sosBusiness.ResetSOSRequest(requestId);
 
             return Ok(response);
         }

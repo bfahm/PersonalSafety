@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using Microsoft.AspNetCore.Identity;
 using PersonalSafety.Hubs;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services.Location;
@@ -41,12 +42,10 @@ namespace PersonalSafety.Business
         {
             APIResponse<SendSOSResponseViewModel> response = new APIResponse<SendSOSResponseViewModel>();
 
-            Client user = _clientRepository.GetById(userId);
-            if (user == null)
+            var nullClientCheckResult = CheckForNullClient(userId, out var user);
+            if (nullClientCheckResult != null)
             {
-                response.Messages.Add("User not authorized.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.Unauthorized;
+                response.WrapResponseData(nullClientCheckResult);
                 return response;
             }
 
@@ -62,6 +61,14 @@ namespace PersonalSafety.Business
             {
                 response.Messages.Add("You currently have an ongoing request, cancel it first to be able to send a new request.");
                 response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.HasErrors = true;
+                return response;
+            }
+
+            if (!_clientHub.isConnected(userId))
+            {
+                response.Status = (int)APIResponseCodesEnum.SignalRError;
+                response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
                 response.HasErrors = true;
                 return response;
             }
@@ -93,22 +100,23 @@ namespace PersonalSafety.Business
                 _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
                 _sosRequestRepository.Save();
 
-                response.Status = (int)APIResponseCodesEnum.SignalRError;
-                response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
-                response.Messages.Add("Your request was deleted.");
+                response.Status = (int)APIResponseCodesEnum.ServerError;
+                response.Messages.Add("A system error occured while trying to maintain connection with the client.");
+                response.Messages.Add("The request was removed. Please have another try.");
+                response.HasErrors = true;
+
                 return response;
             }
 
             _clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
             _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequest.AssignedDepartmentId);
 
-
-
             response.Result = new SendSOSResponseViewModel
             {
                 RequestId = sosRequest.Id,
                 RequestStateId = sosRequest.State,
                 RequestStateName = ((StatesTypesEnum)sosRequest.State).ToString(),
+                AssignedDepartment = nearestDepartment.ToString()
             };
 
             response.Messages.Add("Your request was sent successfully.");
@@ -169,19 +177,19 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            // First: Try Notify the Rescuer, there shouldn't be error unless there is a logical error - bug
-            var rescuerNotificationResult = TryNotifyRescuer(requestId, rescuerEmail);
-            if (rescuerNotificationResult != null)
-            {
-                response.WrapResponseData(rescuerNotificationResult);
-                return response;
-            }
-
-            // Then: Try Notify the Client, there shouldn't be error unless there is a logical error - bug
+            // First: Try Notify the Client, there shouldn't be error unless there is a logical error - bug
             var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
             if (clientNotificationResult != null)
             {
                 response.WrapResponseData(clientNotificationResult);
+                return response;
+            }
+
+            // Then: Try Notify the Rescuer, there shouldn't be error unless there is a logical error - bug
+            var rescuerNotificationResult = TryNotifyRescuer(requestId, rescuerEmail);
+            if (rescuerNotificationResult != null)
+            {
+                response.WrapResponseData(rescuerNotificationResult);
                 return response;
             }
 
@@ -191,7 +199,7 @@ namespace PersonalSafety.Business
             UpdateSOSInline(ref sosRequest, newState, rescuer.Id);
             SaveChangesToRepository(ref sosRequest);
 
-            response.WrapResponseData(FinalizedWithSuccessState(requestId, newState));
+            response.WrapResponseData(FinalizeWithSuccessState(requestId, newState));
             response.Result = true;
             return response;
         }
@@ -247,7 +255,7 @@ namespace PersonalSafety.Business
             UpdateSOSInline(ref sosRequest, newState, null);
             SaveChangesToRepository(ref sosRequest);
 
-            response.WrapResponseData(FinalizedWithSuccessState(requestId, newState));
+            response.WrapResponseData(FinalizeWithSuccessState(requestId, newState));
             response.Status = (int) APIResponseCodesEnum.Ok;
             response.Result = true;
             return response;
@@ -322,9 +330,52 @@ namespace PersonalSafety.Business
             UpdateSOSInline(ref sosRequest, newState, sosRequest.AssignedRescuerId);
             SaveChangesToRepository(ref sosRequest);
 
-            response.WrapResponseData(FinalizedWithSuccessState(requestId, newState));
+            response.WrapResponseData(FinalizeWithSuccessState(requestId, newState));
             response.Messages.Add("Success. You are now idling.");
             response.Status = (int)APIResponseCodesEnum.Ok;
+            response.Result = true;
+            return response;
+        }
+
+        public APIResponse<bool> ResetSOSRequest(int requestId)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullSOSCheckResult = CheckForNullSOS(requestId, out SOSRequest sosRequest);
+            if (nullSOSCheckResult != null)
+            {
+                response.WrapResponseData(nullSOSCheckResult);
+                return response;
+            }
+
+            var resetRescuersTrackersResult = ResetRescuerTrackersByRequestId(requestId);
+            if (resetRescuersTrackersResult != null)
+            {
+                response.WrapResponseData(resetRescuersTrackersResult);
+            }
+            
+
+            UpdateSOSInline(ref sosRequest, (int)StatesTypesEnum.Pending, null);
+            SaveChangesToRepository(ref sosRequest);
+            response.Messages.Add("Request was reset to pending.");
+            response.Messages.Add("Removed Assigned Rescuers from the database.");
+
+            // Reassign user to trackers
+            
+            var clientConnectionInfo = TrackerHandler.ClientConnectionInfoSet.FirstOrDefault(c => c.UserId == sosRequest.UserId);
+            if (clientConnectionInfo != null)
+            {
+                clientConnectionInfo.SOSId = requestId;
+                response.Messages.Add("Reattached Client to trackers.");
+            }
+            else
+            {
+                _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
+                _sosRequestRepository.Save();
+
+                response.Messages.Add("Could not reach client by email, request was deleted.");
+            }
+
             response.Result = true;
             return response;
         }
@@ -333,12 +384,13 @@ namespace PersonalSafety.Business
 
         #region Private Helper Methods
 
+        #region SignalR Related Methods
+
         private void TryNotifyAgent(ref SOSRequest sosRequest, int newStatus)
         {
             // TODO: add here checks related to specifying agent by department
             _agentHub.NotifyNewChanges(sosRequest.Id, newStatus, sosRequest.AssignedDepartmentId);
         }
-
 
         private APIResponseData TryNotifyRescuer(int requestId, string rescuerEmail)
         {
@@ -380,6 +432,47 @@ namespace PersonalSafety.Business
             return null;
         }
 
+        private APIResponseData ResetRescuerTrackersByRequestId(int requestId)
+        {
+            List<string> cumulativeMessages = new List<string>();
+
+            // Reset rescuer trackers
+            // Try find rescuer from connectionInfoSet
+            var assignedRescuerConnectionInfo = TrackerHandler.RescuerConnectionInfoSet.Where(r => r.CurrentJob == requestId).ToList();
+            if (!assignedRescuerConnectionInfo.Any())
+            {
+                cumulativeMessages.Add("No rescuers related to this SOSRequest were tracked in the main trackers.");
+            }
+
+            foreach (var rescuer in assignedRescuerConnectionInfo)
+            {
+                rescuer.CurrentJob = 0;
+                cumulativeMessages.Add("Rescuer " + rescuer.UserEmail + " has been set to idling.");
+            }
+
+            //Try find rescuer from pendingMissionsConnectionInfoSet
+            assignedRescuerConnectionInfo = TrackerHandler.RescuerWithPendingMissionsSet
+                .Where(r => r.CurrentJob == requestId).ToList();
+
+            if (!assignedRescuerConnectionInfo.Any())
+            {
+                cumulativeMessages.Add("No rescuers related to this SOSRequest were tracked in the pending trackers.");
+            }
+
+            foreach (var rescuer in assignedRescuerConnectionInfo)
+            {
+                TrackerHandler.RescuerWithPendingMissionsSet.Remove(rescuer);
+                cumulativeMessages.Add("Rescuer " + rescuer.UserEmail + " has been set to idling. He was offline before being idle.");
+            }
+
+
+            return new APIResponseData((int)APIResponseCodesEnum.Ok, cumulativeMessages);
+        }
+
+        #endregion
+
+        #region Private Checkers
+
         private APIResponseData CheckForNullRescuer(string rescuerEmail, out ApplicationUser rescuer)
         {
             rescuer = _userManager.FindByEmailAsync(rescuerEmail).Result;
@@ -388,6 +481,20 @@ namespace PersonalSafety.Business
                 return new APIResponseData((int)APIResponseCodesEnum.NotFound,
                     new List<string>()
                         {"Error. No Rescuer was found with the provided Email. Check the email for typos."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForNullClient(string clientUsedId, out Client client)
+        {
+            client = _clientRepository.GetById(clientUsedId);
+
+            if (client == null)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
+                    new List<string>()
+                        {"Error. Client unauthorized."});
             }
 
             return null;
@@ -451,8 +558,11 @@ namespace PersonalSafety.Business
             return null;
         }
 
+        #endregion
 
-        private APIResponseData FinalizedWithSuccessState(int requestId, int newState)
+        #region General Usage
+
+        private APIResponseData FinalizeWithSuccessState(int requestId, int newState)
         {
             var messages = new List<string>
             {
@@ -462,7 +572,6 @@ namespace PersonalSafety.Business
             return new APIResponseData((int)APIResponseCodesEnum.Ok, messages);
         }
 
-        
         private void UpdateSOSInline(ref SOSRequest sosRequest, int newState, string rescuerId)
         {
             sosRequest.State = newState;
@@ -475,6 +584,8 @@ namespace PersonalSafety.Business
             _sosRequestRepository.Update(sosRequest);
             _sosRequestRepository.Save();
         }
+
+        #endregion
 
         #endregion
     }
