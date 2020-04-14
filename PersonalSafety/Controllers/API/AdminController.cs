@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.HubTracker;
@@ -122,6 +119,9 @@ namespace PersonalSafety.Controllers.API
             return Ok(authResponse);
         }
 
+        /// <summary>
+        /// Retrieve "as is" values of the HubTracker variables
+        /// </summary>
         [HttpGet]
         [Route("~/api/[controller]/Management/[action]")]
         public IActionResult RetrieveTrackers()
