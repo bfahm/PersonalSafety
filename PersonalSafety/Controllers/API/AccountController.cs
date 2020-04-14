@@ -324,7 +324,7 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
-        [Route("api/[controller]/Personnel/[action]")]
+        [Route("~/api/[controller]/Personnel/[action]")]
         [HttpGet]
         [Authorize(Roles = Roles.ROLE_PERSONNEL)]
         public IActionResult GetBasicInfo()
