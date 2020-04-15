@@ -28,7 +28,8 @@ namespace PersonalSafety.Extensions
                         List<string> errorList = new List<string>
                         {
                             contextFeature.Error.Message,
-                            contextFeature.Error.StackTrace
+                            // ONLY ENABLE THIS WHILE DEBUGGING
+                            // contextFeature.Error.StackTrace 
                         };
                         await context.Response.WriteAsync(new APIResponse<string>
                         {
