@@ -25,12 +25,17 @@ namespace PersonalSafety.Extensions
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null) 
                     {
+                        List<string> errorList = new List<string>
+                        {
+                            contextFeature.Error.Message,
+                            contextFeature.Error.StackTrace
+                        };
                         await context.Response.WriteAsync(new APIResponse<string>
                         {
                             Result = null,
                             Status = context.Response.StatusCode,
                             HasErrors = true,
-                            Messages = new List<string> { contextFeature.Error.Message },
+                            Messages = errorList,
                         }.ToString()); ;
                     }
                 });
