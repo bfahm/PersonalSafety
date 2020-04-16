@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using PersonalSafety.Services;
 using PersonalSafety.Options;
@@ -38,10 +32,12 @@ namespace PersonalSafety.Business
 
         public async Task<APIResponse<LoginResponseViewModel>> LoginAsync(LoginRequestViewModel request)
         {
-            APIResponse<LoginResponseViewModel> response = new APIResponse<LoginResponseViewModel>();
-            response.Status = (int)APIResponseCodesEnum.Unauthorized;
+            APIResponse<LoginResponseViewModel> response = new APIResponse<LoginResponseViewModel>
+            {
+                Status = (int) APIResponseCodesEnum.Unauthorized,
+                HasErrors = true
+            };
             response.Messages.Add("User/Password combination is wrong.");
-            response.HasErrors = true;
 
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -114,9 +110,9 @@ namespace PersonalSafety.Business
 
         public async Task<APIResponse<AuthenticationDetailsViewModel>> RefreshTokenAsync(RefreshTokenRequestViewModel request)
         {
-            APIResponse<AuthenticationDetailsViewModel> response = new APIResponse<AuthenticationDetailsViewModel>();;
+            APIResponse<AuthenticationDetailsViewModel> response = new APIResponse<AuthenticationDetailsViewModel>();
 
-            var validationResult = _loginService.ValidateTokenRefreshTokenPair(request.Token, request.RefreshToken, out var validatedToken);
+            var validationResult = _loginService.ValidateRefreshToken(request.Token, request.RefreshToken, out var validatedToken);
 
             if (validationResult != null)
             {
@@ -182,7 +178,7 @@ namespace PersonalSafety.Business
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                response.Messages.Add("User with provided email does not exsist.");
+                response.Messages.Add("User with provided email does not exist.");
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 return response;
@@ -342,8 +338,7 @@ namespace PersonalSafety.Business
             if (token.Length == OTPHelper.otpSize)
             {
                 var totp = OTPHelper.GenerateOTP(user.Id);
-                long timeFrame;
-                bool isTokenValid = totp.VerifyTotp(token, out timeFrame);
+                bool isTokenValid = totp.VerifyTotp(token, out _);
                 if (isTokenValid)
                 {
                     user.EmailConfirmed = true;

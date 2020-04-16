@@ -8,5 +8,6 @@ namespace PersonalSafety.Models
     public interface IRefreshTokenRepository : IBaseRepository<RefreshToken>
     {
         RefreshToken GetByRefreshToken(string refreshToken);
+        void RemoveUnusedTokensForUser(string userId);
     }
 }

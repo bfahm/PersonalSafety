@@ -16,7 +16,13 @@ namespace PersonalSafety.Models
 
         public RefreshToken GetByRefreshToken(string refreshToken)
         {
-            return context.RefreshTokens.Where(x=>x.Invalidated != true && x.Used != true && x.ExpiryDate > DateTime.Now).SingleOrDefault(x => x.Token == refreshToken);
+            return context.RefreshTokens.Where(x=>x.Invalidated != true && x.ExpiryDate > DateTime.Now).SingleOrDefault(x => x.Token == refreshToken);
+        }
+
+        public void RemoveUnusedTokensForUser(string userId)
+        {
+            var listOfUnusedTokens = context.RefreshTokens.Where(t => t.UserId == userId);
+            context.RefreshTokens.RemoveRange(listOfUnusedTokens);
         }
     }
 }

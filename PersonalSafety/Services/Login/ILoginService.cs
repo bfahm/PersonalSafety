@@ -12,7 +12,7 @@ namespace PersonalSafety.Services
     public interface ILoginService
     {
         Task<AuthenticationDetailsViewModel> GenerateAuthenticationDetailsAsync(ApplicationUser user);
-        APIResponseData ValidateTokenRefreshTokenPair(string token, string refreshToken, out ClaimsPrincipal validatedToken);
+        APIResponseData ValidateRefreshToken(string token, string refreshToken, out ClaimsPrincipal validatedToken);
         ClaimsPrincipal GetPrincipalFromToken(string token);
     }
 }

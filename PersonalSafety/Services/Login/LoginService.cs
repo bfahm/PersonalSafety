@@ -66,7 +66,8 @@ namespace PersonalSafety.Services
                 CreationDate = DateTime.UtcNow,
                 ExpiryDate = DateTime.UtcNow.AddMonths(_jwtSettings.RefreshTokenExpireAfterMonths)
             };
-
+            
+            _refreshTokenRepository.RemoveUnusedTokensForUser(user.Id);
             _refreshTokenRepository.Add(refreshToken);
             _refreshTokenRepository.Save();
 
@@ -80,7 +81,7 @@ namespace PersonalSafety.Services
             return authenticationDetails;
         }
 
-        public APIResponseData ValidateTokenRefreshTokenPair(string token, string refreshToken, out ClaimsPrincipal validatedToken)
+        public APIResponseData ValidateRefreshToken(string token, string refreshToken, out ClaimsPrincipal validatedToken)
         {
             validatedToken = GetPrincipalFromToken(token);
 
@@ -119,15 +120,9 @@ namespace PersonalSafety.Services
                     new List<string>{ "Error: This refresh token does not match your bearer token. Login again." });
             }
 
-            // All checks passed, now use the token
-            storedRefreshToken.Used = true;
-            _refreshTokenRepository.Update(storedRefreshToken);
-            _refreshTokenRepository.Save();
-
             return null;
         }
 
-        
         public ClaimsPrincipal GetPrincipalFromToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
