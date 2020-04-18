@@ -1,5 +1,4 @@
-﻿using PersonalSafety.Options;
-using PersonalSafety.Models;
+﻿using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
@@ -18,6 +17,7 @@ namespace PersonalSafety.Business
     public class SOSBusiness : ISOSBusiness
     {
         private readonly ISOSRequestRepository _sosRequestRepository;
+        private readonly IPersonnelRepository _personnelRepository;
         private readonly IClientRepository _clientRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRescuerHub _rescuerHub;
@@ -25,9 +25,10 @@ namespace PersonalSafety.Business
         private readonly IClientHub _clientHub;
         private readonly ILocationService _locationService;
 
-        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService)
+        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IPersonnelRepository personnelRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService)
         {
             _sosRequestRepository = sosRequestRepository;
+            _personnelRepository = personnelRepository;
             _clientRepository = clientRepository;
             _userManager = userManager;
             _rescuerHub = rescuerHub;
@@ -42,7 +43,7 @@ namespace PersonalSafety.Business
         {
             APIResponse<SendSOSResponseViewModel> response = new APIResponse<SendSOSResponseViewModel>();
 
-            var nullClientCheckResult = CheckForNullClient(userId, out var user);
+            var nullClientCheckResult = CheckForNullClient(userId, out _);
             if (nullClientCheckResult != null)
             {
                 response.WrapResponseData(nullClientCheckResult);
@@ -147,6 +148,13 @@ namespace PersonalSafety.Business
             if (nullRescuerCheckResult != null)
             {
                 response.WrapResponseData(nullRescuerCheckResult);
+                return response;
+            }
+
+            var sameDepartmentCheck = CheckSOSSameDepartment(ref sosRequest, ref rescuer);
+            if (sameDepartmentCheck != null)
+            {
+                response.WrapResponseData(sameDepartmentCheck);
                 return response;
             }
 
@@ -509,6 +517,20 @@ namespace PersonalSafety.Business
                 return new APIResponseData((int) APIResponseCodesEnum.NotFound,
                     new List<string>()
                         {"The SOS Request you are trying to modify was not found, did you mistype the ID?"});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckSOSSameDepartment(ref SOSRequest sosRequest, ref ApplicationUser rescuer)
+        {
+            var personnelDpt = _personnelRepository.GetPersonnelDepartment(rescuer.Id);
+
+            if (sosRequest.AssignedDepartmentId != personnelDpt.Id)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                    new List<string>()
+                        {"Error: The SOS Request you are trying to access was not assigned to this rescuer's department."});
             }
 
             return null;
