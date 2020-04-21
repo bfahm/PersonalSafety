@@ -93,3 +93,111 @@ export function getCookie(name) {
 export function eraseCookie(name) {
     document.cookie = name + '=; Max-Age=-99999999;';
 }
+
+/*Account Related and Token management: */
+// Logs user in and return token results in callback, also sets cookies
+export function loginViaAjax(email, password, cookieDetails) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: 'api/account/login',
+            type: 'POST',
+            dataType: 'json',
+            data: JSON.stringify({
+                "Email": email,
+                "Password": password
+            }),
+            contentType: "application/json",
+            success: function (result) {
+                // Parse JWT to check if user roles are valid
+                var jwtTokenResult = result.result.authenticationDetails.token;
+                var refreshTokenResult = result.result.authenticationDetails.refreshToken;
+                var parsedJwt = parseJwt(jwtTokenResult);
+
+                // Extract user data from token
+                var role = parsedJwt.role;
+
+                // If user is admin, let him through
+                if (role === "Admin") {
+
+                    if (cookieDetails != null) {
+                        //save user login state to cookie
+                        setCookie(cookieDetails.cookieTokenKey, jwtTokenResult, 4320);
+                        setCookie(cookieDetails.cookieRefreshTokenKey, refreshTokenResult, 4320);
+                    }
+
+                    resolve(jwtTokenResult, refreshTokenResult);
+                } else {
+                    reject();
+                }
+            },
+            error: function () {
+                reject();
+            }
+        });
+    });
+}
+
+// Erases cookies and refreshes the page
+export function logoutUser(cookieDetails) {
+    eraseCookie(cookieDetails.cookieTokenKey);
+    eraseCookie(cookieDetails.cookieRefreshTokenKey);
+    location.reload();
+}
+
+// Requests a new token and refresh token pair, and returns them in callback, also sets cookies
+export function refreshTokenViaAjax(token, refreshToken, cookieDetails) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: 'api/account/refreshToken',
+            type: 'POST',
+            dataType: 'json',
+            data: JSON.stringify({
+                "token": token,
+                "refreshToken": refreshToken
+            }),
+            contentType: "application/json",
+            success: function (result) {
+                // Parse JWT to check if user roles are valid
+                var jwtTokenResult = result.result.token;
+                var refreshTokenResult = result.result.refreshToken;
+
+                if (cookieDetails) {
+                    //save user login state to cookie
+                    setCookie(cookieDetails.cookieTokenKey, jwtTokenResult, 4320);
+                    setCookie(cookieDetails.cookieRefreshTokenKey, refreshTokenResult, 4320);
+                }
+
+                resolve(jwtTokenResult, refreshTokenResult);
+            },
+            error: function () {
+                reject();
+            }
+        });
+    });
+}
+
+export function tokenFactory(cookieDetails) {
+    //Log use in directly if he has a valid token
+    var currentToken = getCookie(cookieDetails.cookieTokenKey);
+    var currentRefreshToken = getCookie(cookieDetails.cookieRefreshTokenKey);
+
+    return new Promise(function (resolve, reject) {
+        if (currentToken != null && currentRefreshToken != null) {
+            var parsedToken = parseJwt(currentToken);
+            var tokenExpiry = parsedToken.exp;
+
+            if (Date.now() >= tokenExpiry * 1000) {
+                refreshTokenViaAjax(currentToken, currentRefreshToken, cookieDetails)
+                    .then(function (token, refreshToken) {
+                        resolve(token);
+                    }).catch(function () {
+                        reject(true);
+                    });
+            } else {
+                resolve(currentToken);
+            }
+        } else {
+            reject(false);
+        }
+    });
+}
