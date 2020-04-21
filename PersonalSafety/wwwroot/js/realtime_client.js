@@ -1,5 +1,6 @@
 import { parseJwt } from "../lib/app_lib.js";
 import { copyToClipboard } from "../lib/app_lib.js";
+import { loginViaAjax } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
@@ -8,11 +9,7 @@ var scrollTo = "";
 
 $(document).ready(function () {
     $("#btn_connect").click(function () {
-        token = $("#ip_token").val();
-
-        toggleSpinnerAnimation(true);
-
-        startConnection(token);
+        loginAndStartConnection();
     });
 
     $("#btn_copy_to_clipboard").click(function () {
@@ -28,7 +25,7 @@ $(document).ready(function () {
         connection.stop();
         connection = null;
         toggleSpinnerAnimation(true);
-        startConnection(token);
+        loginAndStartConnection();
     });
 
     $("#link_disconnect").click(function () {
@@ -44,6 +41,24 @@ $(document).ready(function () {
     });
 });
 
+function loginAndStartConnection() {
+    var inputEmail = $("#ip_email").val();
+    var inputPassword = $("#ip_password").val();
+
+    loginViaAjax(inputEmail, inputPassword, null, false)
+        .then(function (resultToken, resultRefreshToken) {
+            token = resultToken;
+
+            toggleSpinnerAnimation(true);
+            startConnection(token);
+
+            $("#login_result").attr("hidden", true);
+        }).catch(function (err) {
+            console.log(err);
+            $("#login_result").removeAttr('hidden');
+        });
+}
+
 function startConnection(token) {
     var role;
     try {
@@ -51,8 +66,8 @@ function startConnection(token) {
     } catch (ex) {
         toggleSpinnerAnimation(false);
 
-        $("#ip_token").val("");
-        $("#ip_token").attr("placeholder", "Problem parsing the token");
+        $("#login_result").html("Problem parsing the token");
+        $("#login_result").removeAttr('hidden');
     }
     
     console.log(parseJwt(token));
@@ -155,11 +170,10 @@ function startConnection(token) {
         $("#btn_connect").addClass('btn-success');
         $("#btn_connect").addClass('disabled');
         $("#btn_connect_label").html('Connected');
-        $("#ip_token").prop('disabled', true);
+        $("#ip_email").prop('disabled', true);
+        $("#ip_password").prop('disabled', true);
 
         toggleSpinnerAnimation(false);
-
-        $("#ip_token").attr("placeholder", "Type your verified token here");
 
         $('html, body').animate({
             scrollTop: $("#start_of_form").offset().top - 20
@@ -167,10 +181,11 @@ function startConnection(token) {
     });
 
     connection.start().catch(function (err) {
-        $("#ip_token").val("");
-        $("#ip_token").attr("placeholder", "Wrong or Expired Token");
+        $("#login_result").html("Error while trying to connect.");
+        $("#login_result").removeAttr('hidden');
 
         toggleSpinnerAnimation(false);
+        console.error("this was the value of the token " + token);
         return console.error(err.toString());
     });
 
@@ -184,7 +199,8 @@ function startConnection(token) {
         $("#btn_connect").addClass("btn-danger");
         $("#btn_connect").removeClass("disabled");
         $("#btn_connect_label").html("Reconnect");
-        $("#ip_token").prop("disabled", false);
+        $("#ip_email").prop("disabled", false);
+        $("#ip_password").prop("disabled", false);
 
         $("#btn_copy_to_clipboard").html("Copy");
 

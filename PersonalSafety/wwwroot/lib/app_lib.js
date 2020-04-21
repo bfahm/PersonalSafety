@@ -96,7 +96,7 @@ export function eraseCookie(name) {
 
 /*Account Related and Token management: */
 // Logs user in and return token results in callback, also sets cookies
-export function loginViaAjax(email, password, cookieDetails) {
+export function loginViaAjax(email, password, cookieDetails, requireAdmin) {
     return new Promise(function (resolve, reject) {
         $.ajax({
             url: 'api/account/login',
@@ -117,7 +117,7 @@ export function loginViaAjax(email, password, cookieDetails) {
                 var role = parsedJwt.role;
 
                 // If user is admin, let him through
-                if (role === "Admin") {
+                if (role === "Admin" && requireAdmin === true) {
 
                     if (cookieDetails != null) {
                         //save user login state to cookie
@@ -125,6 +125,8 @@ export function loginViaAjax(email, password, cookieDetails) {
                         setCookie(cookieDetails.cookieRefreshTokenKey, refreshTokenResult, 4320);
                     }
 
+                    resolve(jwtTokenResult, refreshTokenResult);
+                } else if (requireAdmin === false) {
                     resolve(jwtTokenResult, refreshTokenResult);
                 } else {
                     reject();

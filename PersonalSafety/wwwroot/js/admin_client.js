@@ -40,7 +40,7 @@ function initializeButtons() {
         var email = $("#input_email").val();
         var password = $("#input_password").val();
 
-        loginViaAjax(email, password, cookieDetails)
+        loginViaAjax(email, password, cookieDetails, true)
             .then(function (token, refreshToken) {
                 loginAnimationHandler(true, token);
             }).catch(function() {
