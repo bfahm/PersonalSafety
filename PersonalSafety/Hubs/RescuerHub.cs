@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using PersonalSafety.Contracts.Enums;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.Helpers;
@@ -88,6 +85,7 @@ namespace PersonalSafety.Hubs
             {
                 ConnectionId = Context.ConnectionId,
                 UserEmail = Context.User.FindFirst(ClaimTypes.Email).Value,
+                UserId = Context.User.Claims.FirstOrDefault(x => x.Type == "id")?.Value,
                 DepartmentId = _personnelRepository.GetPersonnelDepartment(Context.User.Claims.FirstOrDefault(x => x.Type == "id")?.Value).Id
             };
             TrackerHandler.RescuerConnectionInfoSet.Add(currentConnection);

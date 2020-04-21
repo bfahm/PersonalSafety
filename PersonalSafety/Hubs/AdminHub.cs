@@ -1,38 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using PersonalSafety.Hubs.HubTracker;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Hubs
 {
     [Authorize(Roles = Roles.ROLE_ADMIN)]
-    public class AdminHub : MainHub
+    public class AdminHub : MainHub, IAdminHub
     {
-        public Task GetConnectionInfo()
+        private readonly IHubContext<AdminHub> _hubContext;
+        public static readonly string ChannelNotifyTrackerChanges = "AdminTrackerChanges";
+        public static readonly string ChannelNotifyConsoleChanges = "AdminConsoleChanges";
+
+        public AdminHub(IHubContext<AdminHub> hubContext)
         {
-            var json = JsonSerializer.Serialize(TrackerHandler.AllConnectionInfoSet);
-            return Clients.Caller.SendAsync("AdminGetConnectionInfo", json);
+            _hubContext = hubContext;
         }
 
-        public Task GetConsoleLines()
+        public Task NotifyChanges(string channelName)
         {
-            var json = JsonSerializer.Serialize(TrackerHandler.ConsoleSet.ToList());
-            return Clients.Caller.SendAsync("AdminGetConsoleLines", json);
-        }
-        
-        public void ClearConsoleLines()
-        {
-            TrackerHandler.InitializeConsoleLog();
-        }
-
-        public void ResetTrackers()
-        {
-            TrackerHandler.InitializeTrackers();
+            return _hubContext.Clients.All.SendAsync(channelName);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using PersonalSafety.Models;
+﻿using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 using System;
@@ -8,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
+using PersonalSafety.Hubs;
+using PersonalSafety.Hubs.Helpers;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.ViewModels.AdminVM;
 using PersonalSafety.Services;
 
@@ -18,12 +19,14 @@ namespace PersonalSafety.Business
         private readonly IRegistrationService _registrationService;
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IPersonnelRepository _personnelRepository;
+        private readonly IAdminHub _adminHub;
 
-        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository)
+        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IAdminHub adminHub)
         {
             _registrationService = registrationService;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
+            _adminHub = adminHub;
         }
 
         public APIResponse<List<GetDepartmentDataViewModel>> GetDepartments()
@@ -110,6 +113,70 @@ namespace PersonalSafety.Business
             };
 
             return await _registrationService.RegisterNewUserAsync(newUser, request.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
+        }
+
+        public APIResponse<Dictionary<string, object>> RetrieveTrackers()
+        {
+            var trackerLists = typeof(TrackerHandler).GetFields().Where(f=>f.Name != "ConsoleSet");
+            var trackerListsValues = new Dictionary<string, object>();
+            foreach (var fieldInfo in trackerLists)
+            {
+                var value = fieldInfo.GetValue(typeof(TrackerHandler));
+                if (value != null)
+                {
+                    trackerListsValues.Add(fieldInfo.Name, value);
+                }
+            }
+
+            return new APIResponse<Dictionary<string, object>>
+            {
+                Result = trackerListsValues
+            };
+        }
+
+        public APIResponse<object> RetrieveConsole()
+        {
+            var trackerLists = typeof(TrackerHandler).GetFields().Single(f => f.Name == "ConsoleSet")
+                .GetValue(typeof(TrackerHandler));
+            
+            return new APIResponse<object>
+            {
+                Result = trackerLists
+            };
+        }
+
+        public APIResponse<bool> ResetTrackers()
+        {
+            TrackerHandler.InitializeTrackers();
+            HubTools.PrintToConsole("Trackers Reset.");
+            _adminHub.NotifyChanges(AdminHub.ChannelNotifyTrackerChanges);
+            return new APIResponse<bool>
+            {
+                Result = true
+            };
+        }
+
+        public APIResponse<bool> ResetConsole()
+        {
+            TrackerHandler.InitializeConsoleLog();
+            _adminHub.NotifyChanges(AdminHub.ChannelNotifyConsoleChanges);
+            return new APIResponse<bool>
+            {
+                Result = true
+            };
+        }
+
+        public APIResponse<bool> ResetRescuerState(string rescuerEmail)
+        {
+            TrackerHandler.RescuerConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
+            TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
+            TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
+            HubTools.PrintToConsole(rescuerEmail, "was forced offline.");
+            _adminHub.NotifyChanges(AdminHub.ChannelNotifyTrackerChanges);
+            return new APIResponse<bool>
+            {
+                Result = true
+            };
         }
     }
 }

@@ -3,6 +3,7 @@ import { animateProgressBar } from "../lib/app_lib.js";
 import { loginViaAjax } from "../lib/app_lib.js";
 import { logoutUser } from "../lib/app_lib.js";
 import { tokenFactory } from "../lib/app_lib.js";
+import { simpleGet } from "../lib/app_lib.js";
 
 "use strict";
 
@@ -25,6 +26,53 @@ $(document).ready(function () {
         });
 });
 
+// API Functions
+function retrieveTrackers() {
+    tokenFactory(cookieDetails)
+        .then(function (token) {
+            simpleGet('api/Admin/Management/RetrieveTrackers', token)
+                .then(function (result) {
+                    animateProgressBar("retrieve_connection_bar");
+
+                    $("#table_container").empty();
+                    for (var x in result.result) {
+                        if (Object.prototype.hasOwnProperty.call(result.result, x)) {
+                            loadConnectionsTable(x, result.result[x]);
+                        }
+                    }
+                    $('#table_container').children().last().remove();
+                    $('#table_container').children().last().remove();
+                });
+        });
+}
+
+function retrieveConsole() {
+    tokenFactory(cookieDetails)
+        .then(function (token) {
+            simpleGet('api/Admin/Management/RetrieveConsole', token)
+                .then(function (result) {
+                    animateProgressBar("retrieve_console_bar");
+                    loadConsoleContents(result.result);
+                    setTimeout(function () {
+                        $("#console_container").attr("hidden", false);
+                    }, 1000); //time before animation starts execution
+                });
+        });
+}
+
+function clearConsole() {
+    tokenFactory(cookieDetails)
+        .then(function (token) {
+            simpleGet('api/Admin/Management/ResetConsole', token);
+        });
+}
+
+function clearTrackers() {
+    tokenFactory(cookieDetails)
+        .then(function (token) {
+            simpleGet('api/Admin/Management/ResetTrackers', token);
+        });
+}
 
 // UI Functions
 
@@ -57,6 +105,31 @@ function initializeButtons() {
     $("#a_refresh").click(function () {
         location.reload();
     });
+
+
+    $("#btn_retrieve").click(function () {
+        retrieveTrackers();
+
+        $(this).removeClass("btn-secondary");
+        $(this).addClass("btn-primary");
+        $("#retrieve_main_container").addClass("border-primary");
+    });
+
+    $("#btn_update").click(function () {
+        retrieveConsole();
+
+        $(this).removeClass("btn-secondary");
+        $(this).addClass("btn-primary");
+        $("#console_main_container").addClass("border-primary");
+    });
+
+    $("#btn_clear").click(function () {
+        clearConsole();
+    });
+
+    $("#btn_reset_trackers").click(function () {
+        clearTrackers();
+    });
 }
 
 function loginAnimationHandler(toAnimate, token) {
@@ -79,25 +152,56 @@ function loginAnimationHandler(toAnimate, token) {
     }
 }
 
-function loadConnectionsTable(parsedJson) {
-    // Clear current table entries first
-    $("#result_table > tbody > tr").remove();
+function loadConnectionsTable(jsonKey, jsonList) {
+    $("#retrieve_result").attr("hidden", true);
 
-    for (var i = 0; i < parsedJson.length; i++) {
-        var obj = parsedJson[i];
-        console.log(obj);
+    var firstItem = jsonList[0];
+    if (firstItem) {
 
-        var email = obj.UserEmail;
-        var userId = obj.UserId;
-        var connectionId = obj.ConnectionId;
+        //table header
+        var tableHeader = '<h5 class="float-left">' + jsonKey + '</h5>';
+        tableHeader += '<table id="table_' + jsonKey + '" class="table table-sm table-hover">';
+        tableHeader += '<thead>';
+        tableHeader += '<tr>';
+        tableHeader += '<th scope="col">#</th>';
+        
+        for (var x in firstItem) {
+            if (Object.prototype.hasOwnProperty.call(firstItem, x)) {
+                tableHeader +='<th scope="col">'+x+'</th>';
+            }
+        }
+        tableHeader += '</tr>';
+        tableHeader += '</thead>';
+        tableHeader += '</table>';
 
-        var currentIndex = '<th>' + (i + 1) + '</th>';
-        var emailInRow = '<td>' + email + '</td>';
-        var userIdInRow = '<td>' + userId + '</td>';
-        var connectionIdInRow = '<td>' + connectionId + '</td>';
-        var newRow = '<tr>' + currentIndex + emailInRow + userIdInRow + connectionIdInRow + '</tr>';
+        $('#table_container').append(tableHeader);
 
-        $('#result_table > tbody:last-child').append(newRow);
+        //table data
+
+        var tbody = $("<tbody />"), tr;
+        var counter = 1;
+        $.each(jsonList, function (_, obj) {
+            tr = $("<tr />");
+            tr.append("<td>" + counter + "</td>");
+            $.each(obj, function (_, text) {
+                
+                tr.append("<td>" + text + "</td>");
+                
+            });
+            counter += 1;
+            tr.appendTo(tbody);
+        });
+
+        tbody.appendTo('#table_'+jsonKey); // only DOM insertion
+
+        //splitter
+        $('#table_container').append('<br/>');
+        $('#table_container').append('<hr/>');
+
+        
+        setTimeout(function () {
+            $("#retrieve_result").attr("hidden", false);
+        }, 1000); //time before animation starts execution
     }
 }
 
@@ -107,7 +211,7 @@ function loadConsoleContents(parsedJson) {
 
     for (var i = 0; i < parsedJson.length; i++) {
         var obj = parsedJson[i];
-        console.log(obj);
+        
 
         $('#console_container').append('<p> > ' + obj + '</p>');
     }
@@ -125,73 +229,19 @@ function startConnection(token) {
         })
         .build();
 
-    connection.on("AdminGetConnectionInfo", function (message) {
-        animateProgressBar("retrieve_connection_bar");
-        var parsedJson = JSON.parse(message);
-
-        loadConnectionsTable(parsedJson);
-        
-        setTimeout(function () {
-            $("#retrieve_result").attr("hidden", false);
-        }, 1000); //time before animation starts execution
+    connection.on("AdminTrackerChanges", function () {
+        retrieveTrackers();
     });
 
-    connection.on("AdminGetConsoleLines", function (message) {
-        animateProgressBar("retrieve_console_bar");
-        var parsedJson = JSON.parse(message);
-
-        console.log(parsedJson);
-        loadConsoleContents(parsedJson);
-
-        setTimeout(function () {
-            $("#console_container").attr("hidden", false);
-        }, 1000); //time before animation starts execution
+    connection.on("AdminConsoleChanges", function () {
+        retrieveConsole();
     });
 
     // Start connection after finishing all the settings
-    connection.start().then(function () {
-        // Wait for connection to be established before trying to retreive data
-
-        $("#btn_retrieve").click(function () {
-            connection.invoke("GetConnectionInfo").catch(function (err) {
-                return console.error(err.toString());
-            });
-            $(this).removeClass("btn-secondary");
-            $(this).addClass("btn-primary");
-            $("#retrieve_main_container").addClass("border-primary");
-        });
-
-        $("#btn_update").click(function () {
-            connection.invoke("GetConsoleLines").catch(function (err) {
-                return console.error(err.toString());
-            });
-            $(this).removeClass("btn-secondary");
-            $(this).addClass("btn-primary");
-            $("#console_main_container").addClass("border-primary");
-        });
-
-        $("#btn_clear").click(function () {
-            connection.invoke("ClearConsoleLines").catch(function (err) {
-                return console.error(err.toString());
-            });
-            connection.invoke("GetConsoleLines").catch(function (err) {
-                return console.error(err.toString());
-            });
-        });
-
-        $("#btn_reset_trackers").click(function () {
-            connection.invoke("ResetTrackers").catch(function (err) {
-                return console.error(err.toString());
-            });
-            connection.invoke("GetConnectionInfo").catch(function (err) {
-                return console.error(err.toString());
-            });
-        });
-
-
-    }).catch(function (err) {
+    connection.start()
+        .catch(function (err) {
         return console.error(err.toString());
-    });
+        });
 
     connection.onclose(function () {
         $('html, body').animate({

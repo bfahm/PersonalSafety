@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -126,18 +127,55 @@ namespace PersonalSafety.Controllers.API
         [Route("~/api/[controller]/Management/[action]")]
         public IActionResult RetrieveTrackers()
         {
-            var trackerLists = typeof(TrackerHandler).GetFields();
-            var trackerListsValues = new Dictionary<string, object>();
-            foreach (var fieldInfo in trackerLists)
-            {
-                var value = fieldInfo.GetValue(typeof(TrackerHandler));
-                if (value != null)
-                {
-                    trackerListsValues.Add(fieldInfo.Name, value);
-                }
-            }
+            var response = _adminBusiness.RetrieveTrackers();
+            return Ok(response);
+        }
 
-            return Ok(trackerListsValues);
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult RetrieveConsole()
+        {
+            var response = _adminBusiness.RetrieveConsole();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetTrackers()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+            var response = _adminBusiness.ResetTrackers();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetConsole()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+            var response = _adminBusiness.ResetConsole();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetRescuerState([FromQuery]string rescuerEmail)
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+            var response = _adminBusiness.ResetRescuerState(rescuerEmail);
+            return Ok(response);
         }
     }
 }

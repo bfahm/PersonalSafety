@@ -2,10 +2,8 @@
 using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Hubs.HubTracker;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
 using PersonalSafety.Hubs.Helpers;
 
@@ -14,7 +12,7 @@ namespace PersonalSafety.Hubs
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
-        public static readonly string connectionInfoChannel = "ConnectionInfoChannel";
+        private static readonly string ConnectionInfoChannel = "ConnectionInfoChannel";
         
         public bool isConnected(string userId)
         {
@@ -38,7 +36,7 @@ namespace PersonalSafety.Hubs
             HubTools.PrintToConsole(currentConnection.UserEmail, currentConnection.ConnectionId, false);
 
             // Automatically send client data to him after connection.
-            await Clients.Caller.SendAsync(connectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
+            await Clients.Caller.SendAsync(ConnectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
             
             await base.OnConnectedAsync();
         }

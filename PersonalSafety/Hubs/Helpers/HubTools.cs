@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PersonalSafety.Hubs.HubTracker;
 
 namespace PersonalSafety.Hubs.Helpers
@@ -20,6 +17,11 @@ namespace PersonalSafety.Hubs.Helpers
         {
             string consoleLine = email + " " + customText + ".";
             PrintFactorizedString(consoleLine);
+        }
+
+        public static void PrintToConsole(string customText)
+        {
+            PrintFactorizedString(customText);
         }
 
         private static void PrintFactorizedString(string factorizedText)
