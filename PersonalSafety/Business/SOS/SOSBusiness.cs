@@ -60,10 +60,9 @@ namespace PersonalSafety.Business
 
             if (_sosRequestRepository.UserHasOngoingRequest(userId))
             {
-                response.Messages.Add("You currently have an ongoing request, cancel it first to be able to send a new request.");
-                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
-                response.HasErrors = true;
-                return response;
+                response.Messages.Add("You currently have ongoing requests, attempting to canceling them automatically.");
+                var cancelResult = await CancelPendingRequestsAsync(userId, false);
+                response.Messages.AddRange(cancelResult.Messages);
             }
 
             if (!_clientHub.isConnected(userId))
@@ -212,7 +211,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId)
+        public async Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId, bool notifyClient)
         {
             const int newState = (int)StatesTypesEnum.Canceled;
             APIResponse<bool> response = new APIResponse<bool>();
@@ -249,14 +248,17 @@ namespace PersonalSafety.Business
             }
             _rescuerHub.MakeRescuerIdle(assignedRescuer?.Email);
 
-            // Then: Try Notify the Client and remove from trackers, no need to break the execution if rescuer was offline at the time of notifying
-            var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
-            if (clientNotificationResult != null)
+            if (notifyClient)
             {
-                response.WrapResponseData(clientNotificationResult);
+                // Then: Try Notify the Client and remove from trackers, no need to break the execution if rescuer was offline at the time of notifying
+                var clientNotificationResult = TryNotifyOwnerClient(requestId, newState);
+                if (clientNotificationResult != null)
+                {
+                    response.WrapResponseData(clientNotificationResult);
+                }
+                _clientHub.RemoveClientFromTrackers(clientUserId);
             }
-            _clientHub.RemoveClientFromTrackers(clientUserId);
-
+            
             // Finally: Try Notify the agent of the update. (No check needed for now)
             TryNotifyAgent(ref sosRequest, newState);
 
@@ -269,7 +271,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> CancelPendingRequestsAsync(string userId)
+        public async Task<APIResponse<bool>> CancelPendingRequestsAsync(string userId, bool notifyClient)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -283,7 +285,7 @@ namespace PersonalSafety.Business
 
             foreach (var request in ongoingRequests)
             {
-                var updateResult = await CancelSOSRequestAsync(request.Id, userId);
+                var updateResult = await CancelSOSRequestAsync(request.Id, userId, notifyClient);
                 if (updateResult.HasErrors)
                 {
                     return updateResult;

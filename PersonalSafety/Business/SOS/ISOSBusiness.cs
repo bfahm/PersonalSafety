@@ -11,8 +11,8 @@ namespace PersonalSafety.Business
     {
         Task<APIResponse<SendSOSResponseViewModel>> SendSOSRequestAsync(string userId, SendSOSRequestViewModel request);
         APIResponse<bool> AcceptSOSRequest(int requestId, string rescuerEmail);
-        Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId);
-        Task<APIResponse<bool>> CancelPendingRequestsAsync(string userId);
+        Task<APIResponse<bool>> CancelSOSRequestAsync(int requestId, string clientUserId, bool notifyClient = true);
+        Task<APIResponse<bool>> CancelPendingRequestsAsync(string userId, bool notifyClient = true);
         Task<APIResponse<bool>> SolveSOSRequestAsync(int requestId, string rescuerUserId);
         APIResponse<bool> ResetSOSRequest(int requestId);
     }
