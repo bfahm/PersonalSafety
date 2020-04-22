@@ -163,24 +163,11 @@ function initializeButtons() {
         $("#retrieve_main_container").addClass("border-primary");
     });
 
-    $("#btn_console_offline").click(function () {
-        consoleIsOnline = false;
+    $("#btn_console_launch").click(function () {
         retrieveConsole();
 
         $(this).removeClass("btn-secondary");
         $(this).addClass("btn-primary");
-        $("#btn_console_online").removeClass("btn-primary");
-        $("#btn_console_online").addClass("btn-secondary");
-        $("#console_main_container").addClass("border-primary");
-    });
-
-    $("#btn_console_online").click(function () {
-        consoleIsOnline = true;
-        loadConsoleContents(""); // empty console contents
-        $(this).removeClass("btn-secondary");
-        $(this).addClass("btn-primary");
-        $("#btn_console_offline").removeClass("btn-primary");
-        $("#btn_console_offline").addClass("btn-secondary");
         $("#console_main_container").addClass("border-primary");
     });
 
@@ -315,10 +302,8 @@ function startConnection(token) {
         .build();
 
     connection.on("AdminConsoleChanges", function (message) {
-        if (consoleIsOnline) {
-            $("#empty_console_pointer").remove();
-            addToConsoleContents(message);
-        }
+        $("#empty_console_pointer").remove();
+        addToConsoleContents(message);
     });
 
     // Start connection after finishing all the settings
