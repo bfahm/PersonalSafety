@@ -23,7 +23,7 @@ namespace PersonalSafety.Hubs
         private readonly IHubContext<AgentHub> _hubContext;
         private readonly IPersonnelRepository _personnelRepository;
 
-        public AgentHub(IHubContext<AgentHub> hubContext, IPersonnelRepository personnelRepository)
+        public AgentHub(IHubContext<AgentHub> hubContext, IPersonnelRepository personnelRepository, IHubTools hubTools) : base(hubTools)
         {
             _hubContext = hubContext;
             _personnelRepository = personnelRepository;

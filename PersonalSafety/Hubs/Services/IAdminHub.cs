@@ -7,6 +7,6 @@ namespace PersonalSafety.Hubs
 {
     public interface IAdminHub
     {
-        Task NotifyChanges(string channelName);
+        Task PrintToOnlineConsole(string text);
     }
 }

@@ -145,11 +145,10 @@ namespace PersonalSafety.Controllers.API
         /// <summary>
         /// 
         /// </summary>
-        [HttpGet]
+        [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
         public IActionResult ResetTrackers()
         {
-            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
             var response = _adminBusiness.ResetTrackers();
             return Ok(response);
         }
@@ -157,11 +156,10 @@ namespace PersonalSafety.Controllers.API
         /// <summary>
         /// 
         /// </summary>
-        [HttpGet]
+        [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
         public IActionResult ResetConsole()
         {
-            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
             var response = _adminBusiness.ResetConsole();
             return Ok(response);
         }
@@ -169,11 +167,21 @@ namespace PersonalSafety.Controllers.API
         /// <summary>
         /// 
         /// </summary>
-        [HttpGet]
+        [HttpPut]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetClientState([FromQuery]string clientEmail)
+        {
+            var response = _adminBusiness.ResetClientState(clientEmail);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
         public IActionResult ResetRescuerState([FromQuery]string rescuerEmail)
         {
-            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
             var response = _adminBusiness.ResetRescuerState(rescuerEmail);
             return Ok(response);
         }

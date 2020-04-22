@@ -157,6 +157,24 @@ export function simpleGet(url, jwt) {
     });
 }
 
+export function simplePut(url, jwt) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: url,
+            type: 'PUT',
+            beforeSend: function (xhr) {   //Include the bearer token in header
+                xhr.setRequestHeader("Authorization", 'Bearer ' + jwt);
+            },
+            success: function (result) {
+                resolve(result);
+            },
+            error: function () {
+                reject();
+            }
+        });
+    });
+}
+
 // Erases cookies and refreshes the page
 export function logoutUser(cookieDetails) {
     eraseCookie(cookieDetails.cookieTokenKey);

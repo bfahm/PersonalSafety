@@ -16,7 +16,7 @@ namespace PersonalSafety.Hubs
         private readonly string channelName = "ClientChannel";
         private readonly IHubContext<ClientHub> _hubContext;
 
-        public ClientHub(IHubContext<ClientHub> hubContext)
+        public ClientHub(IHubContext<ClientHub> hubContext, IHubTools hubTools) : base(hubTools)
         {
             _hubContext = hubContext;
         }

@@ -16,15 +16,18 @@ namespace PersonalSafety.Hubs
     public class RescuerHub : MainHub, IRescuerHub
     {
         private readonly string channelName = "RescuerChannel";
+        
         private readonly IHubContext<RescuerHub> _hubContext;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IAgentHub _agentHub;
+        private readonly IHubTools _hubTools;
 
-        public RescuerHub(IHubContext<RescuerHub> hubContext, IPersonnelRepository personnelRepository, IAgentHub agentHub)
+        public RescuerHub(IHubContext<RescuerHub> hubContext, IPersonnelRepository personnelRepository, IAgentHub agentHub, IHubTools hubTools) : base(hubTools)
         {
             _hubContext = hubContext;
             _personnelRepository = personnelRepository;
             _agentHub = agentHub;
+            _hubTools = hubTools;
         }
 
         public bool NotifyNewChanges(int requestId, string rescuerEmail)
@@ -97,7 +100,7 @@ namespace PersonalSafety.Hubs
                 //If so, send him his previous state and remove that state from the tracker.
                 TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(c=>c.UserEmail == recurrentConnection.UserEmail);
                 NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
-                HubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
+                _hubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
             }
 
             // Notify Agent in the same hub that rescuers state has changed.
@@ -121,7 +124,7 @@ namespace PersonalSafety.Hubs
                     TrackerHandler.RescuerWithPendingMissionsSet.Add(currentDisconnection);
 
                     // Write a summary to the console.
-                    HubTools.PrintToConsole(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on.");
+                    _hubTools.PrintToConsole(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on.");
                 }
 
                 // Notify Agent in the same hub that rescuers state has changed.

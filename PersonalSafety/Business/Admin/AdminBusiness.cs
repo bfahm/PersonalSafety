@@ -20,13 +20,15 @@ namespace PersonalSafety.Business
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IAdminHub _adminHub;
+        private readonly IHubTools _hubTools;
 
-        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IAdminHub adminHub)
+        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IAdminHub adminHub, IHubTools hubTools)
         {
             _registrationService = registrationService;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
             _adminHub = adminHub;
+            _hubTools = hubTools;
         }
 
         public APIResponse<List<GetDepartmentDataViewModel>> GetDepartments()
@@ -148,8 +150,7 @@ namespace PersonalSafety.Business
         public APIResponse<bool> ResetTrackers()
         {
             TrackerHandler.InitializeTrackers();
-            HubTools.PrintToConsole("Trackers Reset.");
-            _adminHub.NotifyChanges(AdminHub.ChannelNotifyTrackerChanges);
+            _hubTools.PrintToConsole("Trackers Reset.");
             return new APIResponse<bool>
             {
                 Result = true
@@ -159,7 +160,6 @@ namespace PersonalSafety.Business
         public APIResponse<bool> ResetConsole()
         {
             TrackerHandler.InitializeConsoleLog();
-            _adminHub.NotifyChanges(AdminHub.ChannelNotifyConsoleChanges);
             return new APIResponse<bool>
             {
                 Result = true
@@ -171,8 +171,18 @@ namespace PersonalSafety.Business
             TrackerHandler.RescuerConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
             TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
             TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
-            HubTools.PrintToConsole(rescuerEmail, "was forced offline.");
-            _adminHub.NotifyChanges(AdminHub.ChannelNotifyTrackerChanges);
+            _hubTools.PrintToConsole(rescuerEmail, "was forced offline.");
+            return new APIResponse<bool>
+            {
+                Result = true
+            };
+        }
+
+        public APIResponse<bool> ResetClientState(string clientEmail)
+        {
+            TrackerHandler.ClientConnectionInfoSet.RemoveWhere(r => r.UserEmail == clientEmail);
+            TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == clientEmail);
+            _hubTools.PrintToConsole(clientEmail, "was forced offline.");
             return new APIResponse<bool>
             {
                 Result = true

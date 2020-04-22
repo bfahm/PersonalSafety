@@ -15,5 +15,6 @@ namespace PersonalSafety.Business
         APIResponse<bool> ResetTrackers();
         APIResponse<bool> ResetConsole();
         APIResponse<bool> ResetRescuerState(string rescuerEmail);
+        APIResponse<bool> ResetClientState(string clientEmail);
     }
 }

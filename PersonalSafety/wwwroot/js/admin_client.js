@@ -4,10 +4,12 @@ import { loginViaAjax } from "../lib/app_lib.js";
 import { logoutUser } from "../lib/app_lib.js";
 import { tokenFactory } from "../lib/app_lib.js";
 import { simpleGet } from "../lib/app_lib.js";
+import { simplePut } from "../lib/app_lib.js";
 
 "use strict";
 
 var connection;
+var consoleIsOnline = false;
 var cookieDetails = {
     cookieTokenKey: "token",
     cookieRefreshTokenKey: "refreshToken"
@@ -63,14 +65,60 @@ function retrieveConsole() {
 function clearConsole() {
     tokenFactory(cookieDetails)
         .then(function (token) {
-            simpleGet('api/Admin/Management/ResetConsole', token);
+            simplePut('api/Admin/Management/ResetConsole', token);
         });
 }
 
 function clearTrackers() {
     tokenFactory(cookieDetails)
         .then(function (token) {
-            simpleGet('api/Admin/Management/ResetTrackers', token);
+            simplePut('api/Admin/Management/ResetTrackers', token);
+        });
+}
+
+function resetClientState(email) {
+    tokenFactory(cookieDetails)
+        .then(function (token) {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: `/api/Admin/Management/ResetClientState?clientEmail=${email}`,
+                    type: 'PUT',
+                    beforeSend: function (xhr) {   //Include the bearer token in header
+                        xhr.setRequestHeader("Authorization", 'Bearer ' + token);
+                    },
+                    success: function () {
+                        console.log("done");
+                        resolve();
+                    },
+                    error: function () {
+                        console.error("error while resetting client");
+                        reject();
+                    }
+                });
+            });
+        });
+}
+
+function resetRescuerState(email) {
+    tokenFactory(cookieDetails)
+        .then(function (token) {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: `/api/Admin/Management/ResetRescuerState?rescuerEmail=${email}`,
+                    type: 'PUT',
+                    beforeSend: function (xhr) {   //Include the bearer token in header
+                        xhr.setRequestHeader("Authorization", 'Bearer ' + token);
+                    },
+                    success: function () {
+                        console.log("done");
+                        resolve();
+                    },
+                    error: function () {
+                        console.error("error while resetting rescuer");
+                        reject();
+                    }
+                });
+            });
         });
 }
 
@@ -115,20 +163,53 @@ function initializeButtons() {
         $("#retrieve_main_container").addClass("border-primary");
     });
 
-    $("#btn_update").click(function () {
+    $("#btn_console_offline").click(function () {
+        consoleIsOnline = false;
         retrieveConsole();
 
         $(this).removeClass("btn-secondary");
         $(this).addClass("btn-primary");
+        $("#btn_console_online").removeClass("btn-primary");
+        $("#btn_console_online").addClass("btn-secondary");
+        $("#console_main_container").addClass("border-primary");
+    });
+
+    $("#btn_console_online").click(function () {
+        consoleIsOnline = true;
+        loadConsoleContents(""); // empty console contents
+        $(this).removeClass("btn-secondary");
+        $(this).addClass("btn-primary");
+        $("#btn_console_offline").removeClass("btn-primary");
+        $("#btn_console_offline").addClass("btn-secondary");
         $("#console_main_container").addClass("border-primary");
     });
 
     $("#btn_clear").click(function () {
+        loadConsoleContents("");
         clearConsole();
     });
 
     $("#btn_reset_trackers").click(function () {
+        loadConnectionsTable("", "");
         clearTrackers();
+    });
+
+    $("#btn_reset_client").click(function () {
+        var email = $("#field_reset_client").val();
+        resetClientState(email);
+        animateProgressBar("progress_bar_reset_client");
+        $(this).removeClass("btn-secondary");
+        $(this).addClass("btn-primary");
+        $("#reset_client_main_container").addClass("border-primary");
+    });
+
+    $("#btn_reset_rescuer").click(function () {
+        var email = $("#field_reset_rescuer").val();
+        resetRescuerState(email);
+        animateProgressBar("progress_bar_reset_rescuer");
+        $(this).removeClass("btn-secondary");
+        $(this).addClass("btn-primary");
+        $("#reset_rescuer_main_container").addClass("border-primary");
     });
 }
 
@@ -216,9 +297,13 @@ function loadConsoleContents(parsedJson) {
         $('#console_container').append('<p> > ' + obj + '</p>');
     }
 
-    if (parsedJson.length === 0) {
-        $('#console_container').append('<p> > </p>');
+    if (parsedJson.length === 0 || parsedJson === null) {
+        $('#console_container').append('<p id="empty_console_pointer"> > </p>');
     }
+}
+
+function addToConsoleContents(text) {
+    $('#console_container').append('<p> > ' + text + '</p>');
 }
 
 // SignalR related code..
@@ -229,12 +314,11 @@ function startConnection(token) {
         })
         .build();
 
-    connection.on("AdminTrackerChanges", function () {
-        retrieveTrackers();
-    });
-
-    connection.on("AdminConsoleChanges", function () {
-        retrieveConsole();
+    connection.on("AdminConsoleChanges", function (message) {
+        if (consoleIsOnline) {
+            $("#empty_console_pointer").remove();
+            addToConsoleContents(message);
+        }
     });
 
     // Start connection after finishing all the settings
