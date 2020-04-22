@@ -132,7 +132,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Retrieve cached content of the console
         /// </summary>
         [HttpGet]
         [Route("~/api/[controller]/Management/[action]")]
@@ -143,7 +143,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Reset all trackers (USE WITH CAUTION)
         /// </summary>
         [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
@@ -154,7 +154,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Deletes console cache.
         /// </summary>
         [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
@@ -165,7 +165,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Removes all occurences of the client email from the trackers
         /// </summary>
         [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
@@ -176,7 +176,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Removes all occurences of the rescuer  email from the trackers
         /// </summary>
         [HttpPut]
         [Route("~/api/[controller]/Management/[action]")]
