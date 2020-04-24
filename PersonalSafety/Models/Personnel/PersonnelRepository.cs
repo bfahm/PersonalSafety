@@ -24,8 +24,12 @@ namespace PersonalSafety.Models
 
         public string GetPersonnelAuthorityTypeString(string userId)
         {
-            int authorityTypeInt = context.Personnels.Include(p => p.Department).FirstOrDefault(p => p.PersonnelId == userId).Department.AuthorityType;
-            return ((AuthorityTypesEnum)authorityTypeInt).ToString();
+            int? authorityTypeInt = context.Personnels.Include(p => p.Department).FirstOrDefault(p => p.PersonnelId == userId)?.Department.AuthorityType;
+            if (authorityTypeInt != null)
+            {
+                return ((AuthorityTypesEnum)authorityTypeInt).ToString();
+            }
+            return null;
         }
 
         public Department GetPersonnelDepartment(string userId)

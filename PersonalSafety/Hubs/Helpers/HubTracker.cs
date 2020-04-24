@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace PersonalSafety.Hubs.HubTracker
 {
@@ -13,7 +10,7 @@ namespace PersonalSafety.Hubs.HubTracker
         public static HashSet<RescuerConnectionInfo> RescuerConnectionInfoSet;
         public static HashSet<RescuerConnectionInfo> RescuerWithPendingMissionsSet;
         public static HashSet<ConnectionInfo> AllConnectionInfoSet;
-        
+
         static TrackerHandler()
         {
             InitializeConsoleLog();

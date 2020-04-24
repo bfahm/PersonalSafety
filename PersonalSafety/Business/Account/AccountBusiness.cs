@@ -1,19 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using PersonalSafety.Services;
 using PersonalSafety.Options;
 using PersonalSafety.Contracts;
+using PersonalSafety.Models.ViewModels.AccountVM;
 using PersonalSafety.Services.Otp;
 
 namespace PersonalSafety.Business
@@ -22,25 +17,27 @@ namespace PersonalSafety.Business
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppSettings _appSettings;
-        private readonly IPersonnelRepository _personnelRepository;
-        private readonly IJwtAuthService _jwtAuthService;
+        private readonly ILoginService _loginService;
         private readonly IEmailService _emailService;
+        private readonly IPersonnelRepository _personnelRepository;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, IPersonnelRepository personnelRepository, IJwtAuthService jwtAuthService, IEmailService emailService)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, ILoginService loginService, IEmailService emailService, IPersonnelRepository personnelRepository)
         {
             _userManager = userManager;
             _appSettings = appSettings;
-            _personnelRepository = personnelRepository;
-            _jwtAuthService = jwtAuthService;
+            _loginService = loginService;
             _emailService = emailService;
+            _personnelRepository = personnelRepository;
         }
 
-        public async Task<APIResponse<string>> LoginAsync(LoginRequestViewModel request)
+        public async Task<APIResponse<LoginResponseViewModel>> LoginAsync(LoginRequestViewModel request)
         {
-            APIResponse<string> response = new APIResponse<string>();
-            response.Status = (int)APIResponseCodesEnum.Unauthorized;
+            APIResponse<LoginResponseViewModel> response = new APIResponse<LoginResponseViewModel>
+            {
+                Status = (int) APIResponseCodesEnum.Unauthorized,
+                HasErrors = true
+            };
             response.Messages.Add("User/Password combination is wrong.");
-            response.HasErrors = true;
 
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -48,13 +45,14 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            bool userHasValidPassowrd = await _userManager.CheckPasswordAsync(user, request.Password);
+            bool userHasValidPassword = await _userManager.CheckPasswordAsync(user, request.Password);
 
-            if (!userHasValidPassowrd)
+            if (!userHasValidPassword)
             {
                 return response;
             }
 
+            response.Messages = new List<string>(); // Reset messages since user had the correct combination.
             bool userHasConfirmedHisEmail = await _userManager.IsEmailConfirmedAsync(user);
 
             if (!userHasConfirmedHisEmail)
@@ -65,9 +63,18 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            AccountDetailsViewModel accountDetailsViewModel = new AccountDetailsViewModel();
+            AuthenticationDetailsViewModel authenticationDetailsViewModel = new AuthenticationDetailsViewModel();
+            LoginResponseViewModel responseViewModel = new LoginResponseViewModel();
+
             if (user.ForceChangePassword)
             {
-                response.Result = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                authenticationDetailsViewModel.Token = passwordResetToken;
+                responseViewModel = new LoginResponseViewModel
+                    { AuthenticationDetails = authenticationDetailsViewModel };
+
+                response.Result = responseViewModel;
                 response.Status = (int)APIResponseCodesEnum.IdentityError;
                 response.HasErrors = false;
                 response.Messages = new List<string>
@@ -78,28 +85,53 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            authenticationDetailsViewModel = await _loginService.GenerateAuthenticationDetailsAsync(user);
+            responseViewModel.AuthenticationDetails = authenticationDetailsViewModel;
+
+            accountDetailsViewModel.Email = user.Email;
+            accountDetailsViewModel.FullName = user.FullName;
+            accountDetailsViewModel.Roles = await _userManager.GetRolesAsync(user);
+
+            if (accountDetailsViewModel.Roles.Any())
+            {
+                response.Messages.Add("If you are a working entity, retrieve more data about your account through the endpoint below:");
+                response.Messages.Add("api/Account/Personnel/GetBasicInfo");
+            }
             
-            response.Result = await _jwtAuthService.GenerateAuthenticationTokenAsync(user);
+            responseViewModel.AccountDetails = accountDetailsViewModel;
+
+            response.Result = responseViewModel;
             response.Status = 0;
             response.HasErrors = false;
-            response.Messages = new List<string> {"Success! You are now logged in."};
+            response.Messages.Add("Success! You are now logged in.");
 
-            IEnumerable<string> roles = await _userManager.GetRolesAsync(user);
-            
-            if (roles.Count() != 0)
+            return response;
+        }
+
+        public async Task<APIResponse<AuthenticationDetailsViewModel>> RefreshTokenAsync(RefreshTokenRequestViewModel request)
+        {
+            APIResponse<AuthenticationDetailsViewModel> response = new APIResponse<AuthenticationDetailsViewModel>();
+
+            var validationResult = _loginService.ValidateRefreshToken(request.Token, request.RefreshToken, out var validatedToken);
+
+            if (validationResult != null)
             {
-                response.Messages.Add("Displaying list of roles current user have:");
-                response.Messages.AddRange(roles);
-
-
-                if (roles.Where(r => r.Contains(Roles.ROLE_PERSONNEL)).Any() != false)
-                {
-                    response.Messages.Add("It appears that you are a working entity, displaying your authority type:");
-                    string authorityTypeString = _personnelRepository.GetPersonnelAuthorityTypeString(user.Id);
-                    response.Messages.Add(authorityTypeString);
-                }
+                response.WrapResponseData(validationResult);
+                return response;
             }
 
+            // All checks passed, generate a new token for the user.
+            var user = await _userManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
+            if (user == null)
+            {
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                response.HasErrors = true;
+                response.Messages.Add("Error: An error occured while trying to retrieve your account details.");
+                return response;
+            }
+
+            response.Result = await _loginService.GenerateAuthenticationDetailsAsync(user);
+            response.Messages.Add("Success! Here is your updated authentication data.");
             return response;
         }
 
@@ -146,7 +178,7 @@ namespace PersonalSafety.Business
             ApplicationUser user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                response.Messages.Add("User with provided email does not exsist.");
+                response.Messages.Add("User with provided email does not exist.");
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.InvalidRequest;
                 return response;
@@ -265,11 +297,12 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> ValidateUserAsync(string userId, string email)
+        public async Task<APIResponse<bool>> ValidateTokenAsync(string token)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
-            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            var validatedToken = _loginService.GetPrincipalFromToken(token);
+            var user = await _userManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
             if (user == null)
             {
                 response.Messages.Add("User not authorized.");
@@ -278,20 +311,26 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            if(user.Email == email)
+            response.Result = true;
+            response.Messages.Add("Your token is valid and did not expire.");
+            response.Messages.Add("Currently logged in user email is: " + user.Email);
+            
+            return response;
+        }
+
+        // Only allowed to be used by personnel..
+        public APIResponse<AccountBasicInfoViewModel> GetBasicInfo(string userId)
+        {
+            APIResponse<AccountBasicInfoViewModel> response = new APIResponse<AccountBasicInfoViewModel>();
+
+            AccountBasicInfoViewModel viewModel = new AccountBasicInfoViewModel
             {
-                response.Result = true;
-                response.Messages.Add(email + " is currently logged in.");
-                return response;
-            }
-            else
-            {
-                response.Status = (int)APIResponseCodesEnum.Unauthorized;
-                response.Result = false;
-                response.HasErrors = true;
-                response.Messages.Add("Email and Token did not match.");
-                return response;
-            }
+                AuthorityTypeName = _personnelRepository.GetPersonnelAuthorityTypeString(userId),
+                DepartmentName = _personnelRepository.GetPersonnelDepartment(userId)?.ToString()
+            };
+
+            response.Result = viewModel;
+            return response;
         }
 
         private async Task<bool> ConfirmMailHybrid(ApplicationUser user, string token)
@@ -299,8 +338,7 @@ namespace PersonalSafety.Business
             if (token.Length == OTPHelper.otpSize)
             {
                 var totp = OTPHelper.GenerateOTP(user.Id);
-                long timeFrame;
-                bool isTokenValid = totp.VerifyTotp(token, out timeFrame);
+                bool isTokenValid = totp.VerifyTotp(token, out _);
                 if (isTokenValid)
                 {
                     user.EmailConfirmed = true;
@@ -316,7 +354,5 @@ namespace PersonalSafety.Business
                 return result.Succeeded;
             }
         }
-
-        
     }
 }

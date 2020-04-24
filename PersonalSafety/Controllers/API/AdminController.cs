@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
+using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
@@ -118,6 +118,72 @@ namespace PersonalSafety.Controllers.API
             }
 
             return Ok(authResponse);
+        }
+
+        /// <summary>
+        /// Retrieve "as is" values of the HubTracker variables
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult RetrieveTrackers()
+        {
+            var response = _adminBusiness.RetrieveTrackers();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Retrieve cached content of the console
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult RetrieveConsole()
+        {
+            var response = _adminBusiness.RetrieveConsole();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Reset all trackers (USE WITH CAUTION)
+        /// </summary>
+        [HttpPut]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetTrackers()
+        {
+            var response = _adminBusiness.ResetTrackers();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Deletes console cache.
+        /// </summary>
+        [HttpPut]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetConsole()
+        {
+            var response = _adminBusiness.ResetConsole();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Removes all occurences of the client email from the trackers
+        /// </summary>
+        [HttpPut]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetClientState([FromQuery]string clientEmail)
+        {
+            var response = _adminBusiness.ResetClientState(clientEmail);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Removes all occurences of the rescuer  email from the trackers
+        /// </summary>
+        [HttpPut]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult ResetRescuerState([FromQuery]string rescuerEmail)
+        {
+            var response = _adminBusiness.ResetRescuerState(rescuerEmail);
+            return Ok(response);
         }
     }
 }

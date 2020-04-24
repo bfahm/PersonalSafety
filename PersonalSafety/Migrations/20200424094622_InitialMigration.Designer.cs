@@ -10,8 +10,8 @@ using PersonalSafety.Models;
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200329183437_AddNewRolesToDbContext")]
-    partial class AddNewRolesToDbContext
+    [Migration("20200424094622_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,36 +46,6 @@ namespace PersonalSafety.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "263dc839-5e82-4dbb-a06e-8ab047056a68",
-                            ConcurrencyStamp = "8855d8e7-b43a-460a-b95a-6ba83e131181",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = "9c36997b-e408-4bcd-a844-c2a1495379c7",
-                            ConcurrencyStamp = "0666a7a7-09bb-4065-a53e-5aaa9d789ddd",
-                            Name = "Personnel",
-                            NormalizedName = "PERSONNEL"
-                        },
-                        new
-                        {
-                            Id = "72630ad4-895a-4ad5-ba34-ce9d172c48af",
-                            ConcurrencyStamp = "c9045169-1e3e-4c3f-857a-3abfdc4df7c7",
-                            Name = "Agent",
-                            NormalizedName = "AGENT"
-                        },
-                        new
-                        {
-                            Id = "3b13be57-7cd4-4822-975f-139a2836e1ac",
-                            ConcurrencyStamp = "75d465d3-85c8-4dfe-985c-555ca6f65a03",
-                            Name = "Rescuer",
-                            NormalizedName = "RESCUER"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -272,10 +242,7 @@ namespace PersonalSafety.Migrations
                     b.Property<string>("CurrentAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CurrentInvolvement")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentOngoingEvent")
+                    b.Property<int?>("InvolvedInEventId")
                         .HasColumnType("int");
 
                     b.Property<string>("MedicalHistoryNotes")
@@ -285,10 +252,17 @@ namespace PersonalSafety.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("PublicEventId")
+                        .HasColumnType("int");
+
                     b.HasKey("ClientId");
+
+                    b.HasIndex("InvolvedInEventId");
 
                     b.HasIndex("NationalId")
                         .IsUnique();
+
+                    b.HasIndex("PublicEventId");
 
                     b.ToTable("Clients");
                 });
@@ -301,6 +275,9 @@ namespace PersonalSafety.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("AuthorityType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("City")
                         .HasColumnType("int");
 
                     b.Property<double>("Latitude")
@@ -396,6 +373,34 @@ namespace PersonalSafety.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Personnels");
+                });
+
+            modelBuilder.Entity("PersonalSafety.Models.RefreshToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Invalidated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JwtId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>
@@ -504,6 +509,14 @@ namespace PersonalSafety.Migrations
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PersonalSafety.Models.Event", "InvolvedInEvent")
+                        .WithMany()
+                        .HasForeignKey("InvolvedInEventId");
+
+                    b.HasOne("PersonalSafety.Models.Event", "PublicEvent")
+                        .WithMany()
+                        .HasForeignKey("PublicEventId");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.EmergencyContact", b =>
@@ -533,6 +546,13 @@ namespace PersonalSafety.Migrations
                         .HasForeignKey("PersonnelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PersonalSafety.Models.RefreshToken", b =>
+                {
+                    b.HasOne("PersonalSafety.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>

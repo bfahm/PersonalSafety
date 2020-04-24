@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
+using PersonalSafety.Models.ViewModels.AccountVM;
 
 namespace PersonalSafety.Business
 {
@@ -12,7 +13,7 @@ namespace PersonalSafety.Business
         Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
         APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId);
         APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request);
-        Task<APIResponse<string>> LoginWithFacebookAsync(string accessToken);
+        Task<APIResponse<LoginResponseViewModel>> LoginWithFacebookAsync(string accessToken);
         Task<APIResponse<bool>> RegisterWithFacebookAsync(RegistrationWithFacebookViewModel request);
     }
 }

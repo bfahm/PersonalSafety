@@ -2,10 +2,8 @@
 using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Hubs.HubTracker;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
 using PersonalSafety.Hubs.Helpers;
 
@@ -14,8 +12,17 @@ namespace PersonalSafety.Hubs
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
-        public static readonly string connectionInfoChannel = "ConnectionInfoChannel";
-        
+        private readonly IHubTools _hubTools;
+
+        private static readonly string ConnectionInfoChannel = "ConnectionInfoChannel";
+
+        public MainHub(IHubTools hubTools)
+        {
+            _hubTools = hubTools;
+        }
+
+        public MainHub(){}
+
         public bool isConnected(string userId)
         {
             return TrackerHandler.AllConnectionInfoSet.FirstOrDefault(c => c.UserId == userId) != null;
@@ -35,10 +42,10 @@ namespace PersonalSafety.Hubs
             TrackerHandler.AllConnectionInfoSet.Add(currentConnection);
 
             // Print to the console
-            HubTools.PrintToConsole(currentConnection.UserEmail, currentConnection.ConnectionId, false);
+            _hubTools?.PrintToConsole(currentConnection.UserEmail, currentConnection.ConnectionId, false);
 
             // Automatically send client data to him after connection.
-            await Clients.Caller.SendAsync(connectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
+            await Clients.Caller.SendAsync(ConnectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
             
             await base.OnConnectedAsync();
         }
@@ -50,7 +57,7 @@ namespace PersonalSafety.Hubs
             if (currentDisconnection != null)
             {
                 TrackerHandler.AllConnectionInfoSet.RemoveWhere(c=> c.UserEmail == currentDisconnection.UserEmail);
-                HubTools.PrintToConsole(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true);
+                _hubTools?.PrintToConsole(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true);
             }
 
             await base.OnDisconnectedAsync(ex);

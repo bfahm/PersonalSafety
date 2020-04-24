@@ -3,6 +3,41 @@
     ViewBag.Title = "Personal Safety";
 }
 
+<style>
+
+    .new_content.new_content_static {
+        background: rgb(250, 245, 226);
+    }
+
+    .new_content.new_content_animation {
+        -webkit-animation: pulse 0.6s ease-in-out infinite alternate;
+        animation: pulse 0.6s ease-in-out infinite alternate;
+    }
+
+    @@-webkit-keyframes pulse {
+        0% {
+            background: transparent;
+        }
+        50% {
+            background: rgb(250, 245, 226);
+        }
+        100% {
+            background: transparent;
+        }
+    }
+
+    @@keyframes pulse {
+        0% {
+            background: transparent;
+        }
+        50% {
+            background: rgb(250, 245, 226);
+        }
+        100% {
+            background: transparent;
+        }
+    }
+</style>
 
 <section class="pb_cover_v3 overflow-hidden cover-bg-indigo cover-bg-opacity text-left pb_gradient_v1 pb_slant-white" id="section-home">
     <div class="container">
@@ -11,7 +46,7 @@
                 <h2 class="heading mb-3" style="display:inline">Server Running</h2>
                 <div class="sub-heading">
                     <p class="mb-4">Head to the <a href="~/swagger" target="_blank" style="text-decoration:none; "class="text-primary">documentation</a> to make use of our publicly available API, or check out the new content below.</p>
-                    <p class="mb-5"><a target="_blank" class="btn btn-primary btn-lg pb_btn-pill smoothscroll" href="#section-bookmarks"><span class="pb_font-14 text-uppercase pb_letter-spacing-1">NEW CONTENTS</span></a></p>
+                    <p class="mb-5"><a id="btn-new-contents" target="_blank" class="border-0 btn btn-primary btn-lg pb_btn-pill smoothscroll" href="#section-bookmarks"><span class="pb_font-14 text-uppercase pb_letter-spacing-1">NEW CONTENTS</span></a></p>
                 </div>
             </div>
             <div class="col-md-1">
@@ -22,110 +57,148 @@
 </section>
 
 <section class="pb_section bg-white pb_pb-250" id="section-bookmarks">
-      <div class="container">
+    <div class="container">
         <div class="row justify-content-center mb-5">
             <div class="col-md-6 text-center mb-5">
                 <div class="pb_feature-v1"><div class="pb_icon"><i class="ion-ios-bookmarks-outline pb_icon-gradient"></i></div></div>
                 <h5 class="text-uppercase pb_font-15 mb-2 pb_color-dark-opacity-3 pb_letter-spacing-2"><strong>Bookmarks</strong></h5>
-                <h2>Quick Links</h2>
+                <h2>New Content</h2>
             </div>
         </div>
         <div class="row">
-          <div class="col-lg-12 col-md- col-sm-12">
-            <div class="media d-block pb_feature-v1 text-left">
-              <div class="media-body">
+            <div class="col-lg-12 col-md- col-sm-12">
+                <div class="media d-block pb_feature-v1 text-left">
+                    <div class="media-body">
 
 
-                  <ul class="list-group text-sans-serif">
+                        <ul class="list-group text-sans-serif">
 
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <p class="text-primary"><strong>Departments</strong></p>
-                              <p class="text-secondary">The system now ships with 12 different departments, their locations are distributed among <strong>Alexandria, Cairo, and Tanta</strong>. Each city contains 4 departments with actual locations of real life dispatch centers.</p>
-                              <p class="text-secondary">Information about these departments can be retrieved by an <samp>Admin</samp> role through an endpoint method in the API, <samp>/api/Admin/GetDepartments</samp>.</p>
-                              <p class="text-secondary">Admins can easily attach new agents to existing departments by providing the <strong>existing department id</strong> or just create a new department through the creation of the agent account.</p>
-                              <p class="text-secondary">Additionally, new SOSRequests gets assigned to the nearest department serving the type of the request. <br /> Only agents within that department gets notified to refresh their tables. <br /> Changes of the online state of the rescuers also only reach agents of the same department.</p>
-                          </div>
-                          <span class="badge badge-success badge-pill">NEW!</span>
-                      </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
+                                <div>
+                                    <p class="text-primary"><strong>Admin Panel Major Enhancements</strong></p>
+                                    <ul>
+                                        <li>Thorough information about current connections.</li>
+                                        <li>Force offline Rescuers and Clients selectively using their emails.</li>
+                                        <li>Reactive console that updates its contents in realtime.</li>
+                                    </ul>
+                                </div>
+                                <span class="badge badge-success badge-pill">NEW!</span>
+                            </li>
 
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <p class="text-primary"><strong>Orphanage</strong></p>
-                              <p class="text-secondary">Due to latest code enhancements, orphanage state is not relevant anymore, Agents can only upgrade a pending request to be accepted if both the rescuer and the client were online. <br /> If clients lose connection, they can issue a reconnection and Agents would then be able to accept the request.</p>
-                          </div>
-                          <span class="badge badge-warning badge-pill">INFO</span>
-                      </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
+                                <div>
+                                    <p class="text-primary"><strong>Authentication: Refresh Tokens</strong></p>
+                                    <ul>
+                                        <li>New return object for <samp>api/Account/Login</samp> method</li>
+                                        <li>New feature for refreshing <strong>Bearer Tokens</strong>, <samp>api/Account/RefreshToken</samp></li>
+                                        <li>New method for retrieving info about the logged in Personnel, <samp>api/Account/Personnel/GetBasicInfo</samp></li>
+                                    </ul>
+                                </div>
+                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
+                            </li>
 
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <p class="text-primary"><strong>v1.0-alpha Changes that might break implementation</strong></p>
-                              <ul>
-                                  <li><samp>RegisterPersonnel</samp> &#8594 <samp>RegisterAgent</samp></li>
-                                  <li><samp>/api/Personnnel/•••</samp> &#8594 <samp>/api/Agent/SOS/•••</samp></li>
-                                  <li><samp>/hubs/Personnel</samp> &#8594 <samp>/hubs/Agent</samp></li>
-                                  <li><samp>PersonnelChannel</samp> &#8594 <samp>AgentRequestsChannel</samp></li>
-                                  <li><samp>ConnectionId</samp> is not needed anymore while sending new SOSRequests</li>
-                                  <li><samp>GetMyConnectionInfo()</samp> realtime function was removed. Connection info is now sent automatically after establishing connections. Check full realtime documentation <a href="/RealtimeClient">here</a></li>
-                                  <li>User now can only send <strong>one request per connection</strong>. More info <a href="https://trello.com/c/wmj8MGTC">here</a>.</li>
-                                  <li>New First Login functionality for Rescuers and Agents. More info at <samp>api/Account/Login</samp> documentation.</li>
-                              </ul>
-                          </div>
-                          <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
-                      </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-primary"><strong>Departments</strong></p>
+                                    <p class="text-secondary">The system now ships with 12 different departments, their locations are distributed among <strong>Alexandria, Cairo, and Tanta</strong>. Each city contains 4 departments with actual locations of real life dispatch centers.</p>
+                                    <p class="text-secondary">Information about these departments can be retrieved by an <samp>Admin</samp> role through an endpoint method in the API, <samp>/api/Admin/GetDepartments</samp>.</p>
+                                    <p class="text-secondary">Admins can easily attach new agents to existing departments by providing the <strong>existing department id</strong> or just create a new department through the creation of the agent account.</p>
+                                    <p class="text-secondary">Additionally, new SOSRequests gets assigned to the nearest department serving the type of the request. <br /> Only agents within that department gets notified to refresh their tables. <br /> Changes of the online state of the rescuers also only reach agents of the same department.</p>
+                                </div>
+                                <span class="badge badge-success badge-pill">NEW!</span>
+                            </li>
 
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-primary"><strong>Orphanage</strong></p>
+                                    <p class="text-secondary">Due to latest code enhancements, orphanage state is not relevant anymore, Agents can only upgrade a pending request to be accepted if both the rescuer and the client were online. <br /> If clients lose connection, they can issue a reconnection and Agents would then be able to accept the request.</p>
+                                </div>
+                                <span class="badge badge-warning badge-pill">INFO</span>
+                            </li>
 
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/Admin" style="text-decoration: none">Administrator Portal</a>
-                              <p>Simple page to quickly view current SignalR connections to the server, review hub logs, access to this page needs and Administrator privileges though.</p>
-                              <p>Admin can now reset all system trackers for local troubleshooting.</p>
-                          </div>
-                          <span class="badge badge-success badge-pill">NEW!</span>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <p class="text-primary"><strong>Facebook Login</strong></p>
-                              <p>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</p>
-                              <p>Quickly try the new Facebook Login API Endpoints by generating an access token from this tool.</p>
-                          </div>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <div>
-                              <a href="~/swagger" target="_blank" style="text-decoration: none">Current Endpoints</a>
-                              <ul>
-                                  <li>Account management endpoint at <samp>api/Account</samp></li>
-                                  <li>Admin endpoint at <samp>api/Admin</samp></li>
-                                  <li>Agent endpoint for managing his Department <samp>api/Agent/Department</samp></li>
-                                  <li>Agent endpoint for managing rescuers in his department <samp>api/Agent/Rescuer</samp></li>
-                                  <li>Agent endpoint for managing SOS Requests <samp>api/Agent/SOS</samp></li>
-                                  <li>Clients endpoint for completing registration at <samp>api/Client/Registration</samp></li>
-                                  <li>Clients endpoint for SOS actions at <samp>api/Client/SOS</samp></li>
-                                  <li>Rescuer endpoint at <samp>api/Rescuer</samp></li>
-
-                              </ul>
-                          </div>
-                      </li>
-
-                      <!--Old Changes that were removed-->
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a style="text-decoration: none; color: darkgrey"><strike>Personnel Endpoint</strike></a>
-                          <span class="badge badge-light badge-pill">REMOVED</span>
-                      </li>
-
-                      <li class="list-group-item d-flex justify-content-between align-items-center">
-                          <a style="text-decoration: none; color: darkgrey"><strike>User Endpoint</strike></a>
-                          <span class="badge badge-light badge-pill">REMOVED</span>
-                      </li>
-                  </ul>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-primary"><strong>v1.0-alpha Changes that might break implementation</strong></p>
+                                    <ul>
+                                        <li><samp>RegisterPersonnel</samp> &#8594 <samp>RegisterAgent</samp></li>
+                                        <li><samp>/api/Personnnel/•••</samp> &#8594 <samp>/api/Agent/SOS/•••</samp></li>
+                                        <li><samp>/hubs/Personnel</samp> &#8594 <samp>/hubs/Agent</samp></li>
+                                        <li><samp>PersonnelChannel</samp> &#8594 <samp>AgentRequestsChannel</samp></li>
+                                        <li><samp>ConnectionId</samp> is not needed anymore while sending new SOSRequests</li>
+                                        <li><samp>GetMyConnectionInfo()</samp> realtime function was removed. Connection info is now sent automatically after establishing connections. Check full realtime documentation <a href="/RealtimeClient">here</a></li>
+                                        <li>User now can only send <strong>one request per connection</strong>. More info <a href="https://trello.com/c/wmj8MGTC">here</a>.</li>
+                                        <li>New First Login functionality for Rescuers and Agents. More info at <samp>api/Account/Login</samp> documentation.</li>
+                                    </ul>
+                                </div>
+                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
+                            </li>
 
 
-              </div>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="~/Admin" style="text-decoration: none">Administrator Portal</a>
+                                    <p>Simple page to quickly view current SignalR connections to the server, review hub logs, access to this page needs and Administrator privileges though.</p>
+                                    <p>Admin can now reset all system trackers for local troubleshooting.</p>
+                                </div>
+                                <span class="badge badge-success badge-pill">NEW!</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-primary"><strong>Facebook Login</strong></p>
+                                    <p>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</p>
+                                    <p>Quickly try the new Facebook Login API Endpoints by generating an access token from this tool.</p>
+                                </div>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="~/swagger" target="_blank" style="text-decoration: none">Current Endpoints</a>
+                                    <ul>
+                                        <li>Account management endpoint at <samp>api/Account</samp></li>
+                                        <li>Admin endpoint at <samp>api/Admin</samp></li>
+                                        <li>Agent endpoint for managing his Department <samp>api/Agent/Department</samp></li>
+                                        <li>Agent endpoint for managing rescuers in his department <samp>api/Agent/Rescuer</samp></li>
+                                        <li>Agent endpoint for managing SOS Requests <samp>api/Agent/SOS</samp></li>
+                                        <li>Clients endpoint for completing registration at <samp>api/Client/Registration</samp></li>
+                                        <li>Clients endpoint for SOS actions at <samp>api/Client/SOS</samp></li>
+                                        <li>Rescuer endpoint at <samp>api/Rescuer</samp></li>
+
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!--Old Changes that were removed-->
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a style="text-decoration: none; color: darkgrey"><strike>Personnel Endpoint</strike></a>
+                                <span class="badge badge-light badge-pill">REMOVED</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a style="text-decoration: none; color: darkgrey"><strike>User Endpoint</strike></a>
+                                <span class="badge badge-light badge-pill">REMOVED</span>
+                            </li>
+                        </ul>
+
+
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    </section>
+    </div>
+</section>
+
+@section Scripts{ 
+    <script>
+
+        $(document).ready(function() {
+            setTimeout(function () {
+                    $(".new_content").removeClass("new_content_animation");
+                    $(".new_content").addClass("new_content_static");
+                },
+                5000);
+        })
+
+    </script>
+}

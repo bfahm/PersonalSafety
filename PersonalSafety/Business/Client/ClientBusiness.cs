@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.Services;
+using PersonalSafety.Models.ViewModels.AccountVM;
 
 namespace PersonalSafety.Business
 {
@@ -21,16 +22,16 @@ namespace PersonalSafety.Business
         private readonly IEmergencyContactRepository _emergencyContactRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFacebookAuthService _facebookAuthService;
-        private readonly IJwtAuthService _jwtAuthService;
+        private readonly ILoginService _loginService;
         private readonly IRegistrationService _registrationService;
 
-        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, UserManager<ApplicationUser> userManager, IFacebookAuthService facebookAuthService, IJwtAuthService jwtAuthService, IRegistrationService registrationService)
+        public ClientBusiness(IClientRepository clientRepository, IEmergencyContactRepository emergencyContactRepository, UserManager<ApplicationUser> userManager, IFacebookAuthService facebookAuthService, ILoginService loginService, IRegistrationService registrationService)
         {
             _clientRepository = clientRepository;
             _emergencyContactRepository = emergencyContactRepository;
             _userManager = userManager;
             _facebookAuthService = facebookAuthService;
-            _jwtAuthService = jwtAuthService;
+            _loginService = loginService;
             _registrationService = registrationService;
         }
 
@@ -53,9 +54,9 @@ namespace PersonalSafety.Business
             return await _registrationService.RegisterNewUserAsync(newUser, request.Password, client);
         }
 
-        public async Task<APIResponse<string>> LoginWithFacebookAsync(string accessToken)
+        public async Task<APIResponse<LoginResponseViewModel>> LoginWithFacebookAsync(string accessToken)
         {
-            APIResponse<string> response = new APIResponse<string>();
+            APIResponse<LoginResponseViewModel> response = new APIResponse<LoginResponseViewModel>();
 
             FacebookTokenValidationResult tokenValidationResult = await _facebookAuthService.ValidateAccessTokenAsync(accessToken);
             if (!tokenValidationResult.Data.IsValid)
@@ -75,7 +76,21 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            response.Result = await _jwtAuthService.GenerateAuthenticationTokenAsync(user);
+            AccountDetailsViewModel accountDetailsViewModel = new AccountDetailsViewModel();
+            AuthenticationDetailsViewModel authenticationDetailsViewModel = new AuthenticationDetailsViewModel();
+            LoginResponseViewModel responseViewModel = new LoginResponseViewModel();
+
+
+            authenticationDetailsViewModel = await _loginService.GenerateAuthenticationDetailsAsync(user);
+            responseViewModel.AuthenticationDetails = authenticationDetailsViewModel;
+
+            accountDetailsViewModel.Email = user.Email;
+            accountDetailsViewModel.FullName = user.FullName;
+            // NOTE: Users logging in via facebook shouldn't be working entities. eg. shouldn't have any roles
+            // accountDetailsViewModel.Roles = await _userManager.GetRolesAsync(user);
+            responseViewModel.AccountDetails = accountDetailsViewModel;
+
+            response.Result = responseViewModel;
             response.Messages.Add("Success, use the JWToken to access the api in the future requests");
             return response;
         }
@@ -161,7 +176,7 @@ namespace PersonalSafety.Business
 
 
             // Delete functionality implemented in the same hybrid function by simply not providing values
-            // Updaet functionality implemented in the same hybrid function by simply providing new values after deleting old ones
+            // Update functionality implemented in the same hybrid function by simply providing new values after deleting old ones
             _emergencyContactRepository.DeleteForUser(userId);
             if (request.EmergencyContacts != null)
             {
@@ -179,7 +194,7 @@ namespace PersonalSafety.Business
             }
 
 
-           response.Result = true;
+            response.Result = true;
             response.Messages.Add("Success! Saved your info.");
             response.Messages.Add("Current total emergency contacts: " + _emergencyContactRepository.GetByUserId(userId).Count());
             return response;

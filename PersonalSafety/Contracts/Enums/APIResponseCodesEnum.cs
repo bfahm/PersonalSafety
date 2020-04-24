@@ -16,6 +16,7 @@ namespace PersonalSafety.Contracts.Enums
         FacebookAuthError = -6,
         BadRequest = 400, // Happens when validation error occur 
         Unauthorized = 401,
-        NotFound = 404
+        NotFound = 404,
+        ServerError = 500
     }
 }

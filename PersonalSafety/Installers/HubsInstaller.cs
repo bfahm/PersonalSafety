@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Hubs.Services;
+using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety.Installers
 {
@@ -45,6 +46,9 @@ namespace PersonalSafety.Installers
             services.AddScoped<IClientHub, ClientHub>();
             services.AddScoped<IAgentHub, AgentHub>();
             services.AddScoped<IRescuerHub, RescuerHub>();
+            services.AddScoped<IAdminHub, AdminHub>();
+            
+            services.AddScoped<IHubTools, HubTools>();
         }
 
         public static void MapToEndpoints(IEndpointRouteBuilder endpoints)

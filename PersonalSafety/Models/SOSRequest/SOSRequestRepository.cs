@@ -36,7 +36,7 @@ namespace PersonalSafety.Models
 
         private void OrderRequests(ref IEnumerable<SOSRequest> requests)
         {
-            requests.OrderBy(r => r.CreationDate).ThenBy(r => r.State);
+            requests = requests.OrderBy(r => r.State).ThenBy(r => r.CreationDate);
         }
 
         public bool UserHasOngoingRequest(string userId)

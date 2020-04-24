@@ -240,10 +240,7 @@ namespace PersonalSafety.Migrations
                     b.Property<string>("CurrentAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CurrentInvolvement")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentOngoingEvent")
+                    b.Property<int?>("InvolvedInEventId")
                         .HasColumnType("int");
 
                     b.Property<string>("MedicalHistoryNotes")
@@ -253,10 +250,17 @@ namespace PersonalSafety.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("PublicEventId")
+                        .HasColumnType("int");
+
                     b.HasKey("ClientId");
+
+                    b.HasIndex("InvolvedInEventId");
 
                     b.HasIndex("NationalId")
                         .IsUnique();
+
+                    b.HasIndex("PublicEventId");
 
                     b.ToTable("Clients");
                 });
@@ -369,6 +373,34 @@ namespace PersonalSafety.Migrations
                     b.ToTable("Personnels");
                 });
 
+            modelBuilder.Entity("PersonalSafety.Models.RefreshToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Invalidated")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JwtId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -475,6 +507,14 @@ namespace PersonalSafety.Migrations
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PersonalSafety.Models.Event", "InvolvedInEvent")
+                        .WithMany()
+                        .HasForeignKey("InvolvedInEventId");
+
+                    b.HasOne("PersonalSafety.Models.Event", "PublicEvent")
+                        .WithMany()
+                        .HasForeignKey("PublicEventId");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.EmergencyContact", b =>
@@ -504,6 +544,13 @@ namespace PersonalSafety.Migrations
                         .HasForeignKey("PersonnelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PersonalSafety.Models.RefreshToken", b =>
+                {
+                    b.HasOne("PersonalSafety.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.SOSRequest", b =>

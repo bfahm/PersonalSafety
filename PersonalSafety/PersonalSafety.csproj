@@ -13,8 +13,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20200409162432_AddCityToDepartment.cs" />
-    <Compile Remove="Migrations\20200409162432_AddCityToDepartment.Designer.cs" />
+    <Compile Remove="Migrations\20200424094255_InitialMigration.cs" />
+    <Compile Remove="Migrations\20200424094255_InitialMigration.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
