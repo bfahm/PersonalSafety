@@ -1,5 +1,5 @@
 ﻿
-@{ 
+@{
     ViewBag.Title = "Personal Safety";
 }
 
@@ -45,8 +45,8 @@
             <div class="col-md-6">
                 <h2 class="heading mb-3" style="display:inline">Server Running</h2>
                 <div class="sub-heading">
-                    <p class="mb-4">Head to the <a href="~/swagger" target="_blank" style="text-decoration:none; "class="text-primary">documentation</a> to make use of our publicly available API, or check out the new content below.</p>
-                    <p class="mb-5"><a id="btn-new-contents" target="_blank" class="border-0 btn btn-primary btn-lg pb_btn-pill smoothscroll" href="#section-bookmarks"><span class="pb_font-14 text-uppercase pb_letter-spacing-1">NEW CONTENTS</span></a></p>
+                    <p class="mb-4">Head to the <a href="~/swagger" target="_blank" style="text-decoration:none; " class="text-primary">documentation</a> to make use of our publicly available API, or check out the new content below.</p>
+                    <p class="mb-5"><a id="btn-new-contents" target="_blank" class="border-0 btn btn-primary btn-lg pb_btn-pill smoothscroll" href="#header-bookmarks"><span class="pb_font-14 text-uppercase pb_letter-spacing-1">NEW CONTENTS</span></a></p>
                 </div>
             </div>
             <div class="col-md-1">
@@ -62,7 +62,7 @@
             <div class="col-md-6 text-center mb-5">
                 <div class="pb_feature-v1"><div class="pb_icon"><i class="ion-ios-bookmarks-outline pb_icon-gradient"></i></div></div>
                 <h5 class="text-uppercase pb_font-15 mb-2 pb_color-dark-opacity-3 pb_letter-spacing-2"><strong>Bookmarks</strong></h5>
-                <h2>New Content</h2>
+                <h2 id="header-bookmarks">New Content</h2>
             </div>
         </div>
         <div class="row">
@@ -189,16 +189,6 @@
     </div>
 </section>
 
-@section Scripts{ 
-    <script>
-
-        $(document).ready(function() {
-            setTimeout(function () {
-                    $(".new_content").removeClass("new_content_animation");
-                    $(".new_content").addClass("new_content_static");
-                },
-                5000);
-        })
-
-    </script>
+@section Scripts{
+    <script src="~/js/home.js" type="module"></script>
 }
