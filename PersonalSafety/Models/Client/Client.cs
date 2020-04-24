@@ -25,11 +25,13 @@ namespace PersonalSafety.Models
         public string CurrentAddress { get; set; }
 
         [ForeignKey("Event")]
-        public int CurrentOngoingEvent { get; set; }
+        public int? PublicEventId { get; set; }
 
         [ForeignKey("Event")]
-        public int CurrentInvolvement { get; set; }
+        public int? InvolvedInEventId { get; set; }
 
         public virtual ApplicationUser ApplicationUser { get; set; }
+        public virtual Event PublicEvent { get; set; }
+        public virtual Event InvolvedInEvent { get; set; }
     }
 }

@@ -40,7 +40,8 @@ namespace PersonalSafety.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    FullName = table.Column<string>(nullable: false)
+                    FullName = table.Column<string>(nullable: false),
+                    ForceChangePassword = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,6 +55,7 @@ namespace PersonalSafety.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AuthorityType = table.Column<int>(nullable: false),
+                    City = table.Column<int>(nullable: false),
                     Longitude = table.Column<double>(nullable: false),
                     Latitude = table.Column<double>(nullable: false)
                 },
@@ -169,30 +171,6 @@ namespace PersonalSafety.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Clients",
-                columns: table => new
-                {
-                    ClientId = table.Column<string>(nullable: false),
-                    NationalId = table.Column<string>(nullable: false),
-                    Birthday = table.Column<DateTime>(nullable: false),
-                    BloodType = table.Column<int>(nullable: false),
-                    MedicalHistoryNotes = table.Column<string>(nullable: true),
-                    CurrentAddress = table.Column<string>(nullable: true),
-                    CurrentOngoingEvent = table.Column<int>(nullable: false),
-                    CurrentInvolvement = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Clients", x => x.ClientId);
-                    table.ForeignKey(
-                        name: "FK_Clients_AspNetUsers_ClientId",
-                        column: x => x.ClientId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "EmergencyContacts",
                 columns: table => new
                 {
@@ -241,13 +219,34 @@ namespace PersonalSafety.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Token = table.Column<string>(nullable: false),
+                    JwtId = table.Column<string>(nullable: true),
+                    CreationDate = table.Column<DateTime>(nullable: false),
+                    ExpiryDate = table.Column<DateTime>(nullable: false),
+                    Invalidated = table.Column<bool>(nullable: false),
+                    UserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Token);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Personnels",
                 columns: table => new
                 {
                     PersonnelId = table.Column<string>(nullable: false),
                     DepartmentId = table.Column<int>(nullable: false),
-                    IsRescuer = table.Column<bool>(nullable: false),
-                    IsFirstLogin = table.Column<bool>(nullable: false)
+                    IsRescuer = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -264,6 +263,42 @@ namespace PersonalSafety.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Clients",
+                columns: table => new
+                {
+                    ClientId = table.Column<string>(nullable: false),
+                    NationalId = table.Column<string>(nullable: false),
+                    Birthday = table.Column<DateTime>(nullable: false),
+                    BloodType = table.Column<int>(nullable: false),
+                    MedicalHistoryNotes = table.Column<string>(nullable: true),
+                    CurrentAddress = table.Column<string>(nullable: true),
+                    PublicEventId = table.Column<int>(nullable: true),
+                    InvolvedInEventId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clients", x => x.ClientId);
+                    table.ForeignKey(
+                        name: "FK_Clients_AspNetUsers_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Clients_Events_InvolvedInEventId",
+                        column: x => x.InvolvedInEventId,
+                        principalTable: "Events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Clients_Events_PublicEventId",
+                        column: x => x.PublicEventId,
+                        principalTable: "Events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -305,16 +340,6 @@ namespace PersonalSafety.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "ef2fba56-130b-4ba9-b960-88d02bf5ce76", "bf987213-fd12-4810-8ddf-e77d4ff10653", "Admin", "ADMIN" });
-
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
-                values: new object[] { "59ad7863-b3b8-4770-88ac-daba55cc9493", "7d67d6ff-e1cc-4621-8d43-f250c0e99a66", "Personnel", "PERSONNEL" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -363,10 +388,20 @@ namespace PersonalSafety.Migrations
                 filter: "[PhoneNumber] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Clients_InvolvedInEventId",
+                table: "Clients",
+                column: "InvolvedInEventId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clients_NationalId",
                 table: "Clients",
                 column: "NationalId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clients_PublicEventId",
+                table: "Clients",
+                column: "PublicEventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EmergencyContacts_UserId",
@@ -382,6 +417,11 @@ namespace PersonalSafety.Migrations
                 name: "IX_Personnels_DepartmentId",
                 table: "Personnels",
                 column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SOSRequests_AssignedDepartmentId",
@@ -423,13 +463,16 @@ namespace PersonalSafety.Migrations
                 name: "EmergencyContacts");
 
             migrationBuilder.DropTable(
-                name: "Events");
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "SOSRequests");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Personnels");

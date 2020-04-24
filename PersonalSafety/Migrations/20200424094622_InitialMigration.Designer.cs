@@ -10,8 +10,8 @@ using PersonalSafety.Models;
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200416010708_RemoveUsedColumnRefreshTokens")]
-    partial class RemoveUsedColumnRefreshTokens
+    [Migration("20200424094622_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -242,10 +242,7 @@ namespace PersonalSafety.Migrations
                     b.Property<string>("CurrentAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CurrentInvolvement")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentOngoingEvent")
+                    b.Property<int?>("InvolvedInEventId")
                         .HasColumnType("int");
 
                     b.Property<string>("MedicalHistoryNotes")
@@ -255,10 +252,17 @@ namespace PersonalSafety.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("PublicEventId")
+                        .HasColumnType("int");
+
                     b.HasKey("ClientId");
+
+                    b.HasIndex("InvolvedInEventId");
 
                     b.HasIndex("NationalId")
                         .IsUnique();
+
+                    b.HasIndex("PublicEventId");
 
                     b.ToTable("Clients");
                 });
@@ -505,6 +509,14 @@ namespace PersonalSafety.Migrations
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PersonalSafety.Models.Event", "InvolvedInEvent")
+                        .WithMany()
+                        .HasForeignKey("InvolvedInEventId");
+
+                    b.HasOne("PersonalSafety.Models.Event", "PublicEvent")
+                        .WithMany()
+                        .HasForeignKey("PublicEventId");
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.EmergencyContact", b =>
