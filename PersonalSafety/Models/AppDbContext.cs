@@ -40,5 +40,6 @@ namespace PersonalSafety.Models
         public DbSet<Personnel> Personnels { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Distribution> Distributions { get; set; }
     }
 }
