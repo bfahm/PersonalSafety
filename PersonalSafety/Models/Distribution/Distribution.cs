@@ -22,7 +22,7 @@ namespace PersonalSafety.Models
 
         public override string ToString()
         {
-            return "rule_" + Id + "_" + (DistributionTypesEnum)Type + "_" + Value;
+            return "dist_" + Id + "_" + (DistributionTypesEnum)Type + "_" + Value;
         }
     }
 }

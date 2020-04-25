@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using PersonalSafety.Contracts.Enums;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,32 @@ namespace PersonalSafety.Models
         public DistributionRepository(AppDbContext context) : base(context)
         {
             this.context = context;
+        }
+
+        public void AddWithIdentityInsert(List<Distribution> distributions)
+        {
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                foreach(var distribution in distributions)
+                {
+                    context.Distributions.Add(distribution);
+                }
+                
+                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Distributions ON;");
+                context.SaveChanges();
+                context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Distributions OFF");
+                transaction.Commit();
+            }
+        }
+
+        public IEnumerable<Distribution> GetCities()
+        {
+            return context.Distributions.Where(d => d.Type == (int)DistributionTypesEnum.City);
+        }
+
+        public Distribution GetCityByName(string name)
+        {
+            return context.Distributions.SingleOrDefault(d => d.Value == name);
         }
 
         public List<Distribution> GetGrantedDistribution(int distributionId, int distributionType)
@@ -46,6 +73,11 @@ namespace PersonalSafety.Models
             }
 
             return result.Where(d=>d.Type == distributionType).ToList();
+        }
+
+        public bool IsCity(int distributionId)
+        {
+            return context.Distributions.Find(distributionId).Type == (int)DistributionTypesEnum.City;
         }
 
         private List<Distribution> GetChildDistributions(int distributionId)

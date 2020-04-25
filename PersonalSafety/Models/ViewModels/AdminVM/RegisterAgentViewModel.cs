@@ -24,7 +24,7 @@ namespace PersonalSafety.Models.ViewModels
 
         public int AuthorityType { get; set; }
 
-        public int DepartmentCity { get; set; }
+        public int DistributionId { get; set; }
 
         public double DepartmentLongitude { get; set; }
 

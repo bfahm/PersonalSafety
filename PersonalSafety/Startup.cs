@@ -39,7 +39,7 @@ namespace PersonalSafety
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
         {
             if (env.IsDevelopment())
             {
@@ -74,7 +74,7 @@ namespace PersonalSafety
 
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
             
-            ApplicationDbInitializer databaseInitializer = new ApplicationDbInitializer(userManager, roleManager, clientRepository, personnelRepository, departmentRepository);
+            ApplicationDbInitializer databaseInitializer = new ApplicationDbInitializer(userManager, roleManager, clientRepository, personnelRepository, departmentRepository, distributionRepository);
             databaseInitializer.SeedUsers();
 
             app.UseSwagger();

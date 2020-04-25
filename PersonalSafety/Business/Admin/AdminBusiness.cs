@@ -19,14 +19,16 @@ namespace PersonalSafety.Business
         private readonly IRegistrationService _registrationService;
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IPersonnelRepository _personnelRepository;
+        private readonly IDistributionRepository _distributionRepository;
         private readonly IAdminHub _adminHub;
         private readonly IHubTools _hubTools;
 
-        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IAdminHub adminHub, IHubTools hubTools)
+        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, IAdminHub adminHub, IHubTools hubTools)
         {
             _registrationService = registrationService;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
+            _distributionRepository = distributionRepository;
             _adminHub = adminHub;
             _hubTools = hubTools;
         }
@@ -45,8 +47,8 @@ namespace PersonalSafety.Business
                     Id = department.Id,
                     AuthorityType = department.AuthorityType,
                     AuthorityTypeName = ((AuthorityTypesEnum)department.AuthorityType).ToString(),
-                    City = department.City,
-                    CityName = ((CitiesEnum)department.City).ToString(),
+                    DistributionId = department.DistributionId,
+                    DistributionName = department.Distribution.ToString(),
                     Longitude = department.Longitude,
                     Latitude = department.Latitude,
                     AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(department.Id),
@@ -85,13 +87,21 @@ namespace PersonalSafety.Business
                     return response;
                 }
 
+                if (!_distributionRepository.IsCity(request.DistributionId))
+                {
+                    response.Messages.Add("Error: The provided distribution ID is not a leaf in the node, you must provide a city Id.");
+                    response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                    response.HasErrors = true;
+                    return response;
+                }
+
                 // Create department to put the agent in:
                 department = new Department
                 {
                     AuthorityType = request.AuthorityType,
                     Latitude = request.DepartmentLatitude,
                     Longitude = request.DepartmentLongitude,
-                    City = request.DepartmentCity
+                    DistributionId = request.DistributionId
                 };
 
                 _departmentRepository.Add(department);

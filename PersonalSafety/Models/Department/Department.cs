@@ -16,14 +16,16 @@ namespace PersonalSafety.Models
         [Required]
         public int AuthorityType { get; set; }
 
-        public int City { get; set; }
+        [ForeignKey("Distribution")]
+        public int DistributionId { get; set; }
+        public virtual Distribution Distribution { get; set; }
 
         public double Longitude { get; set; }
         public double Latitude { get; set; }
 
         public override string ToString()
         {
-            return "dpt_" + Id + "_" + (CitiesEnum) City + "_" + (AuthorityTypesEnum) AuthorityType;
+            return "dpt_" + Id + "_" + Distribution.Value + "_" + (AuthorityTypesEnum) AuthorityType;
         }
     }
 }
