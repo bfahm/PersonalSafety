@@ -142,7 +142,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, null);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, null);
 
             return Ok(response);
         }
@@ -165,7 +165,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Pending);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Pending);
 
             return Ok(response);
         }
@@ -188,7 +188,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Accepted);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Accepted);
 
             return Ok(response);
         }
@@ -211,7 +211,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Solved);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Solved);
 
             return Ok(response);
         }
@@ -234,7 +234,7 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Canceled);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Canceled);
 
             return Ok(response);
         }

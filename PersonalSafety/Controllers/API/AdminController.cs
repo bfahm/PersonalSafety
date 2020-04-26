@@ -183,28 +183,6 @@ namespace PersonalSafety.Controllers.API
 
 
         /// <summary>
-        /// Retrieve full information about registered departments
-        /// </summary>
-        /// <remarks>
-        /// ## Main Functionality
-        /// Allows administrators to retrieve information about every department available in the system, including:
-        /// - **Id**: Id of the department
-        /// - **Location**: Longs and Lats
-        /// - **City**: City Id and Name
-        /// - **Authority**: Authority Id and Name
-        /// - **Agents**: Emails of registered agents in the department
-        /// - **Rescuers**: Emails of registered rescuers in the department
-        /// 
-        /// </remarks>
-        [HttpGet(ApiRoutes.Admin.Management)]
-        public IActionResult GetDepartments()
-        {
-            var authResponse = _adminBusiness.GetDepartments();
-
-            return Ok(authResponse);
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         [HttpGet(ApiRoutes.Admin.Management)]

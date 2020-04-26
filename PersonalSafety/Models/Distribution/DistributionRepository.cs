@@ -51,7 +51,7 @@ namespace PersonalSafety.Models
             return context.Distributions.Where(d => d.Type == (int)DistributionTypesEnum.City);
         }
 
-        public List<Distribution> GetGrantedDistributions(int distributionId, int distributionType)
+        public List<Distribution> GetGrantedDistributions(int distributionId)
         {
             var result = new List<Distribution>();
 
@@ -80,7 +80,7 @@ namespace PersonalSafety.Models
                 }
             }
 
-            return result.Where(d => d.Type == distributionType).ToList();
+            return result;
         }
 
         public DistributionTreeViewModel GetDistributionTree(int startingNode, bool recursive)

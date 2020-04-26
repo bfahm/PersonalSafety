@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using PersonalSafety.Contracts;
+using System.Security.Claims;
 
 namespace PersonalSafety.Extensions
 {
@@ -45,6 +46,10 @@ namespace PersonalSafety.Extensions
             };
 
             CreateUserAndSetupRole(adminUser, "Admin@123", "Admin");
+            if (_userManager.GetClaimsAsync(_userManager.FindByEmailAsync("admin@admin.com").Result).Result.Count == 0)
+            {
+                _userManager.AddClaimAsync(adminUser, new Claim(ClaimsStore.CLAIM_DISTRIBUTION_ACCESS, "1")).Wait(); // Admin can access all distributions
+            }
 
             #endregion
 

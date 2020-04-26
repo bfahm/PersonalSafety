@@ -242,33 +242,6 @@ namespace PersonalSafety.Business
             };
         }
 
-        public APIResponse<List<GetDepartmentDataViewModel>> GetDepartments()
-        {
-            APIResponse<List<GetDepartmentDataViewModel>> response = new APIResponse<List<GetDepartmentDataViewModel>>();
-            var responseResult = new List<GetDepartmentDataViewModel>();
-
-            var departments = _departmentRepository.GetAll();
-
-            foreach (var department in departments)
-            {
-                responseResult.Add(new GetDepartmentDataViewModel
-                {
-                    Id = department.Id,
-                    AuthorityType = department.AuthorityType,
-                    AuthorityTypeName = ((AuthorityTypesEnum)department.AuthorityType).ToString(),
-                    DistributionId = department.DistributionId,
-                    DistributionName = department.Distribution.ToString(),
-                    Longitude = department.Longitude,
-                    Latitude = department.Latitude,
-                    AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(department.Id),
-                    RescuersEmails = _personnelRepository.GetDepartmentRescuersEmails(department.Id)
-                });
-            }
-
-            response.Result = responseResult;
-            return response;
-        }
-
         public APIResponse<DistributionTreeViewModel> GetDistributionTree()
         {
             APIResponse<DistributionTreeViewModel> response = new APIResponse<DistributionTreeViewModel>();

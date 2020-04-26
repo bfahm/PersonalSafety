@@ -1,0 +1,72 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using PersonalSafety.Business;
+using PersonalSafety.Contracts;
+
+namespace PersonalSafety.Controllers.API
+{
+    [Route(ApiRoutes.Default)]
+    [ApiController]
+    [Authorize(Roles = Roles.ROLE_ADMIN + "," + Roles.ROLE_MANAGER)]
+    public class ManagerController : ControllerBase
+    {
+        private readonly IManagerBusiness _managerBusiness;
+
+        public ManagerController(IManagerBusiness managerBusiness)
+        {
+            _managerBusiness = managerBusiness;
+        }
+
+        /// <summary>
+        /// Retrieve full information about registered departments
+        /// </summary>
+        /// <remarks>
+        /// ## Main Functionality
+        /// Allows administrators to retrieve information about every department available in the system, including:
+        /// - **Id**: Id of the department
+        /// - **Location**: Longs and Lats
+        /// - **City**: City Id and Name
+        /// - **Authority**: Authority Id and Name
+        /// - **Agents**: Emails of registered agents in the department
+        /// - **Rescuers**: Emails of registered rescuers in the department
+        /// 
+        /// </remarks>
+        [HttpGet]
+        public async Task<IActionResult> GetDepartments()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            var authResponse = await _managerBusiness.GetDepartmentsAsync(currentlyLoggedInUserId);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        [HttpGet]
+        public async Task<IActionResult> GetDepartmentRequests([FromQuery] int departmentId)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            var authResponse = await _managerBusiness.GetDepartmentRequestsAsync(currentlyLoggedInUserId, departmentId, null, true);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+    }
+}
