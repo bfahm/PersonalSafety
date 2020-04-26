@@ -155,6 +155,32 @@ namespace PersonalSafety.Controllers.API
             return Ok(authResponse);
         }
 
+        [HttpPost(ApiRoutes.Admin.Registration)]
+        public async Task<IActionResult> RegisterManager([FromBody] RegisterManagerViewModel request)
+        {
+            var authResponse = await _adminBusiness.RegisterManagerAsync(request);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+
+        [HttpPut(ApiRoutes.Admin.Registration)]
+        public async Task<IActionResult> ModifyManagerAccess([FromBody] ModifyManagerViewModel request)
+        {
+            var authResponse = await _adminBusiness.ModifyManagerAccessAsync(request);
+
+            if (authResponse.HasErrors)
+            {
+                return BadRequest(authResponse);
+            }
+
+            return Ok(authResponse);
+        }
+
 
         /// <summary>
         /// Retrieve full information about registered departments

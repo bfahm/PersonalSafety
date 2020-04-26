@@ -72,7 +72,7 @@ namespace PersonalSafety.Business
                 IsRescuer = true
             };
 
-            return await _registrationService.RegisterNewUserAsync(newUser, rescuer.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
+            return await _registrationService.RegisterWorkingEntityAsync(newUser, rescuer.Password, () => _personnelRepository.Add(personnel), new string[] { Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER }, null);
         }
 
         public APIResponse<List<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId)

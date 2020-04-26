@@ -7,17 +7,13 @@ using System.Threading.Tasks;
 namespace PersonalSafety.Contracts
 {
     /// <remarks>
-    /// Add new roles as class constants to be added automatically to the database
+    /// Add new claims as class constants to be added automatically to the database
     /// </remarks>
-    public static class Roles
+    public static class ClaimsStore
     {
-        public const string ROLE_ADMIN = "Admin";
-        public const string ROLE_MANAGER = "Manager";
-        public const string ROLE_PERSONNEL = "Personnel";
-        public const string ROLE_AGENT = "Agent";
-        public const string ROLE_RESCUER = "Rescuer";
+        public const string CLAIM_DISTRIBUTION_ACCESS = "DistributionAccess";
 
-        public static List<string> GetRoles()
+        public static List<string> GetClaims()
         {
             return typeof(Roles).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
                                 .Select(field => field.GetValue(null).ToString())

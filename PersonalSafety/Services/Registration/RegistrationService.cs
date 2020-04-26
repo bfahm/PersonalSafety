@@ -5,6 +5,7 @@ using PersonalSafety.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PersonalSafety.Services
@@ -13,18 +14,16 @@ namespace PersonalSafety.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IClientRepository _clientRepository;
-        private readonly IPersonnelRepository _personnelRepository;
         private readonly IEmailService _emailService;
 
-        public RegistrationService(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IEmailService emailService)
+        public RegistrationService(UserManager<ApplicationUser> userManager, IClientRepository clientRepository, IEmailService emailService)
         {
             _userManager = userManager;
             _clientRepository = clientRepository;
-            _personnelRepository = personnelRepository;
             _emailService = emailService;
         }
 
-        public async Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Client client)
+        public async Task<APIResponse<bool>> RegisterClientAsync(ApplicationUser applicationUser, string password, Client client)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -83,7 +82,7 @@ namespace PersonalSafety.Services
             return response;
         }
 
-        public async Task<APIResponse<bool>> RegisterNewUserAsync(ApplicationUser applicationUser, string password, Personnel personnel, params string[] roles)
+        public async Task<APIResponse<bool>> RegisterWorkingEntityAsync(ApplicationUser applicationUser, string password, EntityAdder entityAdder, string[] roles, Claim[] claims)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -94,8 +93,7 @@ namespace PersonalSafety.Services
                 return response;
             }
 
-            //_personnelRepository.Add(client) still needs saving, but will be done automatically while creating the user below.
-            _personnelRepository.Add(personnel);
+            entityAdder?.Invoke();
 
             var creationResultForAccount = await _userManager.CreateAsync(applicationUser, password);
             var identityCheckResult = CheckIdentityResult(creationResultForAccount);
@@ -105,23 +103,27 @@ namespace PersonalSafety.Services
                 return response;
             }
 
-            foreach (var role in roles)
+            var addToRoleResult = await _userManager.AddToRolesAsync(applicationUser, roles);
+            var roleAddingCheckResult = CheckIdentityResult(addToRoleResult);
+            if (roleAddingCheckResult != null)
             {
-                var addToRoleResult = await _userManager.AddToRoleAsync(applicationUser, role);
-                var roleAddingCheckResult = CheckIdentityResult(addToRoleResult);
-                if (roleAddingCheckResult != null)
-                {
-                    response.WrapResponseData(roleAddingCheckResult);
-                    return response;
-                }
+                response.WrapResponseData(roleAddingCheckResult);
+                return response;
             }
-            
+
+            var addToClaimResult = await _userManager.AddClaimsAsync(applicationUser, claims);
+            var ClaimAddingCheckResult = CheckIdentityResult(addToClaimResult);
+            if (ClaimAddingCheckResult != null)
+            {
+                response.WrapResponseData(ClaimAddingCheckResult);
+                return response;
+            }
+
             // TODO: send just congratulation email using the service here
-            response.Messages.Add("Successfully created a new personnel with email " + applicationUser.Email);
+            response.Messages.Add("Successfully created a new entity with email " + applicationUser.Email);
             return response;
         }
 
-        
         // Helpers and checkers
 
         private async Task<APIResponseData> CheckEmailDuplication(string email)
@@ -171,5 +173,7 @@ namespace PersonalSafety.Services
             }
             return null;
         }
+
+        public delegate void EntityAdder();
     }
 }

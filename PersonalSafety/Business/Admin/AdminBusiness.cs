@@ -7,56 +7,31 @@ using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.Helpers;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.ViewModels.AdminVM;
 using PersonalSafety.Services;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace PersonalSafety.Business
 {
     public class AdminBusiness : IAdminBusiness
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRegistrationService _registrationService;
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IDistributionRepository _distributionRepository;
         private readonly IHubTools _hubTools;
 
-        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, IHubTools hubTools)
+        public AdminBusiness(UserManager<ApplicationUser> userManager, IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, IHubTools hubTools)
         {
+            _userManager = userManager;
             _registrationService = registrationService;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
             _distributionRepository = distributionRepository;
             _hubTools = hubTools;
-        }
-
-        public APIResponse<List<GetDepartmentDataViewModel>> GetDepartments()
-        {
-            APIResponse<List<GetDepartmentDataViewModel>> response = new APIResponse<List<GetDepartmentDataViewModel>>();
-            var responseResult = new List<GetDepartmentDataViewModel>();
-
-            var departments = _departmentRepository.GetAll();
-
-            foreach (var department in departments)
-            {
-                responseResult.Add(new GetDepartmentDataViewModel
-                {
-                    Id = department.Id,
-                    AuthorityType = department.AuthorityType,
-                    AuthorityTypeName = ((AuthorityTypesEnum)department.AuthorityType).ToString(),
-                    DistributionId = department.DistributionId,
-                    DistributionName = department.Distribution.ToString(),
-                    Longitude = department.Longitude,
-                    Latitude = department.Latitude,
-                    AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(department.Id),
-                    RescuersEmails = _personnelRepository.GetDepartmentRescuersEmails(department.Id)
-                });    
-            }
-
-            response.Result = responseResult;
-            return response;
         }
 
         public async Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request)
@@ -123,7 +98,76 @@ namespace PersonalSafety.Business
                 DepartmentId = department.Id
             };
 
-            return await _registrationService.RegisterNewUserAsync(newUser, request.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT);
+            return await _registrationService.RegisterWorkingEntityAsync(newUser, request.Password, () => _personnelRepository.Add(personnel), new string[] { Roles.ROLE_PERSONNEL, Roles.ROLE_AGENT }, null);
+        }
+
+        public async Task<APIResponse<bool>> RegisterManagerAsync(RegisterManagerViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            if (!_distributionRepository.DoesNodeExist(request.DistributionId))
+            {
+                response.Messages.Add("The distribution id you provided was not found.");
+                response.Status = (int)APIResponseCodesEnum.NotFound;
+                response.HasErrors = true;
+                return response;
+            }
+
+            // Then create the agent:
+            ApplicationUser newUser = new ApplicationUser
+            {
+                Email = request.Email,
+                UserName = request.Email,
+                FullName = request.FullName,
+                EmailConfirmed = true,
+                ForceChangePassword = true
+            };
+
+            var managerialClaim = new Claim(ClaimsStore.CLAIM_DISTRIBUTION_ACCESS, request.DistributionId.ToString());
+
+            return await _registrationService.RegisterWorkingEntityAsync(newUser, request.Password, null, new string[] { Roles.ROLE_MANAGER }, new Claim[] { managerialClaim });
+        }
+
+        public async Task<APIResponse<bool>> ModifyManagerAccessAsync(ModifyManagerViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var toBeModifiedManager = await _userManager.FindByEmailAsync(request.Email);
+
+            if (toBeModifiedManager == null)
+            {
+                response.Messages.Add("The provided email was not found.");
+                response.Status = (int)APIResponseCodesEnum.NotFound;
+                response.HasErrors = true;
+                return response;
+            }
+
+            if (!_distributionRepository.DoesNodeExist(request.DistributionId))
+            {
+                response.Messages.Add("The distribution id you provided was not found.");
+                response.Status = (int)APIResponseCodesEnum.NotFound;
+                response.HasErrors = true;
+                return response;
+            }
+
+            var oldClaim = (await _userManager.GetClaimsAsync(toBeModifiedManager))
+                                    .SingleOrDefault(c => c.Type == ClaimsStore.CLAIM_DISTRIBUTION_ACCESS);
+
+            var newClaim = new Claim(ClaimsStore.CLAIM_DISTRIBUTION_ACCESS, request.DistributionId.ToString());
+
+            var identityResult = await _userManager.ReplaceClaimAsync(toBeModifiedManager, oldClaim, newClaim);
+
+            response.Result = identityResult.Succeeded;
+            response.HasErrors = !identityResult.Succeeded;
+            response.Status = (identityResult.Succeeded) ? (int)APIResponseCodesEnum.Ok : (int)APIResponseCodesEnum.IdentityError;
+            response.Messages.AddRange(identityResult.Errors.Select(e => e.Description));
+
+            if (identityResult.Succeeded)
+            {
+                response.Messages.Add(request.Email + " granted access to node: " + _distributionRepository.GetById(request.DistributionId.ToString()).ToString());
+            }
+            
+            return response;
         }
 
         public APIResponse<Dictionary<string, object>> RetrieveTrackers()
@@ -196,6 +240,33 @@ namespace PersonalSafety.Business
             {
                 Result = true
             };
+        }
+
+        public APIResponse<List<GetDepartmentDataViewModel>> GetDepartments()
+        {
+            APIResponse<List<GetDepartmentDataViewModel>> response = new APIResponse<List<GetDepartmentDataViewModel>>();
+            var responseResult = new List<GetDepartmentDataViewModel>();
+
+            var departments = _departmentRepository.GetAll();
+
+            foreach (var department in departments)
+            {
+                responseResult.Add(new GetDepartmentDataViewModel
+                {
+                    Id = department.Id,
+                    AuthorityType = department.AuthorityType,
+                    AuthorityTypeName = ((AuthorityTypesEnum)department.AuthorityType).ToString(),
+                    DistributionId = department.DistributionId,
+                    DistributionName = department.Distribution.ToString(),
+                    Longitude = department.Longitude,
+                    Latitude = department.Latitude,
+                    AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(department.Id),
+                    RescuersEmails = _personnelRepository.GetDepartmentRescuersEmails(department.Id)
+                });
+            }
+
+            response.Result = responseResult;
+            return response;
         }
 
         public APIResponse<DistributionTreeViewModel> GetDistributionTree()

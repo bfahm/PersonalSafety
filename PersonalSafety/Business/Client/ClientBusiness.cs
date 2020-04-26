@@ -51,7 +51,7 @@ namespace PersonalSafety.Business
                 NationalId = request.NationalId
             };
 
-            return await _registrationService.RegisterNewUserAsync(newUser, request.Password, client);
+            return await _registrationService.RegisterClientAsync(newUser, request.Password, client);
         }
 
         public async Task<APIResponse<LoginResponseViewModel>> LoginWithFacebookAsync(string accessToken)
@@ -124,7 +124,7 @@ namespace PersonalSafety.Business
                 NationalId = request.NationalId
             };
 
-            return await _registrationService.RegisterNewUserAsync(newUser, null, client);
+            return await _registrationService.RegisterClientAsync(newUser, null, client);
         }
 
         public APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId)

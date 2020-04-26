@@ -11,6 +11,8 @@ namespace PersonalSafety.Business
     {
         APIResponse<List<GetDepartmentDataViewModel>> GetDepartments();
         Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request);
+        Task<APIResponse<bool>> RegisterManagerAsync(RegisterManagerViewModel request);
+        Task<APIResponse<bool>> ModifyManagerAccessAsync(ModifyManagerViewModel request);
         APIResponse<Dictionary<string, object>> RetrieveTrackers();
         APIResponse<object> RetrieveConsole();
         APIResponse<bool> ResetTrackers();
