@@ -17,7 +17,7 @@ $(document).ready(function () {
     if (((lastBuildDateClientSide !== lastBuildDateServerSide) || (lastBuildDateNotifyServerSide !== lastBuildDateNotifyClientSide))
         && (lastBuildDateNotifyServerSide === "True")) {
         $("#btn-new-contents").click();
-        setCookie("LastBuildDateClientSide", getCookie("LastBuildDateServerSide"), null);
-        setCookie("LastBuildDateNotifyClientSide", getCookie("LastBuildDateNotifyServerSide"), null);
+        setCookie("LastBuildDateClientSide", getCookie("LastBuildDateServerSide"), 4320);
+        setCookie("LastBuildDateNotifyClientSide", getCookie("LastBuildDateNotifyServerSide"), 4320);
     }
 });
