@@ -14,7 +14,7 @@ using PersonalSafety.Models.ViewModels.AccountVM;
 
 namespace PersonalSafety.Controllers.API
 {
-    [Route("api/[controller]/[action]")]
+    [Route(ApiRoutes.Default)]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -383,8 +383,7 @@ namespace PersonalSafety.Controllers.API
         /// *Note that Agents and Rescuers are both considered 'Personnel' and are the only people allowed to use this method.*
         ///
         /// </remarks>
-        [Route("~/api/[controller]/Personnel/[action]")]
-        [HttpGet]
+        [HttpGet(ApiRoutes.Account.PersonnelBasicInfo)]
         [Authorize(Roles = Roles.ROLE_PERSONNEL)]
         public IActionResult GetBasicInfo()
         {

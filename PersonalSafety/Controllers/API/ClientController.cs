@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
-using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubTracker;
-using PersonalSafety.Contracts.Enums;
-using PersonalSafety.Hubs.Services;
+using PersonalSafety.Contracts;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
 {
-    [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class ClientController : ControllerBase
@@ -53,8 +47,7 @@ namespace PersonalSafety.Controllers.API
         /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
         /// </remarks>
         [AllowAnonymous]
-        [HttpPost]
-        [Route("Registration/[action]")]
+        [HttpPost(ApiRoutes.Client.Registration)]
         public async Task<IActionResult> Register([FromBody] RegistrationViewModel request)
         {
             var authResponse = await _clientBusiness.RegisterAsync(request);
@@ -83,8 +76,7 @@ namespace PersonalSafety.Controllers.API
         /// - Accesss Token is invalid or has expired
         /// </remarks>
         [AllowAnonymous]
-        [HttpPost]
-        [Route("Registration/[action]")]
+        [HttpPost(ApiRoutes.Client.Registration)]
         public async Task<IActionResult> LoginViaFacebook([FromQuery] string accessToken)
         {
             var authResponse = await _clientBusiness.LoginWithFacebookAsync(accessToken);
@@ -121,8 +113,7 @@ namespace PersonalSafety.Controllers.API
         /// - Someone with the same Phone Number has registered before
         /// </remarks>
         [AllowAnonymous]
-        [HttpPost]
-        [Route("Registration/[action]")]
+        [HttpPost(ApiRoutes.Client.Registration)]
         public async Task<IActionResult> RegisterViaFacebook([FromBody] RegistrationWithFacebookViewModel request)
         {
             var authResponse = await _clientBusiness.RegisterWithFacebookAsync(request);
@@ -146,8 +137,7 @@ namespace PersonalSafety.Controllers.API
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
-        [HttpGet]
-        [Route("Registration/[action]")]
+        [HttpGet(ApiRoutes.Client.Registration)]
         public IActionResult GetEmergencyInfo()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -186,8 +176,7 @@ namespace PersonalSafety.Controllers.API
         /// #### **[401]**: Unauthorized
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
-        [HttpPut]
-        [Route("Registration/[action]")]
+        [HttpPut(ApiRoutes.Client.Registration)]
         public IActionResult CompleteProfile([FromBody] CompleteProfileViewModel request)
         {
             //? means : If value is not null, retrieve it
@@ -221,8 +210,7 @@ namespace PersonalSafety.Controllers.API
         /// #### **[401]**: Unauthorized
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
-        [HttpPost]
-        [Route("SOS/[action]")]
+        [HttpPost(ApiRoutes.Client.SOS)]
         public async Task<IActionResult> SendSOSRequest([FromBody] SendSOSRequestViewModel request)
         {
             //? means : If value is not null, retrieve it
@@ -245,8 +233,7 @@ namespace PersonalSafety.Controllers.API
         /// #### **[404]**: Notfound
         /// Could happen if the provided Id does not match an existing request.
         /// </remarks>
-        [HttpPut]
-        [Route("SOS/[action]")]
+        [HttpPut(ApiRoutes.Client.SOS)]
         public async Task<IActionResult> CancelSOSRequest([FromQuery] int requestId)
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
@@ -263,8 +250,7 @@ namespace PersonalSafety.Controllers.API
         /// ### Functionality
         /// Searches for any pending request and cancels it. This unlocks the ability send new requests for clients.
         /// </remarks>
-        [HttpPut]
-        [Route("SOS/[action]")]
+        [HttpPut(ApiRoutes.Client.SOS)]
         public async Task<IActionResult> CancelPendingRequests()
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;

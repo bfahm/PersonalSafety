@@ -43,6 +43,8 @@ namespace PersonalSafety.Business
                 AuthorityTypeName = ((AuthorityTypesEnum)currentAgentDepartment.Id).ToString(),
                 DepartmentLongitude = currentAgentDepartment.Longitude,
                 DepartmentLatitude = currentAgentDepartment.Latitude,
+                DistributionId = currentAgentDepartment.DistributionId,
+                DistributionName = currentAgentDepartment.Distribution.ToString(),
                 AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(currentAgentDepartment.Id),
                 RescuerEmails = _personnelRepository.GetDepartmentRescuersEmails(currentAgentDepartment.Id)
             };

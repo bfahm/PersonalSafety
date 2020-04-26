@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
 
 namespace PersonalSafety.Controllers.API
 {
-    [Route("api/[controller]/[action]")]
+    [Route(ApiRoutes.Default)]
     [ApiController]
     [Authorize(Roles = Roles.ROLE_RESCUER)]
     public class RescuerController : ControllerBase

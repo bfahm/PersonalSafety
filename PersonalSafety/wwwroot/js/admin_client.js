@@ -32,7 +32,7 @@ $(document).ready(function () {
 function retrieveTrackers() {
     tokenFactory(cookieDetails)
         .then(function (token) {
-            simpleGet('api/Admin/Management/RetrieveTrackers', token)
+            simpleGet('api/Admin/Technical/RetrieveTrackers', token)
                 .then(function (result) {
                     animateProgressBar("retrieve_connection_bar");
 
@@ -51,7 +51,7 @@ function retrieveTrackers() {
 function retrieveConsole() {
     tokenFactory(cookieDetails)
         .then(function (token) {
-            simpleGet('api/Admin/Management/RetrieveConsole', token)
+            simpleGet('api/Admin/Technical/RetrieveConsole', token)
                 .then(function (result) {
                     animateProgressBar("retrieve_console_bar");
                     loadConsoleContents(result.result);
@@ -65,14 +65,14 @@ function retrieveConsole() {
 function clearConsole() {
     tokenFactory(cookieDetails)
         .then(function (token) {
-            simplePut('api/Admin/Management/ResetConsole', token);
+            simplePut('api/Admin/Technical/ResetConsole', token);
         });
 }
 
 function clearTrackers() {
     tokenFactory(cookieDetails)
         .then(function (token) {
-            simplePut('api/Admin/Management/ResetTrackers', token);
+            simplePut('api/Admin/Technical/ResetTrackers', token);
         });
 }
 
@@ -81,7 +81,7 @@ function resetClientState(email) {
         .then(function (token) {
             return new Promise(function (resolve, reject) {
                 $.ajax({
-                    url: `/api/Admin/Management/ResetClientState?clientEmail=${email}`,
+                    url: `/api/Admin/Technical/ResetClientState?clientEmail=${email}`,
                     type: 'PUT',
                     beforeSend: function (xhr) {   //Include the bearer token in header
                         xhr.setRequestHeader("Authorization", 'Bearer ' + token);
@@ -104,7 +104,7 @@ function resetRescuerState(email) {
         .then(function (token) {
             return new Promise(function (resolve, reject) {
                 $.ajax({
-                    url: `/api/Admin/Management/ResetRescuerState?rescuerEmail=${email}`,
+                    url: `/api/Admin/Technical/ResetRescuerState?rescuerEmail=${email}`,
                     type: 'PUT',
                     beforeSend: function (xhr) {   //Include the bearer token in header
                         xhr.setRequestHeader("Authorization", 'Bearer ' + token);
