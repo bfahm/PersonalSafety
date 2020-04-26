@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using PersonalSafety.Options;
-using PersonalSafety.Models;
+﻿using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,18 +13,14 @@ namespace PersonalSafety.Business
     public class AgentBusiness : IAgentBusiness
     {
         private readonly IPersonnelRepository _personnelRepository;
-        private readonly ISOSRequestRepository _sosRequestRepository;
-        private readonly IClientRepository _clientRepository;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRegistrationService _registrationService;
+        private readonly IManagerBusiness _managerBusiness;
 
-        public AgentBusiness(IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRegistrationService registrationService)
+        public AgentBusiness(IPersonnelRepository personnelRepository, IRegistrationService registrationService, IManagerBusiness managerBusiness)
         {
             _personnelRepository = personnelRepository;
-            _sosRequestRepository = sosRequestRepository;
-            _clientRepository = clientRepository;
-            _userManager = userManager;
             _registrationService = registrationService;
+            _managerBusiness = managerBusiness;
         }
 
         public APIResponse<DepartmentDetailsViewModel> GetDepartmentDetails(string userId)
@@ -43,6 +36,8 @@ namespace PersonalSafety.Business
                 AuthorityTypeName = ((AuthorityTypesEnum)currentAgentDepartment.Id).ToString(),
                 DepartmentLongitude = currentAgentDepartment.Longitude,
                 DepartmentLatitude = currentAgentDepartment.Latitude,
+                DistributionId = currentAgentDepartment.DistributionId,
+                DistributionName = currentAgentDepartment.Distribution.ToString(),
                 AgentsEmails = _personnelRepository.GetDepartmentAgentsEmails(currentAgentDepartment.Id),
                 RescuerEmails = _personnelRepository.GetDepartmentRescuersEmails(currentAgentDepartment.Id)
             };
@@ -70,7 +65,7 @@ namespace PersonalSafety.Business
                 IsRescuer = true
             };
 
-            return await _registrationService.RegisterNewUserAsync(newUser, rescuer.Password, personnel, Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER);
+            return await _registrationService.RegisterWorkingEntityAsync(newUser, rescuer.Password, () => _personnelRepository.Add(personnel), new string[] { Roles.ROLE_PERSONNEL, Roles.ROLE_RESCUER }, null);
         }
 
         public APIResponse<List<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId)
@@ -100,57 +95,12 @@ namespace PersonalSafety.Business
             };
         }
 
-        public async Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState)
+        public async Task<APIResponse<List<GetSOSRequestViewModel>>> GetRequestsByStateAsync(string userId, int? requestState)
         {
-            // Get current agent authority type
-            int authorityTypeInt = _personnelRepository.GetPersonnelAuthorityTypeInt(userId);
             // Get current agent department
             var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
 
-            // Find SOS Requests related to the request
-
-            IEnumerable<SOSRequest> requests = (requestState != null) ? _sosRequestRepository.GetRelevantRequests(authorityTypeInt, currentAgentDepartment.Id, (int)requestState)
-                                                : _sosRequestRepository.GetRelevantRequests(authorityTypeInt, currentAgentDepartment.Id);
-
-            List<GetSOSRequestViewModel> responseViewModel = new List<GetSOSRequestViewModel>();
-
-            foreach (var request in requests)
-            {
-                ApplicationUser requestOwner_Account = await _userManager.FindByIdAsync(request.UserId);
-                Client requestOwner_Client = _clientRepository.GetById(request.UserId);
-                responseViewModel.Add(new GetSOSRequestViewModel
-                {
-                    RequestId = request.Id,
-
-                    UserFullName = requestOwner_Account.FullName,
-                    UserEmail = requestOwner_Account.Email,
-                    UserPhoneNumber = requestOwner_Account.PhoneNumber,
-                    UserNationalId = requestOwner_Client.NationalId,
-                    UserAge = DateTime.Today.Year - requestOwner_Client.Birthday.Year,
-                    UserBloodTypeId = requestOwner_Client.BloodType,
-                    UserBloodTypeName = ((BloodTypesEnum)requestOwner_Client.BloodType).ToString(),
-                    UserMedicalHistoryNotes = requestOwner_Client.MedicalHistoryNotes,
-                    UserSavedAddress = requestOwner_Client.CurrentAddress,
-
-                    RequestStateId = request.State,
-                    RequestStateName = ((StatesTypesEnum)request.State).ToString(),
-                    RequestLocationLatitude = request.Latitude,
-                    RequestLocationLongitude = request.Longitude,
-                    RequestCreationDate = request.CreationDate,
-                    RequestLastModified = request.LastModified
-                });
-            }
-
-            APIResponse<List<GetSOSRequestViewModel>> response = new APIResponse<List<GetSOSRequestViewModel>>
-            {
-                Result = responseViewModel,
-                HasErrors = false,
-                Status = 0,
-                Messages = null
-            };
-
-
-            return response;
+            return await _managerBusiness.GetDepartmentRequestsAsync(userId, currentAgentDepartment.Id, requestState, false);
         }
     }
 }

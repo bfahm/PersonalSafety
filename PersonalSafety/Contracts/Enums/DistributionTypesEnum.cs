@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 
 namespace PersonalSafety.Contracts.Enums
 {
-    public enum CitiesEnum
+    public enum DistributionTypesEnum
     {
-        Tanta,
-        Cairo,
-        Alexandria
+        Country = 1,
+        Region,
+        Province,
+        City
     }
 }

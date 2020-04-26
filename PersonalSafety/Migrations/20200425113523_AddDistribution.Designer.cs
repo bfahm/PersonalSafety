@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalSafety.Models;
 
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200425113523_AddDistribution")]
+    partial class AddDistribution
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -275,7 +277,7 @@ namespace PersonalSafety.Migrations
                     b.Property<int>("AuthorityType")
                         .HasColumnType("int");
 
-                    b.Property<int>("DistributionId")
+                    b.Property<int>("City")
                         .HasColumnType("int");
 
                     b.Property<double>("Latitude")
@@ -285,8 +287,6 @@ namespace PersonalSafety.Migrations
                         .HasColumnType("float");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DistributionId");
 
                     b.ToTable("Departments");
                 });
@@ -540,15 +540,6 @@ namespace PersonalSafety.Migrations
                     b.HasOne("PersonalSafety.Models.Event", "PublicEvent")
                         .WithMany()
                         .HasForeignKey("PublicEventId");
-                });
-
-            modelBuilder.Entity("PersonalSafety.Models.Department", b =>
-                {
-                    b.HasOne("PersonalSafety.Models.Distribution", "Distribution")
-                        .WithMany()
-                        .HasForeignKey("DistributionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.Distribution", b =>

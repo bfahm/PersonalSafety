@@ -12,7 +12,7 @@ namespace PersonalSafety.Business
 {
     public interface IAgentBusiness
     {
-        Task<APIResponse<List<GetSOSRequestViewModel>>> GetRelatedRequestsAsync(string userId, int? requestState);
+        Task<APIResponse<List<GetSOSRequestViewModel>>> GetRequestsByStateAsync(string userId, int? requestState);
         Task<APIResponse<bool>> RegisterRescuersAsync(string userId, RegisterRescuerViewModel accounts);
         APIResponse<DepartmentDetailsViewModel> GetDepartmentDetails(string userId);
         APIResponse<List<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId);

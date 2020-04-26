@@ -10,8 +10,8 @@ namespace PersonalSafety.Models.ViewModels.AdminVM
         public int Id { get; set; }
         public int AuthorityType { get; set; }
         public string AuthorityTypeName { get; set; }
-        public int City { get; set; }
-        public string CityName { get; set; }
+        public int DistributionId { get; set; }
+        public string DistributionName { get; set; }
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public List<string> AgentsEmails{ get; set; }

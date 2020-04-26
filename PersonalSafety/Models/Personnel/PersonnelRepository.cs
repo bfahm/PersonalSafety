@@ -34,7 +34,7 @@ namespace PersonalSafety.Models
 
         public Department GetPersonnelDepartment(string userId)
         {
-            return context.Personnels.Where(p=>p.PersonnelId == userId).Include(p => p.Department).FirstOrDefault()?.Department;
+            return context.Personnels.Where(p=>p.PersonnelId == userId).Include(p => p.Department).Include(p => p.Department.Distribution).FirstOrDefault()?.Department;
         }
 
         public List<string> GetDepartmentAgentsEmails(int departmentId)

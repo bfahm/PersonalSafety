@@ -10,6 +10,8 @@ namespace PersonalSafety.Models.ViewModels
         public int DepartmentId { get; set; }
         public double DepartmentLongitude { get; set; }
         public double DepartmentLatitude { get; set; }
+        public int DistributionId { get; set; }
+        public string DistributionName { get; set; }
         public int AuthorityTypeId { get; set; }
         public string AuthorityTypeName { get; set; }
         public List<string> AgentsEmails { get; set; }

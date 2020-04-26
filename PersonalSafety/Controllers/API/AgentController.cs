@@ -1,36 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
-using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Contracts.Enums;
-using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
 
 namespace PersonalSafety.Controllers.API
 {
-    [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = Roles.ROLE_AGENT)]
     public class AgentController : ControllerBase
     {
         private readonly IAgentBusiness _agentBusiness;
         private readonly ISOSBusiness _sosBusiness;
-        private readonly IClientHub _clientHub;
-        private readonly IRescuerHub _rescuerHub;
 
-        public AgentController(IAgentBusiness agentBusiness, ISOSBusiness sosBusiness, IClientHub clientHub, IRescuerHub rescuerHub)
+        public AgentController(IAgentBusiness agentBusiness, ISOSBusiness sosBusiness)
         {
             _agentBusiness = agentBusiness;
             _sosBusiness = sosBusiness;
-            _clientHub = clientHub;
-            _rescuerHub = rescuerHub;
         }
 
         /// <summary>
@@ -43,8 +32,7 @@ namespace PersonalSafety.Controllers.API
         /// - Department Authority type
         /// - Department Workers (Rescuers and Agents)
         /// </remarks>
-        [HttpGet]
-        [Route("Department/[action]")]
+        [HttpGet(ApiRoutes.Agent.Department)]
         public IActionResult GetDepartmentDetails()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -75,8 +63,7 @@ namespace PersonalSafety.Controllers.API
         /// #### **[-2]**: Identity Error
         /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
         /// </remarks>
-        [HttpPost]
-        [Route("Rescuer/[action]")]
+        [HttpPost(ApiRoutes.Agent.Resucer)]
         public async Task<IActionResult> RegisterRescuer(RegisterRescuerViewModel request)
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
@@ -96,8 +83,7 @@ namespace PersonalSafety.Controllers.API
         ///     - If the `ID = 0` then the rescuer is currently **Idling**
         ///     - If the `ID = x` then the rescuer is currently assigned the SOSRequest of `Id = x`
         /// </remarks>
-        [HttpGet]
-        [Route("Rescuer/[action]")]
+        [HttpGet(ApiRoutes.Agent.Resucer)]
         public IActionResult GetOnlineRescuers()
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
@@ -115,8 +101,7 @@ namespace PersonalSafety.Controllers.API
         /// - Returned information also include the  job that was assigned to the user in the form of the `ID` of the SOSRequest.
         /// - **IMPORTANT NOTE:** Disconnected Rescuers **are not** offline rescuers.
         /// </remarks>
-        [HttpGet]
-        [Route("Rescuer/[action]")]
+        [HttpGet(ApiRoutes.Agent.Resucer)]
         public IActionResult GetDisconnectedRescuers()
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
@@ -152,13 +137,12 @@ namespace PersonalSafety.Controllers.API
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
-        [HttpGet]
-        [Route("SOS/[action]")]
-        public async Task<IActionResult> GetAllAuthorityRequests()
+        [HttpGet(ApiRoutes.Agent.SOS)]
+        public async Task<IActionResult> GetAllRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, null);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, null);
 
             return Ok(response);
         }
@@ -176,13 +160,12 @@ namespace PersonalSafety.Controllers.API
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
-        [HttpGet]
-        [Route("SOS/[action]")]
-        public async Task<IActionResult> GetAuthorityPendingRequests()
+        [HttpGet(ApiRoutes.Agent.SOS)]
+        public async Task<IActionResult> GetPendingRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Pending);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Pending);
 
             return Ok(response);
         }
@@ -200,13 +183,12 @@ namespace PersonalSafety.Controllers.API
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
-        [HttpGet]
-        [Route("SOS/[action]")]
-        public async Task<IActionResult> GetAuthorityAcceptedRequests()
+        [HttpGet(ApiRoutes.Agent.SOS)]
+        public async Task<IActionResult> GetAcceptedRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Accepted);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Accepted);
 
             return Ok(response);
         }
@@ -224,13 +206,12 @@ namespace PersonalSafety.Controllers.API
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
-        [HttpGet]
-        [Route("SOS/[action]")]
-        public async Task<IActionResult> GetAuthoritySolvedRequests()
+        [HttpGet(ApiRoutes.Agent.SOS)]
+        public async Task<IActionResult> GetSolvedRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Solved);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Solved);
 
             return Ok(response);
         }
@@ -248,13 +229,12 @@ namespace PersonalSafety.Controllers.API
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
-        [HttpGet]
-        [Route("SOS/[action]")]
-        public async Task<IActionResult> GetAuthorityCanceledRequests()
+        [HttpGet(ApiRoutes.Agent.SOS)]
+        public async Task<IActionResult> GetCanceledRequests()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _agentBusiness.GetRelatedRequestsAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Canceled);
+            var response = await _agentBusiness.GetRequestsByStateAsync(currentlyLoggedInUserId, (int)StatesTypesEnum.Canceled);
 
             return Ok(response);
         }
@@ -277,8 +257,7 @@ namespace PersonalSafety.Controllers.API
         /// #### **[401]**: Unauthorized
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
-        [HttpPut]
-        [Route("SOS/[action]")]
+        [HttpPut(ApiRoutes.Agent.SOS)]
         public IActionResult AcceptSOSRequest([FromQuery] int requestId, [FromQuery] string rescuerEmail)
         {
             var response = _sosBusiness.AcceptSOSRequest(requestId, rescuerEmail??"");
@@ -304,8 +283,7 @@ namespace PersonalSafety.Controllers.API
         /// This method doesn't return any errors per se, although it returns a list of messages that represents the outcome of each attempt in the above functionality.
         /// 
         /// </remarks>
-        [HttpPut]
-        [Route("SOS/[action]")]
+        [HttpPut(ApiRoutes.Agent.SOS)]
         public IActionResult ResetSOSRequest([FromQuery] int requestId)
         {
             var response = _sosBusiness.ResetSOSRequest(requestId);

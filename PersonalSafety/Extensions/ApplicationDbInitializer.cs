@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 using PersonalSafety.Contracts;
+using System.Security.Claims;
 
 namespace PersonalSafety.Extensions
 {
@@ -17,19 +17,23 @@ namespace PersonalSafety.Extensions
         private readonly IClientRepository _clientRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly IDistributionRepository _distributionRepository;
 
-        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository)
+        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _clientRepository = clientRepository;
             _personnelRepository = personnelRepository;
             _departmentRepository = departmentRepository;
+            _distributionRepository = distributionRepository;
         }
 
         public void SeedUsers()
         {
             CreateRoles();
+
+            CreateDistributions();
 
             #region Create Admin
 
@@ -42,6 +46,10 @@ namespace PersonalSafety.Extensions
             };
 
             CreateUserAndSetupRole(adminUser, "Admin@123", "Admin");
+            if (_userManager.GetClaimsAsync(_userManager.FindByEmailAsync("admin@admin.com").Result).Result.Count == 0)
+            {
+                _userManager.AddClaimAsync(adminUser, new Claim(ClaimsStore.CLAIM_DISTRIBUTION_ACCESS, "1")).Wait(); // Admin can access all distributions
+            }
 
             #endregion
 
@@ -75,8 +83,9 @@ namespace PersonalSafety.Extensions
             #region Create Departments
 
             CreateDepartments();
+            var tantaCity = _distributionRepository.GetCityByName("Tanta");
             var tantaPoliceDepartment = _departmentRepository.GetAll().FirstOrDefault(d =>
-                d.AuthorityType == (int) AuthorityTypesEnum.Police && d.City == (int) CitiesEnum.Tanta);
+                d.AuthorityType == (int) AuthorityTypesEnum.Police && d.DistributionId == tantaCity.Id);
             Debug.Assert(tantaPoliceDepartment != null, nameof(tantaPoliceDepartment) + " != null");
 
             #endregion
@@ -198,15 +207,16 @@ namespace PersonalSafety.Extensions
                     {29.950524 }                // Alexandria   Ambulance            Lat
                 };
 
+                var cities = _distributionRepository.GetCities().Take(3);
 
                 int counter = 0;
-                foreach (var city in Enum.GetValues(typeof(CitiesEnum)))
+                foreach (var city in cities)
                 {
                     foreach (var authorityType in Enum.GetValues(typeof(AuthorityTypesEnum)))
                     {
                         _departmentRepository.Add(new Department()
                         {
-                            City = (int)city,
+                            DistributionId = city.Id,
                             AuthorityType = (int)authorityType,
                             Longitude = locations[counter],
                             Latitude = locations[counter+1],
@@ -217,6 +227,31 @@ namespace PersonalSafety.Extensions
                 }
 
                 _departmentRepository.Save();
+            }
+        }
+
+        private void CreateDistributions()
+        {
+            if (!_distributionRepository.GetAll().Any())
+            {
+                List<Distribution> distributions = new List<Distribution>
+                {
+                    new Distribution { Id = 1, Type = (int)DistributionTypesEnum.Country, Value = "Egypt", ParentId = null },
+                    new Distribution { Id = 2, Type = (int)DistributionTypesEnum.Region, Value = "LowerEgypt", ParentId = 1 },
+                    new Distribution { Id = 3, Type = (int)DistributionTypesEnum.Region, Value = "UpperEgypt", ParentId = 1 },
+                    new Distribution { Id = 4, Type = (int)DistributionTypesEnum.Province, Value = "Gharbia", ParentId = 2 },
+                    new Distribution { Id = 5, Type = (int)DistributionTypesEnum.Province, Value = "Cairo", ParentId = 2 },
+                    new Distribution { Id = 6, Type = (int)DistributionTypesEnum.Province, Value = "Alexandria", ParentId = 2 },
+                    new Distribution { Id = 7, Type = (int)DistributionTypesEnum.Province, Value = "Aswan", ParentId = 3 },
+                    new Distribution { Id = 8, Type = (int)DistributionTypesEnum.City, Value = "Tanta", ParentId = 4 },
+                    new Distribution { Id = 9, Type = (int)DistributionTypesEnum.City, Value = "Cairo", ParentId = 5 },
+                    new Distribution { Id = 10, Type = (int)DistributionTypesEnum.City, Value = "Alexandria", ParentId = 6 },
+                    new Distribution { Id = 11, Type = (int)DistributionTypesEnum.City, Value = "Mahala", ParentId = 4 },
+                    new Distribution { Id = 12, Type = (int)DistributionTypesEnum.City, Value = "Aswan", ParentId = 7 },
+                    new Distribution { Id = 13, Type = (int)DistributionTypesEnum.City, Value = "Idfo", ParentId = 7 },
+                };
+
+                _distributionRepository.AddWithIdentityInsert(distributions);
             }
         }
     }
