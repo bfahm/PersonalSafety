@@ -75,7 +75,53 @@
 
                             <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
                                 <div>
-                                    <p class="text-primary"><strong>Admin Panel Major Enhancements</strong></p>
+                                    <p class="text-primary"><strong>Distributions and Permissions</strong></p>
+                                    <p>
+                                        System now supports dynamic permission handling through a tree of nodes, called "Distribution".
+                                        <br /> Acquiring a distribution node as a claim means you have access to any department under that node.
+                                    </p>
+                                    <p>To consume these new permission rules, a "Manager" is needed and is registered via the one and only Super Admin.</p>
+                                    <p>Distributions affects mostly "Admins" and "Managers".</p>
+                                    <p class="text-secondary"><strong>New Content</strong></p>
+                                    <ul>
+                                        <li><samp>Admin/Management</samp> endpoint to manage the distribution setup.</li>
+                                        <li>
+                                            <samp>Manager</samp> controller that allows access to assigned departments and Requests within these departments.
+                                            <ul>
+                                                <li>Admins can also use this controller with super permissions (access to all departments granted).</li>
+                                            </ul>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                                <span class="badge badge-success badge-pill">NEW!</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
+                                <div>
+                                    <p class="text-primary"><strong>Breaking Changes</strong></p>
+                                    <ul>
+                                        <li>
+                                            <samp>Admin/RegisterAgent</samp> &#8594; <samp>Admin/Registration/RegisterAgent</samp>
+                                            <ul>
+                                                <li>
+                                                    <samp>DepartmentCity</samp> was also replaced by <samp>DistributionId</samp>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><samp>Admin/GetDepartments</samp> &#8594; <samp>Manager/GetDepartments</samp></li>
+                                        <li><samp>Admin/Get[Authority]Something</samp> &#8594; <samp>Admin/GetSomething</samp></li>
+                                    </ul>
+                                </div>
+                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-primary"><strong>Admin Panel</strong></p>
+                                    <p>Simple page to quickly view current SignalR connections to the server, review hub logs, access to this page needs and Administrator privileges though.</p>
+                                    <p>Admin can now reset all system trackers for local troubleshooting.</p>
+                                    <p class="text-secondary"><strong>New Content: Major Enhancements</strong></p>
                                     <ul>
                                         <li>Thorough information about current connections.</li>
                                         <li>Force offline Rescuers and Clients selectively using their emails.</li>
@@ -85,7 +131,7 @@
                                 <span class="badge badge-success badge-pill">NEW!</span>
                             </li>
 
-                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <p class="text-primary"><strong>Authentication: Refresh Tokens</strong></p>
                                     <ul>
@@ -105,7 +151,6 @@
                                     <p class="text-secondary">Admins can easily attach new agents to existing departments by providing the <strong>existing department id</strong> or just create a new department through the creation of the agent account.</p>
                                     <p class="text-secondary">Additionally, new SOSRequests gets assigned to the nearest department serving the type of the request. <br /> Only agents within that department gets notified to refresh their tables. <br /> Changes of the online state of the rescuers also only reach agents of the same department.</p>
                                 </div>
-                                <span class="badge badge-success badge-pill">NEW!</span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -113,57 +158,14 @@
                                     <p class="text-primary"><strong>Orphanage</strong></p>
                                     <p class="text-secondary">Due to latest code enhancements, orphanage state is not relevant anymore, Agents can only upgrade a pending request to be accepted if both the rescuer and the client were online. <br /> If clients lose connection, they can issue a reconnection and Agents would then be able to accept the request.</p>
                                 </div>
-                                <span class="badge badge-warning badge-pill">INFO</span>
-                            </li>
-
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <p class="text-primary"><strong>v1.0-alpha Changes that might break implementation</strong></p>
-                                    <ul>
-                                        <li><samp>RegisterPersonnel</samp> &#8594 <samp>RegisterAgent</samp></li>
-                                        <li><samp>/api/Personnnel/•••</samp> &#8594 <samp>/api/Agent/SOS/•••</samp></li>
-                                        <li><samp>/hubs/Personnel</samp> &#8594 <samp>/hubs/Agent</samp></li>
-                                        <li><samp>PersonnelChannel</samp> &#8594 <samp>AgentRequestsChannel</samp></li>
-                                        <li><samp>ConnectionId</samp> is not needed anymore while sending new SOSRequests</li>
-                                        <li><samp>GetMyConnectionInfo()</samp> realtime function was removed. Connection info is now sent automatically after establishing connections. Check full realtime documentation <a href="/RealtimeClient">here</a></li>
-                                        <li>User now can only send <strong>one request per connection</strong>. More info <a href="https://trello.com/c/wmj8MGTC">here</a>.</li>
-                                        <li>New First Login functionality for Rescuers and Agents. More info at <samp>api/Account/Login</samp> documentation.</li>
-                                    </ul>
-                                </div>
-                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
-                            </li>
-
-
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <a href="~/Admin" style="text-decoration: none">Administrator Portal</a>
-                                    <p>Simple page to quickly view current SignalR connections to the server, review hub logs, access to this page needs and Administrator privileges though.</p>
-                                    <p>Admin can now reset all system trackers for local troubleshooting.</p>
-                                </div>
-                                <span class="badge badge-success badge-pill">NEW!</span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <p class="text-primary"><strong>Facebook Login</strong></p>
-                                    <p>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</p>
-                                    <p>Quickly try the new Facebook Login API Endpoints by generating an access token from this tool.</p>
-                                </div>
-                            </li>
-
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <a href="~/swagger" target="_blank" style="text-decoration: none">Current Endpoints</a>
                                     <ul>
-                                        <li>Account management endpoint at <samp>api/Account</samp></li>
-                                        <li>Admin endpoint at <samp>api/Admin</samp></li>
-                                        <li>Agent endpoint for managing his Department <samp>api/Agent/Department</samp></li>
-                                        <li>Agent endpoint for managing rescuers in his department <samp>api/Agent/Rescuer</samp></li>
-                                        <li>Agent endpoint for managing SOS Requests <samp>api/Agent/SOS</samp></li>
-                                        <li>Clients endpoint for completing registration at <samp>api/Client/Registration</samp></li>
-                                        <li>Clients endpoint for SOS actions at <samp>api/Client/SOS</samp></li>
-                                        <li>Rescuer endpoint at <samp>api/Rescuer</samp></li>
-
+                                        <li>Quickly grant user access to the system services by using his unique Facebook <samp>access_token</samp>.</li>
+                                        <li>Quickly try the new Facebook Login API Endpoints by generating an access token from <a href="/FacebookLoginTool">this tool</a>.</li>
                                     </ul>
                                 </div>
                             </li>

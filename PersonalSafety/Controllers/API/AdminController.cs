@@ -155,6 +155,37 @@ namespace PersonalSafety.Controllers.API
             return Ok(authResponse);
         }
 
+        /// <summary>
+        /// Create a new manager to have an elevated access to different department.
+        /// </summary>
+        /// <remarks>
+        /// ## Main Functionality
+        /// Creates new manager account that have access to a group of departments.
+        /// 
+        /// 
+        /// **IMPORTANT:** Only **ADMINS** are allowed to use this method.
+        /// 
+        /// 
+        /// All these JSON object values **are** required and must follow these rules:
+        /// 
+        /// - **Email** : must be unique and not used before, additionally it must follow the correct email structure
+        /// - **Password** : must be complex, contain number, symbols, Capital and Small letters
+        /// - **FullName** : Must be non null
+        /// - **DistributionId** : An integer that represents the parent node and childs in which the manager would have access to
+        ///     - Consult `/Management/GetDistributionTree` to figure out which distribution the manager should be assigned to.
+        ///
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-1]**: Invalid Request
+        /// - User exists and has registered before
+        /// - Invalid AuthorityType
+        /// 
+        /// #### **[-2]**: Identity Error
+        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
+        /// 
+        /// #### **[404]**: Not Found Error
+        /// Occurs when you provide a wrong department Id.
+        /// </remarks>
         [HttpPost(ApiRoutes.Admin.Registration)]
         public async Task<IActionResult> RegisterManager([FromBody] RegisterManagerViewModel request)
         {
@@ -168,6 +199,32 @@ namespace PersonalSafety.Controllers.API
             return Ok(authResponse);
         }
 
+        /// <summary>
+        /// Modify permissions for existing managers
+        /// </summary>
+        /// <remarks>
+        /// ## Main Functionality
+        /// Modifies the group of departments a manager has access to.
+        /// 
+        /// 
+        /// **IMPORTANT:** Only **ADMINS** are allowed to use this method.
+        /// 
+        /// 
+        /// All these JSON object values **are** required and must follow these rules:
+        /// 
+        /// - **Email** : an email representing the existing account
+        /// - **DistributionId** : An integer that represents the parent node and childs in which the manager would have access to
+        ///     - Consult `/Management/GetDistributionTree` to figure out which distribution the manager should be assigned to.
+        ///
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// 
+        /// #### **[-2]**: Identity Error
+        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
+        /// 
+        /// #### **[404]**: Not Found Error
+        /// Occurs when you provide a wrong email address or department Id.
+        /// </remarks>
         [HttpPut(ApiRoutes.Admin.Registration)]
         public async Task<IActionResult> ModifyManagerAccess([FromBody] ModifyManagerViewModel request)
         {
@@ -183,8 +240,12 @@ namespace PersonalSafety.Controllers.API
 
 
         /// <summary>
-        /// 
+        /// Get the tree of department distribution.
         /// </summary>
+        /// <remarks>
+        /// ## Main Functionality
+        /// Retrieves a tree that is filled recursively representing the full graph of the department distribution in the system. 
+        /// </remarks>
         [HttpGet(ApiRoutes.Admin.Management)]
         public IActionResult GetDistributionTree()
         {
@@ -193,8 +254,25 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Attachs a new node to the Distribution Tree
         /// </summary>
+        /// <remarks>
+        /// All these JSON object values **are** required and must follow these rules:
+        /// 
+        /// - **parentId** : the id of the parent where the new node would be attached under
+        /// - **value** : a string representing the value of the node
+        /// 
+        /// 
+        /// 
+        /// **IMPORTANT:** `DistributionType` is automatically calculated by calculating the number of direct parents, 
+        /// no need to provide it.
+        ///
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// 
+        /// #### **[404]**: Not Found Error
+        /// Occurs when you provide a wrong parent id.
+        /// </remarks>
         [HttpPost(ApiRoutes.Admin.Management)]
         public IActionResult AddNewDistribution([FromBody] NewDistributionRequestViewModel request)
         {
@@ -203,8 +281,22 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Renames an existing node in the Distribution Tree
         /// </summary>
+        /// <remarks>
+        /// All these JSON object values **are** required and must follow these rules:
+        /// 
+        /// - **id** : the id of the node to be renamed
+        /// - **value** : new string value for the node
+        /// 
+        ///         
+        ///
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// 
+        /// #### **[404]**: Not Found Error
+        /// Occurs when you provide a wrong node id.
+        /// </remarks>
         [HttpPost(ApiRoutes.Admin.Management)]
         public IActionResult RenameDistribution([FromBody] RenameDistributionRequestViewModel request)
         {
