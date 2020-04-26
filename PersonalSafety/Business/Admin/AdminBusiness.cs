@@ -11,6 +11,7 @@ using PersonalSafety.Hubs.Helpers;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.ViewModels.AdminVM;
 using PersonalSafety.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace PersonalSafety.Business
 {
@@ -20,16 +21,14 @@ namespace PersonalSafety.Business
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IDistributionRepository _distributionRepository;
-        private readonly IAdminHub _adminHub;
         private readonly IHubTools _hubTools;
 
-        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, IAdminHub adminHub, IHubTools hubTools)
+        public AdminBusiness(IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, IHubTools hubTools)
         {
             _registrationService = registrationService;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
             _distributionRepository = distributionRepository;
-            _adminHub = adminHub;
             _hubTools = hubTools;
         }
 
@@ -197,6 +196,70 @@ namespace PersonalSafety.Business
             {
                 Result = true
             };
+        }
+
+        public APIResponse<DistributionTreeViewModel> GetDistributionTree()
+        {
+            APIResponse<DistributionTreeViewModel> response = new APIResponse<DistributionTreeViewModel>();
+            var root = _distributionRepository.GetRootDistribution();
+            response.Result = _distributionRepository.GetDistributionTree(root?.Id??0, true);
+            return response;
+        }
+
+        public APIResponse<DistributionTreeViewModel> AddNewDistribution(NewDistributionRequestViewModel request)
+        {
+            APIResponse<DistributionTreeViewModel> response = new APIResponse<DistributionTreeViewModel>();
+            
+            if (!_distributionRepository.DoesNodeExist(request.ParentId))
+            {
+                response.Messages.Add("The provided Parent Node does not exist.");
+                response.Status = (int)APIResponseCodesEnum.NotFound;
+                response.HasErrors = true;
+                return response;
+            }
+
+            _distributionRepository.Add(new Distribution
+            {
+                ParentId = request.ParentId,
+                // Automatically calculate the type of the child by knowing the number of the parents of the proivided heritage:
+                // Adding "1" to get the type of the child.
+                Type = _distributionRepository.GetNumberOfParents(request.ParentId) + 1, 
+                Value = request.Value
+            });
+
+            _distributionRepository.Save();
+
+            response.Result = _distributionRepository.GetDistributionTree(request.ParentId, false);
+            response.Messages.Add("Success, here is the new state of the provided Parent node.");
+            response.Messages.Add("Retrieve the children nodes using /GetDistributionTree");
+
+            return response;
+        }
+
+        public APIResponse<DistributionTreeViewModel> RenameDistribution(RenameDistributionRequestViewModel request)
+        {
+            APIResponse<DistributionTreeViewModel> response = new APIResponse<DistributionTreeViewModel>();
+
+            if (!_distributionRepository.DoesNodeExist(request.Id))
+            {
+                response.Messages.Add("The provided Node does not exist.");
+                response.Status = (int)APIResponseCodesEnum.NotFound;
+                response.HasErrors = true;
+                return response;
+            }
+
+            var distToBeUpdated = _distributionRepository.GetById(request.Id.ToString());
+            distToBeUpdated.Value = request.Value;
+
+
+            _distributionRepository.Update(distToBeUpdated);
+            _distributionRepository.Save();
+
+            response.Result = _distributionRepository.GetDistributionTree(distToBeUpdated.Id, false);
+            response.Messages.Add("Success, here is the new state of the provided node.");
+            response.Messages.Add("Retrieve the children nodes using /GetDistributionTree");
+
+            return response;
         }
     }
 }

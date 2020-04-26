@@ -7,6 +7,7 @@ using PersonalSafety.Business;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Models.ViewModels.AdminVM;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -183,6 +184,39 @@ namespace PersonalSafety.Controllers.API
         public IActionResult ResetRescuerState([FromQuery]string rescuerEmail)
         {
             var response = _adminBusiness.ResetRescuerState(rescuerEmail);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpGet]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult GetDistributionTree()
+        {
+            var response = _adminBusiness.GetDistributionTree();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpPost]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult AddNewDistribution([FromBody] NewDistributionRequestViewModel request)
+        {
+            var response = _adminBusiness.AddNewDistribution(request);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [HttpPost]
+        [Route("~/api/[controller]/Management/[action]")]
+        public IActionResult RenameDistribution([FromBody] RenameDistributionRequestViewModel request)
+        {
+            var response = _adminBusiness.RenameDistribution(request);
             return Ok(response);
         }
     }
