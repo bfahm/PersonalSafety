@@ -275,13 +275,18 @@ function loadConnectionsTable(jsonKey, jsonList) {
 
 function loadConsoleContents(parsedJson) {
     // Clear current table entries first
+    console.log(parsedJson);
     $("#console_container").empty();
 
     for (var i = 0; i < parsedJson.length; i++) {
         var obj = parsedJson[i];
-        
 
-        $('#console_container').append('<p> > ' + obj + '</p>');
+        var splitsplit = obj.split("|");
+        var datePart = "<span style='color: Chartreuse'>" + splitsplit[0] + "</span>"
+        splitsplit.shift();
+        var msgPart = splitsplit.join()
+
+        $('#console_container').append('<p> > ' + datePart + " | " + msgPart + '</p>');
     }
 
     if (parsedJson.length === 0 || parsedJson === null) {

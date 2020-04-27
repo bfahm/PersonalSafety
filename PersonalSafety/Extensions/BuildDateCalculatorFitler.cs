@@ -27,7 +27,7 @@ namespace PersonalSafety.Extensions
             var result = localTime.ToString("dd-MMM-yyyy hh:mm:sstt") + " " + TimeZoneInfo.Local.Id;
 
             context.HttpContext.Response.Cookies.Append("LastBuildDateServerSide", result);
-            context.HttpContext.Response.Cookies.Append("LastBuildDateNotifyServerSide", true.ToString());
+            context.HttpContext.Response.Cookies.Append("LastBuildDateNotify", true.ToString());
         }
 
         public void OnActionExecuting(ActionExecutingContext context){ }

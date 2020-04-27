@@ -11,13 +11,14 @@ $(document).ready(function () {
     
     var lastBuildDateClientSide = getCookie("LastBuildDateClientSide");
     var lastBuildDateServerSide = getCookie("LastBuildDateServerSide");
-    var lastBuildDateNotifyServerSide = getCookie("LastBuildDateNotifyServerSide");
-    var lastBuildDateNotifyClientSide = getCookie("LastBuildDateNotifyClientSide");
+    var lastBuildDateNotify = getCookie("LastBuildDateNotify");
 
-    if (((lastBuildDateClientSide !== lastBuildDateServerSide) || (lastBuildDateNotifyServerSide !== lastBuildDateNotifyClientSide))
-        && (lastBuildDateNotifyServerSide === "True")) {
+    if ((lastBuildDateClientSide !== lastBuildDateServerSide) && (lastBuildDateNotify === "True")) {
         $("#btn-new-contents").click();
+        console.log("NEW UPDATE:")
+        console.log("Server Last Build was on: " + unescape(str_esc))
+        console.log("Client Last Build was on: " + unescape(str_esc))
+        console.log("Cookie updated.")
         setCookie("LastBuildDateClientSide", getCookie("LastBuildDateServerSide"), 4320);
-        setCookie("LastBuildDateNotifyClientSide", getCookie("LastBuildDateNotifyServerSide"), 4320);
     }
 });
