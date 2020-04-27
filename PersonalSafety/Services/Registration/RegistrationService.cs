@@ -103,20 +103,26 @@ namespace PersonalSafety.Services
                 return response;
             }
 
-            var addToRoleResult = await _userManager.AddToRolesAsync(applicationUser, roles);
-            var roleAddingCheckResult = CheckIdentityResult(addToRoleResult);
-            if (roleAddingCheckResult != null)
+            if (roles != null)
             {
-                response.WrapResponseData(roleAddingCheckResult);
-                return response;
+                var addToRoleResult = await _userManager.AddToRolesAsync(applicationUser, roles);
+                var roleAddingCheckResult = CheckIdentityResult(addToRoleResult);
+                if (roleAddingCheckResult != null)
+                {
+                    response.WrapResponseData(roleAddingCheckResult);
+                    return response;
+                }
             }
 
-            var addToClaimResult = await _userManager.AddClaimsAsync(applicationUser, claims);
-            var ClaimAddingCheckResult = CheckIdentityResult(addToClaimResult);
-            if (ClaimAddingCheckResult != null)
+            if(claims != null)
             {
-                response.WrapResponseData(ClaimAddingCheckResult);
-                return response;
+                var addToClaimResult = await _userManager.AddClaimsAsync(applicationUser, claims);
+                var ClaimAddingCheckResult = CheckIdentityResult(addToClaimResult);
+                if (ClaimAddingCheckResult != null)
+                {
+                    response.WrapResponseData(ClaimAddingCheckResult);
+                    return response;
+                }
             }
 
             // TODO: send just congratulation email using the service here
