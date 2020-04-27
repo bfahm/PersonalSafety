@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Specialized;
+using Microsoft.AspNetCore.Razor.Language;
 using PersonalSafety.Hubs.HubTracker;
 
 namespace PersonalSafety.Hubs.Helpers
@@ -10,6 +12,15 @@ namespace PersonalSafety.Hubs.Helpers
         public HubTools(IAdminHub adminHub)
         {
             _adminHub = adminHub;
+            TrackerHandler.ConsoleSet.CollectionChanged += ConsoleSetOnChanged;
+        }
+
+        private void ConsoleSetOnChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            foreach(var item in e.NewItems)
+            {
+                _adminHub.PrintToOnlineConsole(item.ToString());
+            }
         }
 
         public void PrintToConsole(string email, string connectionId, bool hasDisconnected)

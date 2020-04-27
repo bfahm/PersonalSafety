@@ -8,12 +8,13 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using PersonalSafety.Contracts;
+using Microsoft.Extensions.Logging;
 
 namespace PersonalSafety.Extensions
 {
     public static class ExceptionMiddlewareExtension
     {
-        public static void ConfigureExceptionHandler(this IApplicationBuilder app)
+        public static void ConfigureExceptionHandler(this IApplicationBuilder app, ILogger<Startup> logger)
         {
             app.UseExceptionHandler(appError =>
             {
@@ -25,18 +26,14 @@ namespace PersonalSafety.Extensions
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
                     if (contextFeature != null) 
                     {
-                        List<string> errorList = new List<string>
-                        {
-                            contextFeature.Error.Message,
-                            // ONLY ENABLE THIS WHILE DEBUGGING
-                            // contextFeature.Error.StackTrace 
-                        };
+                        logger.LogError(contextFeature.Error.StackTrace);
+
                         await context.Response.WriteAsync(new APIResponse<string>
                         {
                             Result = null,
                             Status = context.Response.StatusCode,
                             HasErrors = true,
-                            Messages = errorList,
+                            Messages = new List<string> { contextFeature.Error.Message },
                         }.ToString()); ;
                     }
                 });

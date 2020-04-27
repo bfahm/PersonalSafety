@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Collections.Generic;
 
 namespace PersonalSafety.Hubs.HubTracker
 {
     public static class TrackerHandler
     {
-        public static HashSet<string> ConsoleSet;
+        public static ObservableHashSet<string> ConsoleSet;
         public static HashSet<ClientConnectionInfo> ClientConnectionInfoSet;
         public static HashSet<AgentConnectionInfo> AgentConnectionInfoSet;
         public static HashSet<RescuerConnectionInfo> RescuerConnectionInfoSet;
@@ -19,7 +20,7 @@ namespace PersonalSafety.Hubs.HubTracker
 
         public static void InitializeConsoleLog()
         {
-            ConsoleSet = new HashSet<string>();
+            ConsoleSet = new ObservableHashSet<string>();
         }
 
         public static void InitializeTrackers()

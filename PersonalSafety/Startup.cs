@@ -9,6 +9,8 @@ using Microsoft.Extensions.Hosting;
 using PersonalSafety.Models;
 using PersonalSafety.Installers;
 using PersonalSafety.Extensions;
+using Microsoft.Extensions.Logging;
+using PersonalSafety.Hubs;
 
 namespace PersonalSafety
 {
@@ -39,7 +41,7 @@ namespace PersonalSafety
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository, IHubTools hubtools) //Hubtools are needed for realtime logging
         {
             if (env.IsDevelopment())
             {
@@ -49,7 +51,7 @@ namespace PersonalSafety
             if (env.IsProduction())
             {
                 // APIResponses that support HTTP 500
-                app.ConfigureExceptionHandler();
+                app.ConfigureExceptionHandler(logger);
                 
                 // APIResponses that support HTTP 401 and HTTP 404
                 app.UseStatusCodePagesWithReExecute("/Error/{0}");
