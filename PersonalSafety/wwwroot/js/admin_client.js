@@ -279,14 +279,8 @@ function loadConsoleContents(parsedJson) {
     $("#console_container").empty();
 
     for (var i = 0; i < parsedJson.length; i++) {
-        var obj = parsedJson[i];
-
-        var splitsplit = obj.split("|");
-        var datePart = "<span style='color: Chartreuse'>" + splitsplit[0] + "</span>"
-        splitsplit.shift();
-        var msgPart = splitsplit.join()
-
-        $('#console_container').append('<p> > ' + datePart + " | " + msgPart + '</p>');
+        var text = parsedJson[i];
+        addToConsoleContents(text)
     }
 
     if (parsedJson.length === 0 || parsedJson === null) {
@@ -295,7 +289,12 @@ function loadConsoleContents(parsedJson) {
 }
 
 function addToConsoleContents(text) {
-    $('#console_container').append('<p> > ' + text + '</p>');
+    var splitsplit = text.split("|");
+    var datePart = "<span style='color: Chartreuse'>" + splitsplit[0] + "</span>"
+    splitsplit.shift();
+    var msgPart = splitsplit.join()
+
+    $('#console_container').append('<p> > ' + datePart + " | " + msgPart + '</p>');
 }
 
 // SignalR related code..
