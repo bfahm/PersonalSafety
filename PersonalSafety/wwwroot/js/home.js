@@ -16,8 +16,8 @@ $(document).ready(function () {
     if ((lastBuildDateClientSide !== lastBuildDateServerSide) && (lastBuildDateNotify === "True")) {
         $("#btn-new-contents").click();
         console.log("NEW UPDATE:")
-        console.log("Server Last Build was on: " + unescape(str_esc))
-        console.log("Client Last Build was on: " + unescape(str_esc))
+        console.log("Server Last Build was on: " + unescape(lastBuildDateServerSide))
+        console.log("Client Last Build was on: " + unescape(lastBuildDateClientSide))
         console.log("Cookie updated.")
         setCookie("LastBuildDateClientSide", getCookie("LastBuildDateServerSide"), 4320);
     }
