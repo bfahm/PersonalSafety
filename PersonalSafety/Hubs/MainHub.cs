@@ -6,22 +6,21 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using PersonalSafety.Hubs.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace PersonalSafety.Hubs
 {
     [Authorize]
     public class MainHub : Hub, IMainHub
     {
-        private readonly IHubTools _hubTools;
-
         private static readonly string ConnectionInfoChannel = "ConnectionInfoChannel";
+        private readonly ILogger<MainHub> _logger;
 
-        public MainHub(IHubTools hubTools)
+        public MainHub(){ }
+        public MainHub(ILogger<MainHub> logger)
         {
-            _hubTools = hubTools;
+            _logger = logger;
         }
-
-        public MainHub(){}
 
         public bool isConnected(string userId)
         {
@@ -41,8 +40,8 @@ namespace PersonalSafety.Hubs
 
             TrackerHandler.AllConnectionInfoSet.Add(currentConnection);
 
-            // Print to the console
-            _hubTools?.PrintToConsole(currentConnection.UserEmail, currentConnection.ConnectionId, false);
+            // Log to the consoles
+            _logger?.LogInformation(HubConsoleHelper.ConsoleFormater(currentConnection.UserEmail, currentConnection.ConnectionId, false));
 
             // Automatically send client data to him after connection.
             await Clients.Caller.SendAsync(ConnectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
@@ -57,7 +56,7 @@ namespace PersonalSafety.Hubs
             if (currentDisconnection != null)
             {
                 TrackerHandler.AllConnectionInfoSet.RemoveWhere(c=> c.UserEmail == currentDisconnection.UserEmail);
-                _hubTools?.PrintToConsole(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true);
+                _logger.LogInformation(HubConsoleHelper.ConsoleFormater(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true));
             }
 
             await base.OnDisconnectedAsync(ex);

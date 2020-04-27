@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
-using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models.ViewModels.AdminVM;
 using PersonalSafety.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety.Business
 {
@@ -22,16 +23,16 @@ namespace PersonalSafety.Business
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IDistributionRepository _distributionRepository;
-        private readonly IHubTools _hubTools;
+        private readonly ILogger<AdminBusiness> _logger;
 
-        public AdminBusiness(UserManager<ApplicationUser> userManager, IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, IHubTools hubTools)
+        public AdminBusiness(UserManager<ApplicationUser> userManager, IRegistrationService registrationService, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, IDistributionRepository distributionRepository, ILogger<AdminBusiness> logger)
         {
             _userManager = userManager;
             _registrationService = registrationService;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
             _distributionRepository = distributionRepository;
-            _hubTools = hubTools;
+            _logger = logger;
         }
 
         public async Task<APIResponse<bool>> RegisterAgentAsync(RegisterAgentViewModel request)
@@ -203,7 +204,9 @@ namespace PersonalSafety.Business
         public APIResponse<bool> ResetTrackers()
         {
             TrackerHandler.InitializeTrackers();
-            _hubTools.PrintToConsole("Trackers Reset.");
+
+            _logger.LogInformation("Trackers Reset.");
+
             return new APIResponse<bool>
             {
                 Result = true
@@ -224,7 +227,7 @@ namespace PersonalSafety.Business
             TrackerHandler.RescuerConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
             TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
             TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
-            _hubTools.PrintToConsole(rescuerEmail, "was forced offline.");
+            _logger.LogInformation(HubConsoleHelper.ConsoleFormater(rescuerEmail, "was forced offline."));
             return new APIResponse<bool>
             {
                 Result = true
@@ -235,7 +238,7 @@ namespace PersonalSafety.Business
         {
             TrackerHandler.ClientConnectionInfoSet.RemoveWhere(r => r.UserEmail == clientEmail);
             TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == clientEmail);
-            _hubTools.PrintToConsole(clientEmail, "was forced offline.");
+            _logger.LogInformation(HubConsoleHelper.ConsoleFormater(clientEmail, "was forced offline."));
             return new APIResponse<bool>
             {
                 Result = true

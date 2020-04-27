@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.SignalR;
 using PersonalSafety.Contracts.Enums;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models;
+using Microsoft.Extensions.Logging;
 
 namespace PersonalSafety.Hubs
 {
@@ -23,9 +23,8 @@ namespace PersonalSafety.Hubs
         private readonly IHubContext<AgentHub> _hubContext;
         private readonly IPersonnelRepository _personnelRepository;
 
-        public AgentHub(IHubContext<AgentHub> hubContext, IPersonnelRepository personnelRepository, IHubTools hubTools) : base(hubTools)
+        public AgentHub(IHubContext<AgentHub> hubContext, IPersonnelRepository personnelRepository, ILogger<AgentHub> logger) : base(logger)
         {
-            _hubContext = hubContext;
             _personnelRepository = personnelRepository;
         }
 

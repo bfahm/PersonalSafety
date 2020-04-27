@@ -2,12 +2,10 @@
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Contracts.Enums;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
-using PersonalSafety.Hubs.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace PersonalSafety.Hubs
 {
@@ -16,7 +14,7 @@ namespace PersonalSafety.Hubs
         private readonly string channelName = "ClientChannel";
         private readonly IHubContext<ClientHub> _hubContext;
 
-        public ClientHub(IHubContext<ClientHub> hubContext, IHubTools hubTools) : base(hubTools)
+        public ClientHub(IHubContext<ClientHub> hubContext, ILogger<ClientHub> logger) : base(logger)
         {
             _hubContext = hubContext;
         }

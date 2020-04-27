@@ -9,6 +9,7 @@ using PersonalSafety.Hubs.Helpers;
 using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models;
+using Microsoft.Extensions.Logging;
 
 namespace PersonalSafety.Hubs
 {
@@ -20,14 +21,14 @@ namespace PersonalSafety.Hubs
         private readonly IHubContext<RescuerHub> _hubContext;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IAgentHub _agentHub;
-        private readonly IHubTools _hubTools;
+        private readonly ILogger<RescuerHub> _logger;
 
-        public RescuerHub(IHubContext<RescuerHub> hubContext, IPersonnelRepository personnelRepository, IAgentHub agentHub, IHubTools hubTools) : base(hubTools)
+        public RescuerHub(IHubContext<RescuerHub> hubContext, IPersonnelRepository personnelRepository, IAgentHub agentHub, ILogger<RescuerHub> logger) : base(logger)
         {
             _hubContext = hubContext;
             _personnelRepository = personnelRepository;
             _agentHub = agentHub;
-            _hubTools = hubTools;
+            _logger = logger;
         }
 
         public bool NotifyNewChanges(int requestId, string rescuerEmail)
@@ -100,7 +101,7 @@ namespace PersonalSafety.Hubs
                 //If so, send him his previous state and remove that state from the tracker.
                 TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(c=>c.UserEmail == recurrentConnection.UserEmail);
                 NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
-                _hubTools.PrintToConsole(recurrentConnection.UserEmail, "had a mission with id: "+ recurrentConnection.CurrentJob + " state saved and now restored to him");
+                _logger.LogInformation(HubConsoleHelper.ConsoleFormater(recurrentConnection.UserEmail, "had a mission with id: " + recurrentConnection.CurrentJob + " state saved and now restored to him"));
             }
 
             // Notify Agent in the same hub that rescuers state has changed.
@@ -124,7 +125,7 @@ namespace PersonalSafety.Hubs
                     TrackerHandler.RescuerWithPendingMissionsSet.Add(currentDisconnection);
 
                     // Write a summary to the console.
-                    _hubTools.PrintToConsole(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on.");
+                    _logger.LogInformation(HubConsoleHelper.ConsoleFormater(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on."));
                 }
 
                 // Notify Agent in the same hub that rescuers state has changed.
