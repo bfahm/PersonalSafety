@@ -10,6 +10,7 @@ using PersonalSafety.Options;
 using PersonalSafety.Contracts;
 using PersonalSafety.Models.ViewModels.AccountVM;
 using PersonalSafety.Services.Otp;
+using Microsoft.Extensions.Logging;
 
 namespace PersonalSafety.Business
 {
@@ -20,14 +21,16 @@ namespace PersonalSafety.Business
         private readonly ILoginService _loginService;
         private readonly IEmailService _emailService;
         private readonly IPersonnelRepository _personnelRepository;
+        private readonly ILogger<AccountBusiness> _logger;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, ILoginService loginService, IEmailService emailService, IPersonnelRepository personnelRepository)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, ILoginService loginService, IEmailService emailService, IPersonnelRepository personnelRepository, ILogger<AccountBusiness> logger)
         {
             _userManager = userManager;
             _appSettings = appSettings;
             _loginService = loginService;
             _emailService = emailService;
             _personnelRepository = personnelRepository;
+            _logger = logger;
         }
 
         public async Task<APIResponse<LoginResponseViewModel>> LoginAsync(LoginRequestViewModel request)
@@ -104,6 +107,8 @@ namespace PersonalSafety.Business
             response.Status = 0;
             response.HasErrors = false;
             response.Messages.Add("Success! You are now logged in.");
+
+            _logger.LogInformation("Login Attempt with " + request.Email);
 
             return response;
         }

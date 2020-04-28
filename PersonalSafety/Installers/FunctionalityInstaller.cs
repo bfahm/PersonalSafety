@@ -18,12 +18,10 @@ namespace PersonalSafety.Installers
 
             // Registering Extensions
             //services.AddScoped<GithubUpdateCheckerFilter>();
-            services.AddScoped<BuildDateCalculatorFitler>();
 
             // Needed to display the home page "view"
             services.AddMvc().AddMvcOptions(options => {
                 //options.Filters.AddService(typeof(GithubUpdateCheckerFilter));
-                options.Filters.AddService(typeof(BuildDateCalculatorFitler));
             }).AddSessionStateTempDataProvider();
             services.AddSession();
 
