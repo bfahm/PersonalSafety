@@ -56,7 +56,7 @@ namespace PersonalSafety.Hubs
             if (currentDisconnection != null)
             {
                 TrackerHandler.AllConnectionInfoSet.RemoveWhere(c=> c.UserEmail == currentDisconnection.UserEmail);
-                _logger.LogInformation(HubConsoleHelper.ConsoleFormater(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true));
+                _logger?.LogInformation(HubConsoleHelper.ConsoleFormater(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true));
             }
 
             await base.OnDisconnectedAsync(ex);
