@@ -46,9 +46,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<IClientHub, ClientHub>();
             services.AddScoped<IAgentHub, AgentHub>();
             services.AddScoped<IRescuerHub, RescuerHub>();
-            services.AddScoped<IAdminHub, AdminHub>();
-            
-            services.AddScoped<HubConsoleHelper>();
+            services.AddSingleton<AdminHub>();
         }
 
         public static void MapToEndpoints(IEndpointRouteBuilder endpoints)

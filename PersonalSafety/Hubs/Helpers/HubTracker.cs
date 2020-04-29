@@ -5,7 +5,7 @@ namespace PersonalSafety.Hubs.HubTracker
 {
     public static class TrackerHandler
     {
-        public static ObservableHashSet<string> ConsoleSet;
+        public static ObservableHashSet<string> ConsoleSet = new ObservableHashSet<string>();
         public static HashSet<ClientConnectionInfo> ClientConnectionInfoSet;
         public static HashSet<AgentConnectionInfo> AgentConnectionInfoSet;
         public static HashSet<RescuerConnectionInfo> RescuerConnectionInfoSet;
@@ -20,7 +20,7 @@ namespace PersonalSafety.Hubs.HubTracker
 
         public static void InitializeConsoleLog()
         {
-            ConsoleSet = new ObservableHashSet<string>();
+            ConsoleSet.Clear();
         }
 
         public static void InitializeTrackers()

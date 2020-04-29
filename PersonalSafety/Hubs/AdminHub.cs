@@ -3,22 +3,30 @@ using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.HubTracker;
+using System.Collections.Specialized;
 
 namespace PersonalSafety.Hubs
 {
     [Authorize(Roles = Roles.ROLE_ADMIN)]
-    public class AdminHub : MainHub, IAdminHub
+    public class AdminHub : MainHub
     {
-        private readonly IHubContext<AdminHub> _hubContext;
-        
-        public AdminHub(IHubContext<AdminHub> hubContext)
+        public AdminHub()
         {
-            _hubContext = hubContext;
+            TrackerHandler.ConsoleSet.CollectionChanged += ConsoleSetOnChanged;
         }
 
-        public Task PrintToOnlineConsole(string text)
+        private void PrintToOnlineConsole(string text)
         {
-            return _hubContext.Clients.All.SendAsync("AdminConsoleChanges", text);
+            Clients.All.SendAsync("AdminConsoleChanges", text);
+        }
+
+
+        private void ConsoleSetOnChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            foreach (var item in e.NewItems)
+            {
+                PrintToOnlineConsole(item.ToString());
+            }
         }
     }
 }

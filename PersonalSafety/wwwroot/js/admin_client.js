@@ -169,6 +169,8 @@ function initializeButtons() {
         $(this).removeClass("btn-secondary");
         $(this).addClass("btn-primary");
         $("#console_main_container").addClass("border-primary");
+
+        $(this).val("Refresh");
     });
 
     $("#btn_clear").click(function () {
