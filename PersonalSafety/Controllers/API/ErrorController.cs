@@ -9,7 +9,7 @@ namespace PersonalSafety.Controllers.API
     {
         [Route("Error/{statusCode}")]
         [HttpGet]
-        public object HttpStatusCodeHandler(int statusCode)
+        public IActionResult HttpStatusCodeHandler(int statusCode)
         {
             APIResponse<string> response = new APIResponse<string>();
 
@@ -19,12 +19,14 @@ namespace PersonalSafety.Controllers.API
             {
                 case 404:
                     response.Messages.Add("The requested url could not be found");
-                    break;
+                    return NotFound(response);
                 case 401:
                     response.Messages.Add("You are not authorized. Please login or register to continue.");
-                    break;
+                    return Unauthorized(response);
+                default:
+                    response.Messages.Add("An unhandled error occured. Please have another approach");
+                    return new ObjectResult(response);
             }
-            return response;
 
         }
     }

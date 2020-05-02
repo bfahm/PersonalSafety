@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using PersonalSafety.Extensions;
 using PersonalSafety.Models.ViewModels;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Installers
 {
@@ -54,7 +53,7 @@ namespace PersonalSafety.Installers
                 string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 sw.IncludeXmlComments(xmlPath);
-
+                sw.OperationFilter<SwaggerFileUploadFilter>();
             });
 
             services.AddSwaggerExamplesFromAssemblyOf<LoginRequestViewModel>();

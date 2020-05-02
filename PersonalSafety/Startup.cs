@@ -73,8 +73,6 @@ namespace PersonalSafety
 
             app.UseCors();
 
-            app.UseStaticFiles();
-
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
             
             ApplicationDbInitializer databaseInitializer = new ApplicationDbInitializer(userManager, roleManager, clientRepository, personnelRepository, departmentRepository, distributionRepository);
@@ -85,6 +83,20 @@ namespace PersonalSafety
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                OnPrepareResponse = (context) =>
+                {
+                    // TODO: also check if the image is allowed by the user, by saving the userid in the image path name
+                    var userId = context.Context.User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+                    if (!context.Context.User.Identity.IsAuthenticated && context.Context.Request.Path.StartsWithSegments("/Uploads"))
+                    {
+                        context.Context.Response.StatusCode = 401;
+                        context.Context.Response.Redirect("/Error/401");
+                    }
+                }
+            });
 
             app.UseEndpoints(endpoints =>
             {
