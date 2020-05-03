@@ -24,7 +24,7 @@ namespace PersonalSafety.Controllers.API
         [HttpPost]
         public IActionResult UploadFile(List<IFormFile> files)
         {
-            var response = _fileManager.UploadFiles(files);
+            var response = _fileManager.UploadImages(files);
             return Ok(response);
         }
     }

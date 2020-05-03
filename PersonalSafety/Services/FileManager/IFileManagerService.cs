@@ -8,6 +8,6 @@ namespace PersonalSafety.Services.FileManager
 {
     public interface IFileManagerService
     {
-        List<string> UploadFiles(List<IFormFile> files);
+        List<string> UploadImages(List<IFormFile> files);
     }
 }
