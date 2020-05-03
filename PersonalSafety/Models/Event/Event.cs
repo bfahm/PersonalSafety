@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Models
 {
@@ -13,9 +10,14 @@ namespace PersonalSafety.Models
 
         [ForeignKey("ApplicationUser")]
         public string UserId { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
 
         public string Title { get; set; }
         public string Description { get; set; }
+
+        [ForeignKey("EventCategory")]
+        public int EventCategoryId { get; set; }
+        public virtual EventCategory EventCategory { get; set; }
 
         public double Longitude { get; set; }
         public double Latitude { get; set; }
@@ -23,11 +25,10 @@ namespace PersonalSafety.Models
         public int State { get; set; }
 
         public bool IsValidated { get; set; }
-        public bool IsOnGoing { get; set; }
+        public bool IsPublicHelp { get; set; }
+        public int Votes { get; set; }
 
         public DateTime CreationDate { get; set; } = DateTime.Now;
         public DateTime LastModified { get; set; } = DateTime.Now;
-
-        public virtual ApplicationUser ApplicationUser { get; set; }
     }
 }

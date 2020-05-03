@@ -35,11 +35,13 @@ namespace PersonalSafety.Models
         public DbSet<ApplicationUser> UserInfos { get; set; }
         public DbSet<EmergencyContact> EmergencyContacts { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<EventCategory> EventCategories { get; set; }
         public DbSet<SOSRequest> SOSRequests { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Personnel> Personnels { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Distribution> Distributions { get; set; }
+        public DbSet<Attachment> Attachments { get; set; }
     }
 }

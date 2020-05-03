@@ -11,6 +11,9 @@ namespace PersonalSafety.Models
     {
         [Key, ForeignKey("ApplicationUser")]
         public string ClientId { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
+
+        public float Rate { get; set; }
 
         // Uniqueness enforced in [AppDbContext]
         [Required]
@@ -26,12 +29,10 @@ namespace PersonalSafety.Models
 
         [ForeignKey("Event")]
         public int? PublicEventId { get; set; }
+        public virtual Event PublicEvent { get; set; }
 
         [ForeignKey("Event")]
         public int? InvolvedInEventId { get; set; }
-
-        public virtual ApplicationUser ApplicationUser { get; set; }
-        public virtual Event PublicEvent { get; set; }
         public virtual Event InvolvedInEvent { get; set; }
     }
 }
