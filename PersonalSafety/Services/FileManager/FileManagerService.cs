@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using PersonalSafety.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,32 +12,31 @@ namespace PersonalSafety.Services.FileManager
     public class FileManagerService : IFileManagerService
     {
         private readonly IWebHostEnvironment _env;
+        private readonly AppSettings _appSettings;
         private readonly string _dir;
-        private readonly string folderName = "Uploads";
 
-        public FileManagerService(IWebHostEnvironment env)
+        public FileManagerService(IWebHostEnvironment env, AppSettings appSettings)
         {
+            _appSettings = appSettings;
             _env = env;
             _dir = _env.ContentRootPath + "\\wwwroot";
         }
 
-        public string UploadFile(IFormFile file)
+        public List<string> UploadFiles(List<IFormFile> files)
         {
-            string ext = file.FileName.Split('.')[1];
-            string fileName = Guid.NewGuid().ToString() + "." + ext;
-            string savingLocation = Path.Combine(folderName, fileName);
-            
-            var path = Path.Combine(_dir, savingLocation);
-            using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+            var savingLocations = new List<string>();
+            foreach(var file in files)
             {
+                string ext = file.FileName.Split('.')[1];
+                string fileName = Guid.NewGuid().ToString() + "." + ext;
+                string savingLocation = Path.Combine(_appSettings.AttachmentsLocation, fileName);
+                savingLocations.Add(savingLocation);
+
+                var path = Path.Combine(_dir, savingLocation);
+                using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
                 file.CopyTo(fileStream);
             }
-            return savingLocation;
-        }
-
-        public string RetrieveFile(string guid)
-        {
-            throw new NotImplementedException();
+            return savingLocations;
         }
     }
 }

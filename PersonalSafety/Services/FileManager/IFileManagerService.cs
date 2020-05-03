@@ -8,7 +8,6 @@ namespace PersonalSafety.Services.FileManager
 {
     public interface IFileManagerService
     {
-        string UploadFile(IFormFile file);
-        string RetrieveFile(string guid);
+        List<string> UploadFiles(List<IFormFile> files);
     }
 }

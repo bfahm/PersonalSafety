@@ -10,5 +10,6 @@ namespace PersonalSafety.Options
         public string AppBaseUrl { get; set; }
         public string AppBaseUrlView { get; set; }
         public string AppVersion { get; set; }
+        public string AttachmentsLocation { get; set; }
     }
 }

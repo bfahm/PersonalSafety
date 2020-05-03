@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Services.FileManager;
@@ -19,10 +20,11 @@ namespace PersonalSafety.Controllers.API
             _fileManager = fileManager;
         }
 
+        [Authorize]
         [HttpPost]
-        public IActionResult UploadFile(IFormFile file)
+        public IActionResult UploadFile(List<IFormFile> files)
         {
-            var response = _fileManager.UploadFile(file);
+            var response = _fileManager.UploadFiles(files);
             return Ok(response);
         }
     }

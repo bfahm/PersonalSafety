@@ -12,6 +12,7 @@ using PersonalSafety.Extensions;
 using Microsoft.Extensions.Logging;
 using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.Helpers;
+using PersonalSafety.Options;
 
 namespace PersonalSafety
 {
@@ -42,39 +43,24 @@ namespace PersonalSafety
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger, AppSettings appSettings, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             if (env.IsProduction())
             {
                 // APIResponses that support HTTP 500
                 app.ConfigureExceptionHandler(logger);
-                
                 // APIResponses that support HTTP 401 and HTTP 404
                 app.UseStatusCodePagesWithReExecute("/Error/{0}");
             }
 
             app.UseRouting();
-
-            //Allow headers required by SignalR, order is important
-            app.Use((context, next) =>
-            {
-                context.Response.Headers["Access-Control-Allow-Origin"] = context.Request.Headers.Where(h => h.Key == "Origin").FirstOrDefault().Value.ToString();
-                context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
-                context.Response.Headers["Access-Control-Allow-Methods"] = "*";
-                context.Response.Headers["Access-Control-Allow-Headers"] = "Authorization, X-Requested-With, Content-Type";
-
-                return next.Invoke();
-            });
-
+            app.UseCustomHeaderInjector();
             app.UseCors();
 
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
-            
             ApplicationDbInitializer databaseInitializer = new ApplicationDbInitializer(userManager, roleManager, clientRepository, personnelRepository, departmentRepository, distributionRepository);
             databaseInitializer.SeedUsers();
 
@@ -84,27 +70,13 @@ namespace PersonalSafety
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                OnPrepareResponse = (context) =>
-                {
-                    // TODO: also check if the image is allowed by the user, by saving the userid in the image path name
-                    var userId = context.Context.User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
-                    if (!context.Context.User.Identity.IsAuthenticated && context.Context.Request.Path.StartsWithSegments("/Uploads"))
-                    {
-                        context.Context.Response.StatusCode = 401;
-                        context.Context.Response.Redirect("/Error/401");
-                    }
-                }
-            });
+            app.UseCustomStaticFile(appSettings);
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 HubsInstaller.MapToEndpoints(endpoints);
             });
-
-            //app.UseMvc();
         }
     }
 }
