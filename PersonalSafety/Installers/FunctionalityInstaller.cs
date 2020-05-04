@@ -37,6 +37,9 @@ namespace PersonalSafety.Installers
             var facebookAuthSettings = new FacebookAuthSettings();
             configuration.Bind(nameof(FacebookAuthSettings), facebookAuthSettings);
             services.AddSingleton(facebookAuthSettings);
+
+            // Register the DB Initializer
+            services.AddScoped<IApplicationDbInitializer, ApplicationDbInitializer>();
         }
     }
 }

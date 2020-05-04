@@ -69,11 +69,20 @@
             <div class="col-lg-12 col-md- col-sm-12">
                 <div class="media d-block pb_feature-v1 text-left">
                     <div class="media-body">
-
-
                         <ul class="list-group text-sans-serif">
 
                             <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
+                                <div>
+                                    <p class="text-primary"><strong>Breaking Changes</strong></p>
+                                    <ul>
+                                        <li><samp>Manager/•••</samp> &#8594; <samp>Manager/Departments/•••</samp></li>
+                                        <li><samp>HttpPOST Admin/RenameDistribution</samp> &#8594; <samp>HttpPUT Admin/RenameDistribution</samp></li>
+                                    </ul>
+                                </div>
+                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <p class="text-primary"><strong>Distributions and Permissions</strong></p>
                                     <p>
@@ -94,26 +103,6 @@
 
                                     </ul>
                                 </div>
-                                <span class="badge badge-success badge-pill">NEW!</span>
-                            </li>
-
-                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
-                                <div>
-                                    <p class="text-primary"><strong>Breaking Changes</strong></p>
-                                    <ul>
-                                        <li>
-                                            <samp>Admin/RegisterAgent</samp> &#8594; <samp>Admin/Registration/RegisterAgent</samp>
-                                            <ul>
-                                                <li>
-                                                    <samp>DepartmentCity</samp> was also replaced by <samp>DistributionId</samp>
-                                                </li>
-                                            </ul>
-                                        </li>
-                                        <li><samp>Admin/GetDepartments</samp> &#8594; <samp>Manager/GetDepartments</samp></li>
-                                        <li><samp>Admin/Get[Authority]Something</samp> &#8594; <samp>Admin/GetSomething</samp></li>
-                                    </ul>
-                                </div>
-                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -182,8 +171,6 @@
                                 <span class="badge badge-light badge-pill">REMOVED</span>
                             </li>
                         </ul>
-
-
                     </div>
                 </div>
             </div>

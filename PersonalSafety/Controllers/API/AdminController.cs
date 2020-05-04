@@ -297,7 +297,7 @@ namespace PersonalSafety.Controllers.API
         /// #### **[404]**: Not Found Error
         /// Occurs when you provide a wrong node id.
         /// </remarks>
-        [HttpPost(ApiRoutes.Admin.Management)]
+        [HttpPut(ApiRoutes.Admin.Management)]
         public IActionResult RenameDistribution([FromBody] RenameDistributionRequestViewModel request)
         {
             var response = _adminBusiness.RenameDistribution(request);

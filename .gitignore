@@ -342,3 +342,5 @@ healthchecksdb
 # Execlude contents of the Uploads folder
 /PersonalSafety/wwwroot/Uploads/*
 !/PersonalSafety/wwwroot/Uploads/.gitkeep
+!/PersonalSafety/wwwroot/Uploads/cat_corona.jpg
+!/PersonalSafety/wwwroot/Uploads/cat_nearby.jpg

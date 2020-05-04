@@ -43,7 +43,7 @@ namespace PersonalSafety
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger, AppSettings appSettings, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider, ILogger<Startup> logger, AppSettings appSettings, IApplicationDbInitializer applicationDbInitializer)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -61,8 +61,7 @@ namespace PersonalSafety
             app.UseCors();
 
             serviceProvider.GetService<AppDbContext>().Database.EnsureCreated();
-            ApplicationDbInitializer databaseInitializer = new ApplicationDbInitializer(userManager, roleManager, clientRepository, personnelRepository, departmentRepository, distributionRepository);
-            databaseInitializer.SeedUsers();
+            applicationDbInitializer.SeedData();
 
             app.UseSwagger();
             app.UseSwaggerUI(option => option.SwaggerEndpoint("/swagger/v1/swagger.json", "PersonalSafetyAPI Documentations"));

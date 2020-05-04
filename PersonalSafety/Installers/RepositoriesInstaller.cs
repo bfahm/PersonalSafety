@@ -20,6 +20,8 @@ namespace PersonalSafety.Installers
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IDistributionRepository, DistributionRepository>();
+            services.AddScoped<IEventRepository, EventRepository>();
+            services.AddScoped<IEventCategoryRepository, EventCategoryRepository>();
         }
     }
 }

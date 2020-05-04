@@ -7,29 +7,35 @@ using System.Diagnostics;
 using System.Linq;
 using PersonalSafety.Contracts;
 using System.Security.Claims;
+using PersonalSafety.Options;
+using System.IO;
 
 namespace PersonalSafety.Extensions
 {
-    public class ApplicationDbInitializer
+    public class ApplicationDbInitializer : IApplicationDbInitializer
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly AppSettings _appSettings;
         private readonly IClientRepository _clientRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IDepartmentRepository _departmentRepository;
         private readonly IDistributionRepository _distributionRepository;
+        private readonly IEventCategoryRepository _categoryRepository;
 
-        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
+        public ApplicationDbInitializer(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, AppSettings appSettings, IClientRepository clientRepository, IPersonnelRepository personnelRepository, IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository, IEventCategoryRepository categoryRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _appSettings = appSettings;
             _clientRepository = clientRepository;
             _personnelRepository = personnelRepository;
             _departmentRepository = departmentRepository;
             _distributionRepository = distributionRepository;
+            _categoryRepository = categoryRepository;
         }
 
-        public void SeedUsers()
+        public void SeedData()
         {
             CreateRoles();
 
@@ -49,6 +55,24 @@ namespace PersonalSafety.Extensions
             if (_userManager.GetClaimsAsync(_userManager.FindByEmailAsync("admin@admin.com").Result).Result.Count == 0)
             {
                 _userManager.AddClaimAsync(adminUser, new Claim(ClaimsStore.CLAIM_DISTRIBUTION_ACCESS, "1")).Wait(); // Admin can access all distributions
+            }
+
+            #endregion
+
+            #region Create Manager
+
+            ApplicationUser managerUser = new ApplicationUser
+            {
+                UserName = "manager@test.com",
+                Email = "manager@test.com",
+                FullName = "Manager",
+                EmailConfirmed = true
+            };
+
+            CreateUserAndSetupRole(managerUser, "Test@123", "Manager");
+            if (_userManager.GetClaimsAsync(_userManager.FindByEmailAsync("manager@test.com").Result).Result.Count == 0)
+            {
+                _userManager.AddClaimAsync(managerUser, new Claim(ClaimsStore.CLAIM_DISTRIBUTION_ACCESS, "1")).Wait(); // Admin can access all distributions
             }
 
             #endregion
@@ -144,6 +168,8 @@ namespace PersonalSafety.Extensions
             }
 
             #endregion
+
+            CreateCategories();
         }
 
         private void CreateUserAndSetupRole(ApplicationUser user, string password, params string[] roles)
@@ -252,6 +278,40 @@ namespace PersonalSafety.Extensions
                 };
 
                 _distributionRepository.AddWithIdentityInsert(distributions);
+            }
+        }
+
+        private void CreateCategories()
+        {
+            if(_categoryRepository.GetAll().Count() == 0)
+            {
+                EventCategory coronaCategory = new EventCategory
+                {
+                    Title = "Corona Virus",
+                    Description = "Events related to the novel pandemic",
+                    ThumbnailUrl = Path.Combine(_appSettings.AttachmentsLocation, "cat_corona.jpg")
+                };
+
+                _categoryRepository.Add(coronaCategory);
+
+                EventCategory nearbyCategory = new EventCategory
+                {
+                    Title = "Nearby Stories",
+                    Description = "Events that reside in the neighborhood",
+                    ThumbnailUrl = Path.Combine(_appSettings.AttachmentsLocation, "cat_nearby.jpg")
+                };
+
+                _categoryRepository.Add(nearbyCategory);
+
+                EventCategory userStories = new EventCategory
+                {
+                    Title = "Your Stories",
+                    Description = "Your Events.."
+                };
+
+                _categoryRepository.Add(userStories);
+
+                _categoryRepository.Save();
             }
         }
     }

@@ -14,11 +14,13 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IClientBusiness _clientBusiness;
         private readonly ISOSBusiness _sosBusiness;
+        private readonly ICategoryBusiness _categoryBusiness;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ICategoryBusiness categoryBusiness)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
+            _categoryBusiness = categoryBusiness;
         }
 
         /// <summary>
@@ -256,6 +258,22 @@ namespace PersonalSafety.Controllers.API
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
             var response = await _sosBusiness.CancelPendingRequestsAsync(currentlyLoggedInUserId);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Gets all Categories of Events along there thumbnails (if available)
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// Please note that access to the thumbnail contents also requires user authorization via a normal get request
+        /// with the `Bearer` token attached.
+        /// </remarks>
+        [HttpGet(ApiRoutes.Client.Events)]
+        public IActionResult GetEventsCategories()
+        {
+            var response = _categoryBusiness.GetEventCategories();
 
             return Ok(response);
         }

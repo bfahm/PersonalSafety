@@ -26,6 +26,7 @@ namespace PersonalSafety.Hubs
         public AgentHub(IHubContext<AgentHub> hubContext, IPersonnelRepository personnelRepository, ILogger<AgentHub> logger) : base(logger)
         {
             _personnelRepository = personnelRepository;
+            _hubContext = hubContext;
         }
 
         public void NotifyNewChanges(int requestId, int requestState, int departmentId)

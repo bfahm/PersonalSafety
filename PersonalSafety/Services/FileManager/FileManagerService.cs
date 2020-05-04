@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using PersonalSafety.Options;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,14 @@ namespace PersonalSafety.Services.FileManager
         private readonly IWebHostEnvironment _env;
         private readonly AppSettings _appSettings;
         private readonly string _dir;
+        private readonly ILogger<FileManagerService> _logger;
 
-        public FileManagerService(IWebHostEnvironment env, AppSettings appSettings)
+        public FileManagerService(IWebHostEnvironment env, AppSettings appSettings, ILogger<FileManagerService> logger)
         {
             _appSettings = appSettings;
             _env = env;
             _dir = _env.ContentRootPath + "\\wwwroot";
+            _logger = logger;
         }
 
         public List<string> UploadImages(List<IFormFile> files)
@@ -44,6 +47,26 @@ namespace PersonalSafety.Services.FileManager
             return savingLocations;
         }
 
+        public void DeleteFile(string fileName)
+        {
+            try
+            {
+                var rootPath = Path.Combine(_dir, _appSettings.AttachmentsLocation);
+                var existingFilePath = Path.Combine(rootPath, fileName);
+                // Check if file exists with its full path    
+                if (File.Exists(existingFilePath))
+                {
+                    // If file found, delete it    
+                    File.Delete(existingFilePath);
+                }
+            }
+            catch (IOException ioExp)
+            {
+                _logger.LogInformation("Error while trying to remove file: " + fileName + "\n" + "Exception Details: " + "\n"
+                    + ioExp.Message);
+            }
+        }
+
         private bool IsSupported(string ext)
         {
             List<string> supportedFileTypes = new List<string> 
@@ -57,6 +80,7 @@ namespace PersonalSafety.Services.FileManager
             if (supportedFileTypes.Contains(ext))
                 return true;
 
+            _logger.LogInformation("Unsupported Attachments of type: " + ext);
             return false;
         }
     }

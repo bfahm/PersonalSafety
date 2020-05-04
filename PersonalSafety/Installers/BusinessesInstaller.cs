@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PersonalSafety.Business;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PersonalSafety.Business.Category;
 
 namespace PersonalSafety.Installers
 {
@@ -20,6 +17,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<ISOSBusiness, SOSBusiness>();
             services.AddScoped<IRescuerBusiness, RescuerBusiness>();
             services.AddScoped<IManagerBusiness, ManagerBusiness>();
+            services.AddScoped<ICategoryBusiness, CategoryBusiness>();
         }
     }
 }

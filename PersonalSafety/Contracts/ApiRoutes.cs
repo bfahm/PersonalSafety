@@ -31,6 +31,13 @@
         {
             public const string Registration = DefaultBasic + nameof(Registration) + TrailingAction;
             public const string SOS = DefaultBasic + nameof(SOS) + TrailingAction;
+            public const string Events = DefaultBasic + nameof(Events) + TrailingAction;
+        }
+
+        public static class Manager
+        {
+            public const string Departments = DefaultBasic + nameof(Departments) + TrailingAction;
+            public const string Categories = DefaultBasic + nameof(Categories) + TrailingAction;
         }
     }
 }
