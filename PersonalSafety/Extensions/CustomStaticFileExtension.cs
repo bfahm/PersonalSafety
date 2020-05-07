@@ -11,7 +11,7 @@ namespace PersonalSafety.Extensions
     {
         public static void UseCustomStaticFile(this IApplicationBuilder app, AppSettings appSettings)
         {
-            app.UseStaticFiles(new StaticFileOptions()
+            app.UseStaticFiles(/*new StaticFileOptions()
             {
                 OnPrepareResponse = (context) =>
                 {
@@ -22,7 +22,7 @@ namespace PersonalSafety.Extensions
                         context.Context.Response.Redirect("/Error/401");
                     }
                 }
-            });
+            }*/);
         }
     }
 }
