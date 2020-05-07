@@ -22,11 +22,10 @@ namespace PersonalSafety.Models.ViewModels
 
         public int ExistingDepartmentId { get; set; }
 
-        public int AuthorityType { get; set; }
-
         // Below properties are provided if Admin would be creating a department along creating the agent in the same call
         public int DistributionId { get; set; }
         public double DepartmentLongitude { get; set; }
         public double DepartmentLatitude { get; set; }
+        public int AuthorityType { get; set; }
     }
 }

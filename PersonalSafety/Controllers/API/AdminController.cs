@@ -127,7 +127,7 @@ namespace PersonalSafety.Controllers.API
         ///     "fullName": "John Doe",
         ///     "email": "john@test.com",
         ///     "password": "fjKdl1P-mD",
-        ///     "departmentCity": 0
+        ///     "DistributionId": 0
         ///     "departmentLongitude": 30.123456012
         ///     "departmentLatitude": 30.123456012
         ///     "authorityType": 1
