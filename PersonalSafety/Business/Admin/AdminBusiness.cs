@@ -253,6 +253,52 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public APIResponse<List<DistributionNodeViewModel>> GetDistributionNodes()
+        {
+            APIResponse<List<DistributionNodeViewModel>> response = new APIResponse<List<DistributionNodeViewModel>>();
+            List<DistributionNodeViewModel> distributions = new List<DistributionNodeViewModel>();
+
+            var nodes = _distributionRepository.GetAll();
+
+            foreach(var node in nodes)
+            {
+                distributions.Add(new DistributionNodeViewModel
+                {
+                    Id = node.Id,
+                    TypeId = node.Type,
+                    TypeName = ((DistributionTypesEnum)node.Type).ToString(),
+                    Value = node.Value,
+                    ParentId = node.ParentId
+                });
+            }
+
+            response.Result = distributions;
+            return response;
+        }
+
+        public APIResponse<List<DistributionNodeViewModel>> GetDistributionCities()
+        {
+            APIResponse<List<DistributionNodeViewModel>> response = new APIResponse<List<DistributionNodeViewModel>>();
+            List<DistributionNodeViewModel> distributions = new List<DistributionNodeViewModel>();
+
+            var nodes = _distributionRepository.GetCities();
+
+            foreach (var node in nodes)
+            {
+                distributions.Add(new DistributionNodeViewModel
+                {
+                    Id = node.Id,
+                    TypeId = node.Type,
+                    TypeName = ((DistributionTypesEnum)node.Type).ToString(),
+                    Value = node.Value,
+                    ParentId = node.ParentId
+                });
+            }
+
+            response.Result = distributions;
+            return response;
+        }
+
         public APIResponse<DistributionTreeViewModel> AddNewDistribution(NewDistributionRequestViewModel request)
         {
             APIResponse<DistributionTreeViewModel> response = new APIResponse<DistributionTreeViewModel>();

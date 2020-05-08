@@ -127,7 +127,7 @@ namespace PersonalSafety.Controllers.API
         ///     "fullName": "John Doe",
         ///     "email": "john@test.com",
         ///     "password": "fjKdl1P-mD",
-        ///     "DistributionId": 0
+        ///     "distributionId": 0
         ///     "departmentLongitude": 30.123456012
         ///     "departmentLatitude": 30.123456012
         ///     "authorityType": 1
@@ -238,9 +238,8 @@ namespace PersonalSafety.Controllers.API
             return Ok(authResponse);
         }
 
-
         /// <summary>
-        /// Get the tree of department distribution.
+        /// Get the tree of department distribution
         /// </summary>
         /// <remarks>
         /// ## Main Functionality
@@ -252,6 +251,27 @@ namespace PersonalSafety.Controllers.API
             var response = _adminBusiness.GetDistributionTree();
             return Ok(response);
         }
+
+        /// <summary>
+        /// Get the tree of department distribution (all nodes in the same level)
+        /// </summary>
+        [HttpGet(ApiRoutes.Admin.Management)]
+        public IActionResult GetDistributionNodes()
+        {
+            var response = _adminBusiness.GetDistributionNodes();
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Retrieves only the cities in the distribution
+        /// </summary>
+        [HttpGet(ApiRoutes.Admin.Management)]
+        public IActionResult GetDistributionCities()
+        {
+            var response = _adminBusiness.GetDistributionCities();
+            return Ok(response);
+        }
+
 
         /// <summary>
         /// Attachs a new node to the Distribution Tree

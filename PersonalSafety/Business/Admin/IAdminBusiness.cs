@@ -19,6 +19,8 @@ namespace PersonalSafety.Business
         APIResponse<bool> ResetRescuerState(string rescuerEmail);
         APIResponse<bool> ResetClientState(string clientEmail);
         APIResponse<DistributionTreeViewModel> GetDistributionTree();
+        APIResponse<List<DistributionNodeViewModel>> GetDistributionNodes();
+        APIResponse<List<DistributionNodeViewModel>> GetDistributionCities();
         APIResponse<DistributionTreeViewModel> AddNewDistribution(NewDistributionRequestViewModel request);
         APIResponse<DistributionTreeViewModel> RenameDistribution(RenameDistributionRequestViewModel request);
     }
