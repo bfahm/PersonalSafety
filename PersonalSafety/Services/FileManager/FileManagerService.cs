@@ -40,6 +40,8 @@ namespace PersonalSafety.Services.FileManager
                     savingLocations.Add(savingLocation);
 
                     var path = Path.Combine(_dir, savingLocation);
+                    _logger.LogInformation($"Trying to uploading to path: {path}");
+
                     using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
                     file.CopyTo(fileStream);
                 }

@@ -11,11 +11,18 @@
             font-family: Consolas, monaco, monospace;
             background-color: black;
             color: white;
-            font-size: 14px
+            font-size: 14px;
+            padding: 12px 15px 12px;
+            border-radius: 7px;
         }
         #console_container > p {
             margin-top: 5px;
             margin-bottom: 5px;
+        }
+        
+        #console_container ::selection {
+          color: red;
+          background: yellow;
         }
     </style>
 
@@ -146,7 +153,7 @@
                                     <br />
                                     <br />
 
-                                    <div id="console_container" class="alert text-left" role="alert" hidden>
+                                    <div id="console_container" class="text-left" hidden>
 
                                     </div>
                                 </div>
