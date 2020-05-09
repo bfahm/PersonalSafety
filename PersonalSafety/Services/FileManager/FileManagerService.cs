@@ -41,7 +41,7 @@ namespace PersonalSafety.Services.FileManager
                     savingLocations.Add(savingLocation);
 
                     var path = Path.Combine(_dir, savingLocation);
-                    _logger.LogInformation($"Trying to uploading to path: {path}");
+                    _logger.LogInformation($"Trying to upload to path: {path}");
 
                     using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
                     file.CopyTo(fileStream);
@@ -83,7 +83,7 @@ namespace PersonalSafety.Services.FileManager
             if (supportedFileTypes.Contains(ext))
                 return true;
 
-            _logger.LogInformation("Unsupported Attachments of type: " + ext);
+            _logger.LogInformation($"Unsupported attachment of type: {ext} was detected.");
             return false;
         }
     }
