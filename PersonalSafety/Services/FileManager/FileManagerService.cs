@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PersonalSafety.Options;
 using System;
@@ -19,7 +20,8 @@ namespace PersonalSafety.Services.FileManager
         {
             _appSettings = appSettings;
             _env = env;
-            _dir = _env.ContentRootPath + "\\wwwroot";
+            // Only add the specific root folder while in development, this is added automatically in production
+            _dir = _env.IsDevelopment() ? _env.ContentRootPath + "\\wwwroot" : _env.ContentRootPath;
             _logger = logger;
         }
 
