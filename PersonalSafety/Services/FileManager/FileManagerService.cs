@@ -20,8 +20,7 @@ namespace PersonalSafety.Services.FileManager
         {
             _appSettings = appSettings;
             _env = env;
-            // Only add the specific root folder while in development, this is added automatically in production
-            _dir = _env.IsDevelopment() ? _env.ContentRootPath + "\\wwwroot" : _env.ContentRootPath;
+            _dir = _env.ContentRootPath + "/wwwroot";
             _logger = logger;
         }
 
