@@ -9,22 +9,24 @@ import { simplePut } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
-var consoleIsOnline = false;
 var cookieDetails = {
     cookieTokenKey: "token",
     cookieRefreshTokenKey: "refreshToken"
 };
+var consoleLaunched = false;
 
 $(document).ready(function () {
     initializeButtons();
+
     tokenFactory(cookieDetails)
         .then(function (token) {
-            loginAnimationHandler(false, token);
+            loginUiHandler(token);
         })
         .catch(function (fatal) {
             if (fatal === true) {
                 logoutUser(cookieDetails);
             }
+            loginUiHandler(null); // Process a failed auto login..
         });
 });
 
@@ -136,11 +138,17 @@ function initializeButtons() {
         var email = $("#input_email").val();
         var password = $("#input_password").val();
 
+        $("#btn_connect_animation").attr("hidden", false);
+        $("#btn_connect_label").attr("hidden", true);
+
         loginViaAjax(email, password, cookieDetails, true)
             .then(function (token, refreshToken) {
-                loginAnimationHandler(true, token);
+                loginUiHandler(token);
             }).catch(function() {
                 $("#login_result").html("Wrong username or password..");
+
+                $("#btn_connect_animation").attr("hidden", true);
+                $("#btn_connect_label").attr("hidden", false);
             });
     });
 
@@ -171,6 +179,7 @@ function initializeButtons() {
         $("#console_main_container").addClass("border-primary");
 
         $(this).val("Refresh");
+        consoleLaunched = true;
     });
 
     $("#btn_clear").click(function () {
@@ -202,8 +211,14 @@ function initializeButtons() {
     });
 }
 
-function loginAnimationHandler(toAnimate, token) {
+function loginUiHandler(token) {
     //login animations and element swaps
+
+    if (token == null) {
+        $("#logging_in_div").attr("hidden", true);
+        $("#login_form").attr("hidden", false);
+        return;
+    }
 
     var email = parseJwt(token).sub;
 
@@ -213,13 +228,13 @@ function loginAnimationHandler(toAnimate, token) {
     $("#logged_in_notifier").attr("hidden", false);
     $("#section-tools").attr("hidden", false);
 
-    if (toAnimate) {
-        setTimeout(function () {
-            $([document.documentElement, document.body]).animate({
-                scrollTop: $("#section-tools").offset().top
-            }, 300); //time for animation to execute
-        }, 750); //time before animation starts execution
-    }
+    $("#logging_in_div").attr("hidden", true);
+
+    setTimeout(function () {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $("#section-tools").offset().top
+        }, 300); //time for animation to execute
+    }, 750); //time before animation starts execution
 }
 
 function loadConnectionsTable(jsonKey, jsonList) {
@@ -277,12 +292,11 @@ function loadConnectionsTable(jsonKey, jsonList) {
 
 function loadConsoleContents(parsedJson) {
     // Clear current table entries first
-    console.log(parsedJson);
     $("#console_container").empty();
 
     for (var i = 0; i < parsedJson.length; i++) {
         var text = parsedJson[i];
-        addToConsoleContents(text)
+        addToConsoleContents(text, false)
     }
 
     if (parsedJson.length === 0 || parsedJson === null) {
@@ -290,13 +304,28 @@ function loadConsoleContents(parsedJson) {
     }
 }
 
-function addToConsoleContents(text) {
+function addToConsoleContents(text, toScroll) {
     var splitsplit = text.split("|");
-    var datePart = "<span style='color: Chartreuse'>" + splitsplit[0] + "</span>"
+    var datePart = splitsplit[0]
+    var datePartSpan = `<span style='color: Chartreuse'> ${datePart} </span>`
+
+    // Only keep the numbers in the date part to be used as an ID
+    datePart = datePart.replace(/\s+/g, '');
+    datePart = datePart.replace(/:+/g, '');
+    datePart = datePart.replace(/-+/g, '');
+    datePart = datePart.replace('.', '');
+
     splitsplit.shift();
     var msgPart = splitsplit.join()
 
-    $('#console_container').append('<p> > ' + datePart + " | " + msgPart + '</p>');
+    var pElemenetId = `p_${datePart}`
+    $('#console_container').append(`<p id="${pElemenetId}"> > ${datePartSpan} | ${msgPart} </p>`);
+
+    if (toScroll && consoleLaunched) {
+        $([document.documentElement, document.body]).animate({
+            scrollTop: $(`#${pElemenetId}`).offset().top - 500
+        }, 100);
+    }
 }
 
 // SignalR related code..
@@ -309,7 +338,7 @@ function startConnection(token) {
 
     connection.on("AdminConsoleChanges", function (message) {
         $("#empty_console_pointer").remove();
-        addToConsoleContents(message);
+        addToConsoleContents(message, true);
     });
 
     // Start connection after finishing all the settings
