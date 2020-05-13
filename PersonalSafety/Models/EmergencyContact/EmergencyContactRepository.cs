@@ -1,8 +1,5 @@
-﻿using PersonalSafety.Models;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Models
 {
@@ -24,7 +21,6 @@ namespace PersonalSafety.Models
         {
             IEnumerable<EmergencyContact> emergencyContactsForUser = GetByUserId(userId);
             context.RemoveRange(emergencyContactsForUser);
-            context.SaveChanges();
         }
     }
 }

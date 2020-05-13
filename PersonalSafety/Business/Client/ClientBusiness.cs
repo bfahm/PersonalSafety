@@ -1,17 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using PersonalSafety.Hubs;
-using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Contracts;
-using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels.AccountVM;
 
 namespace PersonalSafety.Business
@@ -127,9 +121,9 @@ namespace PersonalSafety.Business
             return await _registrationService.RegisterClientAsync(newUser, null, client);
         }
 
-        public APIResponse<CompleteProfileViewModel> GetEmergencyInfo(string userId)
+        public APIResponse<ProfileViewModel> GetEmergencyInfo(string userId)
         {
-            APIResponse<CompleteProfileViewModel> response = new APIResponse<CompleteProfileViewModel>();
+            APIResponse<ProfileViewModel> response = new APIResponse<ProfileViewModel>();
 
             Client user = _clientRepository.GetById(userId);
             if (user == null)
@@ -140,7 +134,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            CompleteProfileViewModel viewModel = new CompleteProfileViewModel
+            ProfileViewModel viewModel = new ProfileViewModel
             {
                 BloodType = user.BloodType,
                 CurrentAddress = user.CurrentAddress,
@@ -154,7 +148,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public APIResponse<bool> CompleteProfile(string userId, CompleteProfileViewModel request)
+        public APIResponse<bool> EditProfile(string userId, ProfileViewModel request)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -168,12 +162,14 @@ namespace PersonalSafety.Business
             }
 
             // Check if user provided a value, else keep old value.
+            user.ApplicationUser.FullName = string.IsNullOrEmpty(request.FullName) ? user.ApplicationUser.FullName : request.FullName;
+            user.ApplicationUser.PhoneNumber = string.IsNullOrEmpty(request.PhoneNumber) ? user.ApplicationUser.PhoneNumber : request.PhoneNumber;
+            user.NationalId = string.IsNullOrEmpty(request.NationalId) ? user.NationalId : request.NationalId;
+            
             user.CurrentAddress = string.IsNullOrEmpty(request.CurrentAddress) ? user.CurrentAddress : request.CurrentAddress;
             user.MedicalHistoryNotes = string.IsNullOrEmpty(request.MedicalHistoryNotes) ? user.MedicalHistoryNotes : request.MedicalHistoryNotes;
             user.BloodType = (request.BloodType != 0) ? request.BloodType : user.BloodType;
             user.Birthday = (request.Birthday != null) ? request.Birthday : user.Birthday;
-            //_clientRepository.Save() is NOT needed since EF already updates the values inline
-
 
             // Delete functionality implemented in the same hybrid function by simply not providing values
             // Update functionality implemented in the same hybrid function by simply providing new values after deleting old ones
@@ -189,10 +185,9 @@ namespace PersonalSafety.Business
                         UserId = userId
                     });
                 }
-
-                _emergencyContactRepository.Save();
             }
 
+            _clientRepository.Save();
 
             response.Result = true;
             response.Messages.Add("Success! Saved your info.");

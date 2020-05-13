@@ -1,8 +1,5 @@
-﻿using PersonalSafety.Models;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Models
 {
@@ -18,6 +15,11 @@ namespace PersonalSafety.Models
         public Client GetByNationalId(string nationalId)
         {
             return context.Clients.FirstOrDefault(u => u.NationalId == nationalId);
+        }
+
+        new public Client GetById(string Id)
+        {
+            return context.Clients.Include(c => c.ApplicationUser).FirstOrDefault(c => c.ClientId == Id);
         }
     }
 }

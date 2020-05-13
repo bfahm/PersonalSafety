@@ -156,6 +156,9 @@ namespace PersonalSafety.Controllers.API
         /// # **`AuthenticatedRequest`**
         /// ## Main Functionality
         /// End-user can update his:
+        /// - Full Name
+        /// - Phone Number (Must be in the correct format)
+        /// - National Id (Must be in the correct format)
         /// - Current Address
         /// - Blood Type
         ///     -  O = 1
@@ -170,21 +173,93 @@ namespace PersonalSafety.Controllers.API
         /// User could also modify his current Emergency Contacts **by providing new ones here**.
         /// ####**IMPORTANT:** New emergency contacts replace old ones, so there is no need for separate delete/update calls for the sake of simplicity. Just provide the new setup and it will replace the old one.
         /// 
+        /// ## Example for Usage
+        /// ### First Time Login 
+        /// All data provided along two emergency contacts
+        /// 
+        /// ```
+        /// {
+        ///     "currentAddress": "1841  Butternut Lane",
+        ///     "bloodType": 1,
+        ///     "medicalHistoryNotes": "Type A Diabetes",
+        ///     "birthday": "1997-05-13",
+        ///     "emergencyContacts": [
+        ///         {
+        ///             "name": "My Dad",
+        ///             "phoneNumber": "012345678910"
+        ///         },
+        ///         {
+        ///             "name": "My Mom",
+        ///             "phoneNumber": "012345678910"
+        ///         }
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// ### First Time Login 
+        /// Only some of the data provided (Without emergency contacts and empty medical notes)
+        /// 
+        /// ```
+        /// {
+        ///     "currentAddress": "1841  Butternut Lane",
+        ///     "bloodType": 1,
+        ///     "birthday": "1997-05-13"
+        /// }
+        /// ```
+        /// 
+        /// ### Edit Profile
+        /// Editing any value while logged in, after passing the first log in screen
+        /// 
+        /// ```
+        /// {
+        ///     "fullName": "John Doe",
+        ///     "phoneNumber": "01234567890",
+        ///     "nationalId": "01234567891011",
+        ///     "currentAddress": "1841  Butternut Lane",
+        ///     "bloodType": 1,
+        ///     "medicalHistoryNotes": "Type A Diabetes",
+        ///     "birthday": "1997-05-13",
+        ///     "emergencyContacts": [
+        ///         {
+        ///             "name": "My Dad",
+        ///             "phoneNumber": "012345678910"
+        ///         },
+        ///         {
+        ///             "name": "My Mom",
+        ///             "phoneNumber": "012345678910"
+        ///         }
+        ///     ]
+        /// }
+        /// ```
+        /// 
+        /// ### Deleting Emergency Contacts
+        /// This call with empty data will cause the emergency contacts to be removed.
+        /// 
+        ///
+        /// Other fields will remain to their state without changing though.
+        /// ```
+        /// {
+        /// 
+        /// }
+        /// ```
+        /// 
         /// ## Possible Result Codes in case of Errors:
         /// #### **[-2]**: IdentityError
         /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
         /// #### **[-4]**: NotConfrimed
         /// Could happen if the email matching the provided token was not verified.
+        /// #### **[400]**: Bad Request
+        /// Could happen if the provided PhoneNumber / NationalId is not in the correct format
         /// #### **[401]**: Unauthorized
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
         [HttpPut(ApiRoutes.Client.Registration)]
-        public IActionResult CompleteProfile([FromBody] CompleteProfileViewModel request)
+        public IActionResult EditProfile([FromBody] ProfileViewModel request)
         {
             //? means : If value is not null, retrieve it
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = _clientBusiness.CompleteProfile(currentlyLoggedInUserId, request);
+            var response = _clientBusiness.EditProfile(currentlyLoggedInUserId, request);
 
             return Ok(response);
         }

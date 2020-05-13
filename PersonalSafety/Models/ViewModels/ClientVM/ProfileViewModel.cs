@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Models.ViewModels
 {
-    public class CompleteProfileViewModel
+    public class ProfileViewModel
     {
+        public string FullName { get; set; }
+
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Phone number is invalid")]
+        public string PhoneNumber { get; set; }
+        
+        [RegularExpression(@"^[0-9]{14}$", ErrorMessage = "National ID is invalid")]
+        public string NationalId { get; set; }
+
         public string CurrentAddress { get; set; }
         public int BloodType { get; set; }
         public string MedicalHistoryNotes { get; set; }

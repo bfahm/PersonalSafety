@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace PersonalSafety.Models
+﻿namespace PersonalSafety.Models
 {
     public interface IClientRepository : IBaseRepository<Client>
     {
         Client GetByNationalId(string nationalId);
+        new Client GetById(string Id);
     }
 }
