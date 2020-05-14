@@ -73,10 +73,30 @@
 
                             <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
                                 <div>
-                                    <p class="text-primary"><strong>Breaking Changes</strong></p>
+                                    <p class="text-primary"><strong>Emails and Profiles</strong></p>
                                     <ul>
-                                        <li><samp>Manager/•••</samp> &#8594; <samp>Manager/Departments/•••</samp></li>
-                                        <li><samp>HttpPOST Admin/RenameDistribution</samp> &#8594; <samp>HttpPUT Admin/RenameDistribution</samp></li>
+                                        <li>
+                                            <samp>EditProfile</samp> (previously <samp>CompleteProfile</samp>) now supports modifying the client's Fullname, PhoneNumber, and NationalId. 
+                                            This method can now be used in various ways: 
+                                            <ul>
+                                                <li>Providing client information the first time he logs in</li>
+                                                <li>Editing his profile</li>
+                                                <li>Deleting/Modifying his emergency contacts</li>
+                                            </ul>
+                                        </li>
+                                        <li>Any account can now change his email using <samp>Account/ChangeEmail</samp> and <samp>Account/SubmitChangeEmail</samp></li>
+                                        <li>All account actions, specially sensitive ones will result in a unique email to be sent. <a href="~/PreviewEmails">Here is the current full list of email templates</a> sent out to users. </li>
+                                    </ul>
+                                </div>
+                                <span class="badge badge-success badge-pill">NEW!</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
+                                <div>
+                                    <p class="text-primary"><strong>Endpoint Renames</strong></p>
+                                    <ul>
+                                        <li><samp>Client/Registration/CompleteProfile</samp> &#8594; <samp>Client/Registration/EditProfile</samp></li>
+                                        <li><samp>Account/ConfirmMail</samp> &#8594; <samp>Account/SubmitConfirmation</samp></li>
                                     </ul>
                                 </div>
                                 <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
@@ -117,7 +137,6 @@
                                         <li>Reactive console that updates its contents in realtime.</li>
                                     </ul>
                                 </div>
-                                <span class="badge badge-success badge-pill">NEW!</span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -129,7 +148,6 @@
                                         <li>New method for retrieving info about the logged in Personnel, <samp>api/Account/Personnel/GetBasicInfo</samp></li>
                                     </ul>
                                 </div>
-                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">
