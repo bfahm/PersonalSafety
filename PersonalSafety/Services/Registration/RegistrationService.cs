@@ -2,7 +2,7 @@
 using PersonalSafety.Contracts;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models;
-using System;
+using PersonalSafety.Services.Otp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -66,15 +66,20 @@ namespace PersonalSafety.Services
 
             response.Messages.Add("Successfully created a new client with email " + applicationUser.Email);
 
-            if (!string.IsNullOrEmpty(password))  // normal registration
+            if (!string.IsNullOrEmpty(password))  // normal registration (not with facebook)
             {
-                var confirmationMailResult = await _emailService.SendConfirmMailAsync(applicationUser.Email);
+                string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
+                string mailConfirmationOTP = OTPHelper.GenerateOTP(applicationUser.Id).ComputeTotp();
+                var confirmationMailResult = _emailService.SendWelcomeEmail(applicationUser.Email, mailConfirmationToken, mailConfirmationOTP, "ConfirmMail");
+
                 response.Messages.Add("Please check your email for activation links before you continue.");
                 response.Messages.AddRange(confirmationMailResult);
             }
             else // registration was done using facebook
             {
                 response.Messages.Add("User has registered using his Facebook account with no passwords saved to his account.");
+                var confirmationMailResult = _emailService.SendWelcomeEmail(applicationUser.Email);
+                response.Messages.AddRange(confirmationMailResult);
             }
             
             
@@ -125,7 +130,9 @@ namespace PersonalSafety.Services
                 }
             }
 
-            // TODO: send just congratulation email using the service here
+            var confirmationMailResult = _emailService.SendWelcomeEmail(applicationUser.Email);
+            response.Messages.AddRange(confirmationMailResult);
+
             response.Messages.Add("Successfully created a new entity with email " + applicationUser.Email);
             return response;
         }

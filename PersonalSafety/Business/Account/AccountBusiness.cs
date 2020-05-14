@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PersonalSafety.Services;
-using PersonalSafety.Options;
 using PersonalSafety.Contracts;
 using PersonalSafety.Models.ViewModels.AccountVM;
 using PersonalSafety.Services.Otp;
@@ -17,16 +16,14 @@ namespace PersonalSafety.Business
     public class AccountBusiness : IAccountBusiness
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppSettings _appSettings;
         private readonly ILoginService _loginService;
         private readonly IEmailService _emailService;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly ILogger<AccountBusiness> _logger;
 
-        public AccountBusiness(UserManager<ApplicationUser> userManager, AppSettings appSettings, ILoginService loginService, IEmailService emailService, IPersonnelRepository personnelRepository, ILogger<AccountBusiness> logger)
+        public AccountBusiness(UserManager<ApplicationUser> userManager, ILoginService loginService, IEmailService emailService, IPersonnelRepository personnelRepository, ILogger<AccountBusiness> logger)
         {
             _userManager = userManager;
-            _appSettings = appSettings;
             _loginService = loginService;
             _emailService = emailService;
             _personnelRepository = personnelRepository;
@@ -140,7 +137,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> ForgotPasswordAsync(string email)
+        public async Task<APIResponse<bool>> ResetPasswordAsync(string email)
         {
             APIResponse<bool> response = new APIResponse<bool>
             {
@@ -163,7 +160,7 @@ namespace PersonalSafety.Business
             }
 
             string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            List<string> emailSendingResults = new EmailServiceHelper(email, resetPasswordToken, null ,_appSettings.AppBaseUrlView, "ResetPassword").SendEmail();
+            List<string> emailSendingResults = _emailService.SendPasswordResetEmail(email, resetPasswordToken, "ResetPassword");
             if (emailSendingResults.Count != 0)
             {
                 response.Messages.AddRange(emailSendingResults);
@@ -176,7 +173,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> ResetPasswordAsync(ResetPasswordViewModel request)
+        public async Task<APIResponse<bool>> SubmitResetPasswordAsync(ResetPasswordViewModel request)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -220,9 +217,18 @@ namespace PersonalSafety.Business
             APIResponse<bool> response = new APIResponse<bool>();
             response.Messages.Add("We got your email, if this email is registered you should get an activation link and an OTP shortly.");
 
-            var emailSendingResults = await _emailService.SendConfirmMailAsync(email);
+            ApplicationUser user = await _userManager.FindByEmailAsync(email);
 
-            if (emailSendingResults != null)
+            if (user == null)
+            {
+                return response;
+            }
+
+            string mailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            string mailConfirmationOTP = OTPHelper.GenerateOTP(user.Id).ComputeTotp();
+            List<string> emailSendingResults = _emailService.SendActivationEmail(email, mailConfirmationToken, mailConfirmationOTP, "ConfirmMail");
+
+            if (emailSendingResults.Count() != 0)
             {
                 response.HasErrors = true;
                 response.Status = (int)APIResponseCodesEnum.TechnicalError;
@@ -234,7 +240,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<bool>> ConfirmMailAsync(ConfirmMailViewModel request)
+        public async Task<APIResponse<bool>> SubmitConfirmationAsync(ConfirmMailViewModel request)
         {
             APIResponse<bool> response = new APIResponse<bool>();
 
@@ -259,6 +265,85 @@ namespace PersonalSafety.Business
             }
 
             response.Messages = new List<string> { "Success! Email Confirmed." };
+            response.Result = true;
+
+            return response;
+        }
+
+        public async Task<APIResponse<bool>> ChangeEmailAsync(string userId, string newEmail)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                response.Messages.Add("Could not authenticate user.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.Unauthorized;
+                return response;
+            }
+
+            if ((await _userManager.FindByEmailAsync(newEmail)) != null)
+            {
+                response.Messages.Add("The provided new email address was taken before.");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.IdentityError;
+                return response;
+            }
+
+            string confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            List<string> emailSendingResults = _emailService.SendEmailChangedNewEmail(user.Email, newEmail, confirmationToken, "ChangeEmail");
+
+            if (emailSendingResults.Count != 0)
+            {
+                response.Messages.AddRange(emailSendingResults);
+                response.Status = (int)APIResponseCodesEnum.TechnicalError;
+                response.HasErrors = true;
+            }
+
+            response.Messages.Add($"Please check your new email {user.Email} for confimation links.");
+            response.Result = true;
+            return response;
+        }
+
+        public async Task<APIResponse<bool>> SubmitChangeEmailAsync(ChangeEmailViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            ApplicationUser user = await _userManager.FindByEmailAsync(request.OldEmail);
+
+            if (user == null)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                response.Messages = new List<string> { "The email provided was not registered before, please check for typos." };
+                return response;
+            }
+
+            user.EmailConfirmed = false;
+            var result = await ConfirmMailHybrid(user, request.Token);
+
+            if (!result)
+            {
+                response.Messages.Add("Invalid Token");
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.InvalidRequest;
+                return response;
+            }
+
+            user.Email = request.NewEmail;
+            user.UserName = request.NewEmail;
+            await _userManager.UpdateAsync(user);
+
+            List<string> emailSendingResults = _emailService.SendEmailChangedOldEmail(request.OldEmail, request.NewEmail);
+
+            if (emailSendingResults.Count != 0)
+            {
+                response.Messages.AddRange(emailSendingResults);
+                response.Status = (int)APIResponseCodesEnum.TechnicalError;
+            }
+
+            response.Messages = new List<string> { "Success! Email Changed." };
             response.Result = true;
 
             return response;
@@ -299,6 +384,16 @@ namespace PersonalSafety.Business
 
             response.Messages.Add("Success! Password was changed for " + user.Email);
             response.Result = true;
+
+            List<string> emailSendingResults = _emailService.SendPasswordChangedEmail(user.Email);
+
+            if (emailSendingResults.Count() != 0)
+            {
+                response.HasErrors = true;
+                response.Status = (int)APIResponseCodesEnum.TechnicalError;
+                response.Messages.AddRange(emailSendingResults);
+            }
+
             return response;
         }
 

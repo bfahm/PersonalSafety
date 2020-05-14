@@ -18,8 +18,7 @@ namespace PersonalSafety.Controllers.Views
             _accountBusiness = accountBusiness;
         }
 
-        //--------------------------------------------------------------------
-        //RESSETING PASSWORD
+        #region RESSETING PASSWORD
 
         [Route("ResetPassword")]
         [HttpGet]
@@ -38,7 +37,7 @@ namespace PersonalSafety.Controllers.Views
         {
             if (ModelState.IsValid)
             {
-                var result = await _accountBusiness.ResetPasswordAsync(request);
+                var result = await _accountBusiness.SubmitResetPasswordAsync(request);
                 bool booleanResult = result.Status == 0 && !result.HasErrors;
                 return RedirectToAction("ResetPasswordResult", new { result = booleanResult });
             }
@@ -57,8 +56,9 @@ namespace PersonalSafety.Controllers.Views
             return View();
         }
 
-        //--------------------------------------------------------------------
-        //RESENDING FORGET PASSWORD MAIL
+        #endregion
+
+        #region RESENDING FORGET PASSWORD MAIL
 
         [Route("ForgotPasswordMail")]
         [HttpGet]
@@ -71,7 +71,7 @@ namespace PersonalSafety.Controllers.Views
         [HttpPost]
         public async Task<IActionResult> ForgotPasswordMail(string email)
         {
-            var result = await _accountBusiness.ForgotPasswordAsync(email);
+            var result = await _accountBusiness.ResetPasswordAsync(email);
             bool booleanResult = result.Status == 0 && !result.HasErrors;
             return RedirectToAction("ForgotPasswordMailResult", new { result = booleanResult });
         }
@@ -84,8 +84,9 @@ namespace PersonalSafety.Controllers.Views
             return View();
         }
 
-        //--------------------------------------------------------------------
-        //SENDING CONFIRMATION EMAIL
+        #endregion
+
+        #region SENDING CONFIRMATION EMAIL
 
         [Route("SendConfirmationMail")]
         [HttpGet]
@@ -111,8 +112,9 @@ namespace PersonalSafety.Controllers.Views
             return View();
         }
 
-        //--------------------------------------------------------------------
-        //CONFIRMING EMAIL
+        #endregion
+
+        #region CONFIRMING EMAIL
 
         [Route("ConfirmMail")]
         [HttpGet]
@@ -120,7 +122,7 @@ namespace PersonalSafety.Controllers.Views
         {
             if (ModelState.IsValid) 
             { 
-                var result = await _accountBusiness.ConfirmMailAsync(request);
+                var result = await _accountBusiness.SubmitConfirmationAsync(request);
                 bool booleanResult = result.Status == 0 && !result.HasErrors;
                 return RedirectToAction("ConfimMailResult", new { result = booleanResult });
             }
@@ -138,5 +140,6 @@ namespace PersonalSafety.Controllers.Views
             return View();
         }
 
+        #endregion
     }
 }

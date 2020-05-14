@@ -186,11 +186,11 @@ namespace PersonalSafety.Controllers.API
         /// **IMPORTANT:** For security reasons, even if user provided an invalid email, there wouldn't be any indications of errors to protect from **Brute Force** attacks.
         /// </remarks>
         [HttpGet]
-        public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
+        public async Task<IActionResult> ResetPassword([FromQuery] string mail)
         {
             if (mail!=null)
             {
-                var response = await _accountBusiness.ForgotPasswordAsync(mail);
+                var response = await _accountBusiness.ResetPasswordAsync(mail);
 
                 return Ok(response);
             }
@@ -228,9 +228,9 @@ namespace PersonalSafety.Controllers.API
         /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
         /// </remarks>
         [HttpPost]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel request)
+        public async Task<IActionResult> SubmitResetPassword([FromBody] ResetPasswordViewModel request)
         {
-            var response = await _accountBusiness.ResetPasswordAsync(request);
+            var response = await _accountBusiness.SubmitResetPasswordAsync(request);
 
             return Ok(response);
         }
@@ -310,9 +310,64 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// </remarks>
         [HttpPost]
-        public async Task<IActionResult> ConfirmMail([FromBody] ConfirmMailViewModel request)
+        public async Task<IActionResult> SubmitConfirmation([FromBody] ConfirmMailViewModel request)
         {
-            var response = await _accountBusiness.ConfirmMailAsync(request);
+            var response = await _accountBusiness.SubmitConfirmationAsync(request);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Main Functionality
+        /// Unlike the other method `ResetPassword`, this method needs the user to be logged in **and** to remember his old password to be able to update it to a new one. Also this method doesn't need any email sending logic.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-1]**: InvalidRequest
+        /// Could happen if Confirm Password and New Password does not match.
+        /// #### **[-2]**: IdentityError
+        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
+        /// #### **[-4]**: NotConfirmed
+        /// Could happen if the email matching the provided token was not verified.
+        /// #### **[401]**: Unauthorized
+        /// Could happen if the provided token in the header has expired or is not valid.
+        /// </remarks>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ChangeEmail([FromQuery] string newEmail)
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response = await _accountBusiness.ChangeEmailAsync(currentlyLoggedInUserId, newEmail);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Main Functionality
+        /// Unlike the other method `ResetPassword`, this method needs the user to be logged in **and** to remember his old password to be able to update it to a new one. Also this method doesn't need any email sending logic.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-1]**: InvalidRequest
+        /// Could happen if Confirm Password and New Password does not match.
+        /// #### **[-2]**: IdentityError
+        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
+        /// #### **[-4]**: NotConfirmed
+        /// Could happen if the email matching the provided token was not verified.
+        /// #### **[401]**: Unauthorized
+        /// Could happen if the provided token in the header has expired or is not valid.
+        /// </remarks>
+        [HttpPost]
+        public async Task<IActionResult> SubmitChangeEmail([FromBody] ChangeEmailViewModel request)
+        {
+            var response = await _accountBusiness.SubmitChangeEmailAsync(request);
 
             return Ok(response);
         }
