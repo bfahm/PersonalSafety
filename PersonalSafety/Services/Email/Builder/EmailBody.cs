@@ -7,70 +7,71 @@ namespace PersonalSafety.Services.Email
     public class EmailBody
     {   
         public string Introduction { get; set; }
+        public ActivationSection ActivationSection { get; set; }
+        public OtpSection OtpSection { get; set; }
         public string Footer { get; set; }
-        public ActivationLink ActivationLink { get; set; }
-        public Otp Otp { get; set; }
 
         public override string ToString()
         {
             var body = new StringBuilder();
 
-            if (string.IsNullOrEmpty(Introduction) || string.IsNullOrEmpty(Footer))
-                throw new InvalidEmailBodyException("Email Body could not be compiled. Fields are not complete.");
+            if (string.IsNullOrEmpty(Introduction))
+                body.AppendLine(Introduction);
 
-            body.AppendLine(Introduction);
+            if (ActivationSection != null)
+                body.Append(ActivationSection.ToString());
 
-            if (ActivationLink != null)
-            {
-                UriBuilder activationLinkBuilder = new UriBuilder(ActivationLink.AppBaseUrl + "/" + ActivationLink.RedirectEndpoint)
-                {
-                    Query = ActivationLink.QueryParams.ToString()
-                };
+            if (OtpSection != null)
+                body.Append(OtpSection.ToString());
 
-                body.AppendLine("</br>");
-                body.AppendLine($"<p> {ActivationLink.Description} </p>");
-                body.AppendLine($"<a href= \"{activationLinkBuilder}\" >{ActivationLink.Title}</a>");
-                body.AppendLine("</br>");
-            }
-
-            if (Otp != null)
-            {
-                body.AppendLine("</br>");
-                body.AppendLine($"<p> {Otp.OtpDescription} </p>");
-                body.AppendLine("<h6>" + Otp.OtpCode + "</h6>");
-            }
-
-            body.AppendLine(Footer);
+            if (string.IsNullOrEmpty(Footer))
+                body.AppendLine(Footer);
 
             return body.ToString();
         }
     }
 
-    public class ActivationLink
+    public class ActivationSection
     {
+        public string Title { get; set; }
+        public string Description { get; set; }
         public string AppBaseUrl { get; set; }
         public string RedirectEndpoint { get; set; }
         public string Token { get; set; }
         public NameValueCollection QueryParams { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+
+        public override string ToString()
+        {
+            var linkString = new StringBuilder();
+
+            UriBuilder activationLinkBuilder = new UriBuilder(AppBaseUrl + "/" + RedirectEndpoint)
+            {
+                Query = QueryParams.ToString()
+            };
+
+            linkString.AppendLine("</br>");
+            linkString.AppendLine($"<p> {Description} </p>");
+            linkString.AppendLine($"<a href= \"{activationLinkBuilder}\" >{Title}</a>");
+            linkString.AppendLine("</br>");
+
+            return linkString.ToString();
+        }
     }
 
-    public class Otp
+    public class OtpSection
     {
         public string OtpCode { get; set; }
         public string OtpDescription { get; set; }
-    }
 
-    [Serializable()]
-    public class InvalidEmailBodyException : Exception
-    {
-        public InvalidEmailBodyException() : base() { }
-        public InvalidEmailBodyException(string message) : base(message) { }
+        public override string ToString()
+        {
+            var otpSectionString = new StringBuilder();
 
-        // A constructor is needed for serialization when an
-        // exception propagates from a remoting server to the client.
-        protected InvalidEmailBodyException(System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+            otpSectionString.AppendLine("</br>");
+            otpSectionString.AppendLine($"<p> {OtpDescription} </p>");
+            otpSectionString.AppendLine("<h6>" + OtpCode + "</h6>");
+            
+            return otpSectionString.ToString();
+        }
     }
 }

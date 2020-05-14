@@ -29,15 +29,15 @@ namespace PersonalSafety.Services.Email.Builder
             return this;
         }
 
-        public IEmailBodyBuilder AddActivationLink(ActivationLink activationLink)
+        public IEmailBodyBuilder AddActivationLink(ActivationSection activationLink)
         {
-            _emailBody.ActivationLink = activationLink;
+            _emailBody.ActivationSection = activationLink;
             return this;
         }
 
-        public IEmailBodyBuilder AddOtp(Otp otp)
+        public IEmailBodyBuilder AddOtp(OtpSection otp)
         {
-            _emailBody.Otp = otp;
+            _emailBody.OtpSection = otp;
             return this;
         }
 
