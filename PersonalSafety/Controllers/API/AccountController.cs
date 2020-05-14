@@ -176,6 +176,9 @@ namespace PersonalSafety.Controllers.API
         ///
         /// **IMPORTANT:** For security reasons, this call requires the user to be previously verified with a confirmed mail.
         /// 
+        /// ## Remarks
+        /// This request is handled by the front end portal and processed autotmatically.
+        /// 
         /// ## Technical Note
         /// Unlike the Email Confirmation logic, this function only produces one type of tokens, Identity token (long complex string), to be used directly by Web end interfaces.
         /// 
@@ -186,8 +189,11 @@ namespace PersonalSafety.Controllers.API
         /// **IMPORTANT:** For security reasons, even if user provided an invalid email, there wouldn't be any indications of errors to protect from **Brute Force** attacks.
         /// </remarks>
         [HttpGet]
-        public async Task<IActionResult> ResetPassword([FromQuery] string mail)
+        public async Task<IActionResult> ForgotPassword([FromQuery] string mail)
         {
+            /* New NameScheme is in the form of [verb] -> [submit][verb]
+             * This function will be an exception wont be renamed to avoid breaking mobile end code.
+             */
             if (mail!=null)
             {
                 var response = await _accountBusiness.ResetPasswordAsync(mail);
@@ -205,34 +211,6 @@ namespace PersonalSafety.Controllers.API
                 });
             }
             
-        }
-
-        /// <summary>
-        /// This function uses the token that was sent to the email to be able to update user's password to a new one. 
-        /// </summary>
-        /// <remarks>
-        /// ## Main Functionality
-        /// *All the JSON object values **are** required and must follow these rules*
-        /// 
-        /// ### Important Notes
-        /// - The new password must be complex.
-        /// - This is a one time use token and it expires once used.
-        /// - Confirm Password **MUST** match New Password
-        /// 
-        /// ## Possible Result Codes in case of Errors:
-        /// #### **[-1]**: Invalid Request
-        /// - Email was not registered before
-        /// - Confirm Password does not match New Password
-        /// 
-        /// #### **[-2]**: Identity Error
-        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
-        /// </remarks>
-        [HttpPost]
-        public async Task<IActionResult> SubmitResetPassword([FromBody] ResetPasswordViewModel request)
-        {
-            var response = await _accountBusiness.SubmitResetPasswordAsync(request);
-
-            return Ok(response);
         }
 
         /// <summary>
@@ -318,20 +296,18 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Request a change email event that is processed via the new email
         /// </summary>
         /// <remarks>
         /// # **`AuthenticatedRequest`**
-        /// ## Main Functionality
-        /// Unlike the other method `ResetPassword`, this method needs the user to be logged in **and** to remember his old password to be able to update it to a new one. Also this method doesn't need any email sending logic.
+        /// ## Remarks
+        /// This request is handled by the front end portal and processed autotmatically.
         /// 
         /// ## Possible Result Codes in case of Errors:
-        /// #### **[-1]**: InvalidRequest
-        /// Could happen if Confirm Password and New Password does not match.
         /// #### **[-2]**: IdentityError
-        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
-        /// #### **[-4]**: NotConfirmed
-        /// Could happen if the email matching the provided token was not verified.
+        /// Email address provided is taken before.
+        /// /// #### **[-3]**: Technical Error
+        /// Could happen due to some problems that occured while trying to send the email. Often related to Gmail's SMTP server.
         /// #### **[401]**: Unauthorized
         /// Could happen if the provided token in the header has expired or is not valid.
         /// </remarks>
@@ -346,32 +322,7 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>
-        /// # **`AuthenticatedRequest`**
-        /// ## Main Functionality
-        /// Unlike the other method `ResetPassword`, this method needs the user to be logged in **and** to remember his old password to be able to update it to a new one. Also this method doesn't need any email sending logic.
-        /// 
-        /// ## Possible Result Codes in case of Errors:
-        /// #### **[-1]**: InvalidRequest
-        /// Could happen if Confirm Password and New Password does not match.
-        /// #### **[-2]**: IdentityError
-        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
-        /// #### **[-4]**: NotConfirmed
-        /// Could happen if the email matching the provided token was not verified.
-        /// #### **[401]**: Unauthorized
-        /// Could happen if the provided token in the header has expired or is not valid.
-        /// </remarks>
-        [HttpPost]
-        public async Task<IActionResult> SubmitChangeEmail([FromBody] ChangeEmailViewModel request)
-        {
-            var response = await _accountBusiness.SubmitChangeEmailAsync(request);
-
-            return Ok(response);
-        }
-
+        
         /// <summary>
         /// This method changes the currently logged in user's password. 
         /// </summary>
