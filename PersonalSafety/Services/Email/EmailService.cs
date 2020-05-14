@@ -14,9 +14,6 @@ namespace PersonalSafety.Services
     public class EmailService : IEmailService
     {
         private readonly AppSettings _appSettings;
-        private const string _from = "personalsafety20@gmail.com";
-        private const string _password = "Test@123";
-        private const string _brand = "Personal Safety";
 
         public EmailService(AppSettings appSettings)
         {
@@ -25,11 +22,11 @@ namespace PersonalSafety.Services
 
         public List<string> SendWelcomeEmail(string recepientEmail, string token, string otp, string redirectTo)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, recepientEmail, $"Welcome to {_brand}");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, recepientEmail, $"Welcome to {_appSettings.BrandName}");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(recepientEmail));
-            intro.AppendLine($"<p> Welcome to {_brand}. We’re thrilled to see you here! </p>");
-            intro.AppendLine($"<p> We’re confident that {_brand} will help you find safety in your neighborhood, city, country, and anywhere you go. </p>");
+            intro.AppendLine($"<p> Welcome to {_appSettings.BrandName}. We’re thrilled to see you here! </p>");
+            intro.AppendLine($"<p> We’re confident that {_appSettings.BrandName} will help you find safety in your neighborhood, city, country, and anywhere you go. </p>");
 
             MailMessage mailMessage = emailBuilder.AddIntroduction(intro.ToString())
                     .AddActivationLink(new ActivationSection
@@ -46,7 +43,7 @@ namespace PersonalSafety.Services
                         OtpCode = otp,
                         OtpDescription = "You can also validate your request using this OTP which is valid for " + OTPHelper.validFor + " seconds."
                     })
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -54,14 +51,14 @@ namespace PersonalSafety.Services
 
         public List<string> SendWelcomeEmail(string recepientEmail)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, recepientEmail, $"Welcome to {_brand}");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, recepientEmail, $"Welcome to {_appSettings.BrandName}");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(recepientEmail));
-            intro.AppendLine($"<p> Welcome to {_brand}. We’re thrilled to see you here! </p>");
-            intro.AppendLine($"<p> We’re confident that {_brand} will help you find safety in your neighborhood, city, country, and anywhere you go. </p>");
+            intro.AppendLine($"<p> Welcome to {_appSettings.BrandName}. We’re thrilled to see you here! </p>");
+            intro.AppendLine($"<p> We’re confident that {_appSettings.BrandName} will help you find safety in your neighborhood, city, country, and anywhere you go. </p>");
 
             MailMessage mailMessage = emailBuilder.AddIntroduction(intro.ToString())
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -69,7 +66,7 @@ namespace PersonalSafety.Services
 
         public List<string> SendActivationEmail(string recepientEmail, string token, string otp, string redirectTo)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, recepientEmail, "Activate your Account");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, recepientEmail, "Activate your Account");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(recepientEmail));
             intro.AppendLine($"<p> You have recently requested to activate your account. If you intended to do so, proceed reading, else, discard this email safely.</p>");
@@ -89,7 +86,7 @@ namespace PersonalSafety.Services
                         OtpCode = otp,
                         OtpDescription = "You can also validate your request using this OTP which is valid for " + OTPHelper.validFor + " seconds."
                     })
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -97,7 +94,7 @@ namespace PersonalSafety.Services
 
         public List<string> SendPasswordResetEmail(string recepientEmail, string token, string redirectTo)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, recepientEmail, "Password Reset");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, recepientEmail, "Password Reset");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(recepientEmail));
             intro.AppendLine($"<p> You have recently requested to reset your password. If you intended to do so, proceed reading, else, secure your account by changing the password..</p>");
@@ -112,7 +109,7 @@ namespace PersonalSafety.Services
                         Title = "Reset Password",
                         Description = "Click the following link, then fill the form with your new password."
                     })
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -120,13 +117,13 @@ namespace PersonalSafety.Services
 
         public List<string> SendPasswordChangedEmail(string recepientEmail)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, recepientEmail, "Password Changed Recently");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, recepientEmail, "Password Changed Recently");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(recepientEmail));
             intro.AppendLine($"<p> There has been recently a change in your password. If you intended to do so, kindly discard this email, else, secure your account by changing the password..</p>");
 
             MailMessage mailMessage = emailBuilder.AddIntroduction(intro.ToString())
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -134,7 +131,7 @@ namespace PersonalSafety.Services
 
         public List<string> SendEmailChangedNewEmail(string oldEmail, string newEmail, string token, string redirectTo)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, newEmail, "Activate your new Email");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, newEmail, "Activate your new email");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(newEmail));
             intro.AppendLine($"<p> There has been recently a change in your account email. If you intended to do so, kindly proceed with the following instructions.</p>");
@@ -149,7 +146,7 @@ namespace PersonalSafety.Services
                         Title = "Transfer to this Email",
                         Description = "Tap the below link to proceed with transfering your email configuration from the old address to the new one.."
                     })
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -157,7 +154,7 @@ namespace PersonalSafety.Services
 
         public List<string> SendEmailChangedOldEmail(string oldEmail, string newEmail)
         {
-            EmailBuilder emailBuilder = new EmailBuilder(_from, oldEmail, "Email Address Changed");
+            EmailBuilder emailBuilder = new EmailBuilder(_appSettings.EmailsFrom, oldEmail, "Email Address Changed");
 
             StringBuilder intro = new StringBuilder(EmailSnippets.BuildHi(oldEmail));
             intro.AppendLine($"<p> There has been recently a change in your account. </p>");
@@ -165,7 +162,7 @@ namespace PersonalSafety.Services
             intro.AppendLine($"<p> If you did not intend to do so, contact us as soon as possible. </p>");
 
             MailMessage mailMessage = emailBuilder.AddIntroduction(intro.ToString())
-                    .AddFooter(EmailSnippets.BuildFooter(_brand))
+                    .AddFooter(EmailSnippets.BuildFooter(_appSettings.BrandName))
                     .Build();
 
             return TrySend(mailMessage);
@@ -180,7 +177,7 @@ namespace PersonalSafety.Services
                 {
                     smtp.EnableSsl = true;
                     smtp.UseDefaultCredentials = false;
-                    smtp.Credentials = new NetworkCredential(_from, _password);
+                    smtp.Credentials = new NetworkCredential(_appSettings.EmailsFrom, _appSettings.SMTPPassword);
                     smtp.Host = "smtp.gmail.com";
                     smtp.Port = 587;
                     smtp.DeliveryMethod = SmtpDeliveryMethod.Network;

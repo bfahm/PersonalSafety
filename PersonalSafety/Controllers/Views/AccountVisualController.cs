@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Business;
+using PersonalSafety.Models.ViewModels.AccountVM;
 
 namespace PersonalSafety.Controllers.Views
 {
@@ -135,6 +136,34 @@ namespace PersonalSafety.Controllers.Views
         [Route("ConfimMailResult")]
         [HttpGet]
         public IActionResult ConfimMailResult(bool result)
+        {
+            ViewBag.Result = result;
+            return View();
+        }
+
+        #endregion
+
+        #region CHANGING EMAIL
+
+        [Route("ChangeEmail")]
+        [HttpGet]
+        public async Task<IActionResult> ChangeEmail(ChangeEmailViewModel request)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _accountBusiness.SubmitChangeEmailAsync(request);
+                bool booleanResult = result.Status == 0 && !result.HasErrors;
+                return RedirectToAction("ChangeEmailResult", new { result = booleanResult });
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+
+        [Route("ChangeEmailResult")]
+        [HttpGet]
+        public IActionResult ChangeEmailResult(bool result)
         {
             ViewBag.Result = result;
             return View();

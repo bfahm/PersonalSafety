@@ -15,7 +15,7 @@ namespace PersonalSafety.Services.Email
         {
             var body = new StringBuilder();
 
-            if (string.IsNullOrEmpty(Introduction))
+            if (!string.IsNullOrEmpty(Introduction))
                 body.AppendLine(Introduction);
 
             if (ActivationSection != null)
@@ -24,7 +24,7 @@ namespace PersonalSafety.Services.Email
             if (OtpSection != null)
                 body.Append(OtpSection.ToString());
 
-            if (string.IsNullOrEmpty(Footer))
+            if (!string.IsNullOrEmpty(Footer))
                 body.AppendLine(Footer);
 
             return body.ToString();
