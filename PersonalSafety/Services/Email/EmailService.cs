@@ -85,7 +85,9 @@ namespace PersonalSafety.Services
                     ex.Message
                 };
 
-                _logger.LogWarning(ex, $"An error occured while trying to send an email with subject {mailMessage.Subject}.");
+                _logger.LogWarning($"An error occured while trying to send an email with subject {mailMessage.Subject}.");
+                _logger.LogWarning($"Exception Message: {ex.Message}");
+                _logger.LogWarning($"With stack trace: {ex.StackTrace}");
 
                 return result;
             }
