@@ -1,4 +1,5 @@
-﻿using PersonalSafety.Options;
+﻿using Microsoft.Extensions.Logging;
+using PersonalSafety.Options;
 using PersonalSafety.Services.Email;
 using PersonalSafety.Services.Email.Builder;
 using PersonalSafety.Services.Otp;
@@ -14,10 +15,12 @@ namespace PersonalSafety.Services
     public class EmailService : IEmailService
     {
         private readonly AppSettings _appSettings;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(AppSettings appSettings)
+        public EmailService(AppSettings appSettings, ILogger<EmailService> logger)
         {
             _appSettings = appSettings;
+            _logger = logger;
         }
 
         #region API CALLS
@@ -79,10 +82,11 @@ namespace PersonalSafety.Services
             {
                 List<string> result = new List<string>
                 {
-                    ex.Message,
-                    ex.InnerException?.ToString(),
-                    ex.StackTrace
+                    ex.Message
                 };
+
+                _logger.LogWarning(ex, $"An error occured while trying to send an email with subject {mailMessage.Subject}.");
+
                 return result;
             }
         }
