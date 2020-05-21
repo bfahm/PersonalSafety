@@ -306,7 +306,8 @@ namespace PersonalSafety.Extensions
                 EventCategory userStories = new EventCategory
                 {
                     Title = "Your Stories",
-                    Description = "Your Events.."
+                    Description = "Your Events..",
+                    ThumbnailUrl = Path.Combine(_appSettings.AttachmentsLocation, "cat_your.png")
                 };
 
                 _categoryRepository.Add(userStories);
