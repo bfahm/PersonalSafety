@@ -101,7 +101,7 @@ namespace PersonalSafety.Hubs
                 //If so, send him his previous state and remove that state from the tracker.
                 TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(c=>c.UserEmail == recurrentConnection.UserEmail);
                 NotifyNewChanges(recurrentConnection.CurrentJob, recurrentConnection.UserEmail);
-                _logger.LogInformation(HubConsoleHelper.ConsoleFormater(recurrentConnection.UserEmail, "had a mission with id: " + recurrentConnection.CurrentJob + " state saved and now restored to him"));
+                _logger.LogInformation(ConsoleFormatter.onGenericText(recurrentConnection.UserEmail, "had a mission with id: " + recurrentConnection.CurrentJob + " state saved and now restored to him"));
             }
 
             // Notify Agent in the same hub that rescuers state has changed.
@@ -125,7 +125,7 @@ namespace PersonalSafety.Hubs
                     TrackerHandler.RescuerWithPendingMissionsSet.Add(currentDisconnection);
 
                     // Write a summary to the console.
-                    _logger.LogInformation(HubConsoleHelper.ConsoleFormater(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on."));
+                    _logger.LogInformation(ConsoleFormatter.onGenericText(currentDisconnection.UserEmail, "was helping a client with request id: " + currentDisconnection.CurrentJob + ", his state was saved until he's back on."));
                 }
 
                 // Notify Agent in the same hub that rescuers state has changed.

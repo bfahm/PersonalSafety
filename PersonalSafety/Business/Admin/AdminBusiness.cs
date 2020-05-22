@@ -227,7 +227,7 @@ namespace PersonalSafety.Business
             TrackerHandler.RescuerConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
             TrackerHandler.RescuerWithPendingMissionsSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
             TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == rescuerEmail);
-            _logger.LogInformation(HubConsoleHelper.ConsoleFormater(rescuerEmail, "was forced offline."));
+            _logger.LogInformation(ConsoleFormatter.onGenericText(rescuerEmail, "was forced offline."));
             return new APIResponse<bool>
             {
                 Result = true
@@ -238,7 +238,7 @@ namespace PersonalSafety.Business
         {
             TrackerHandler.ClientConnectionInfoSet.RemoveWhere(r => r.UserEmail == clientEmail);
             TrackerHandler.AllConnectionInfoSet.RemoveWhere(r => r.UserEmail == clientEmail);
-            _logger.LogInformation(HubConsoleHelper.ConsoleFormater(clientEmail, "was forced offline."));
+            _logger.LogInformation(ConsoleFormatter.onGenericText(clientEmail, "was forced offline."));
             return new APIResponse<bool>
             {
                 Result = true

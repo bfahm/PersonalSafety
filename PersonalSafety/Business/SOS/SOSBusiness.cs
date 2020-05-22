@@ -11,6 +11,8 @@ using PersonalSafety.Hubs.HubTracker;
 using PersonalSafety.Hubs.Services;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services.Location;
+using Microsoft.Extensions.Logging;
+using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety.Business
 {
@@ -24,8 +26,9 @@ namespace PersonalSafety.Business
         private readonly IAgentHub _agentHub;
         private readonly IClientHub _clientHub;
         private readonly ILocationService _locationService;
+        private readonly ILogger<SOSBusiness> _logger;
 
-        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IPersonnelRepository personnelRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService)
+        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IPersonnelRepository personnelRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService, ILogger<SOSBusiness> logger)
         {
             _sosRequestRepository = sosRequestRepository;
             _personnelRepository = personnelRepository;
@@ -35,6 +38,7 @@ namespace PersonalSafety.Business
             _agentHub = agentHub;
             _clientHub = clientHub;
             _locationService = locationService;
+            _logger = logger;
         }
 
         #region Main Methods
@@ -100,9 +104,15 @@ namespace PersonalSafety.Business
                 _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
                 _sosRequestRepository.Save();
 
+                var errorMessage1 = "A system error occured while trying to maintain connection with the client.";
+                var errorMessage2 = "The request was removed. Please have another try.";
+
+                _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage1));
+                _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage2));
+
+                response.Messages.Add(errorMessage1);
+                response.Messages.Add(errorMessage2);
                 response.Status = (int)APIResponseCodesEnum.ServerError;
-                response.Messages.Add("A system error occured while trying to maintain connection with the client.");
-                response.Messages.Add("The request was removed. Please have another try.");
                 response.HasErrors = true;
 
                 return response;
@@ -119,6 +129,7 @@ namespace PersonalSafety.Business
                 AssignedDepartment = nearestDepartment.ToString()
             };
 
+            _logger.LogInformation(ConsoleFormatter.onSOSStateChanged(userAccount.Email, sosRequest.Id, StatesTypesEnum.Pending, nearestDepartment.ToString()));
             response.Messages.Add("Your request was sent successfully.");
 
             return response;
@@ -160,6 +171,7 @@ namespace PersonalSafety.Business
             var rescuerOnMissionCheckResult = CheckIfRescuerIsOnMission(rescuerEmail);
             if (rescuerOnMissionCheckResult != null)
             {
+                _logger.LogInformation(ConsoleFormatter.WrapSOSBusiness($"Selected rescuer {rescuerEmail} is currently on mission."));
                 response.WrapResponseData(rescuerOnMissionCheckResult);
                 return response;
             }
@@ -180,6 +192,8 @@ namespace PersonalSafety.Business
                 {
                     response.Messages.Add("Failed to reach the chosen rescuer, changes were not saved.");
                 }
+
+                _logger.LogInformation(ConsoleFormatter.WrapSOSBusiness($"Couldn't accept the request, either owner client or selected rescuer was currently offline."));
 
                 return response;
             }
@@ -208,6 +222,9 @@ namespace PersonalSafety.Business
 
             response.WrapResponseData(FinalizeWithSuccessState(requestId, newState));
             response.Result = true;
+
+            _logger.LogInformation(ConsoleFormatter.onSOSStateChanged(null, sosRequest.Id, StatesTypesEnum.Accepted));
+
             return response;
         }
 
@@ -268,6 +285,9 @@ namespace PersonalSafety.Business
             response.WrapResponseData(FinalizeWithSuccessState(requestId, newState));
             response.Status = (int) APIResponseCodesEnum.Ok;
             response.Result = true;
+
+            _logger.LogInformation(ConsoleFormatter.onSOSStateChanged(null, sosRequest.Id, StatesTypesEnum.Canceled));
+
             return response;
         }
 
@@ -344,6 +364,9 @@ namespace PersonalSafety.Business
             response.Messages.Add("Success. You are now idling.");
             response.Status = (int)APIResponseCodesEnum.Ok;
             response.Result = true;
+
+            _logger.LogInformation(ConsoleFormatter.onSOSStateChanged(assignedRescuer?.Email, sosRequest.Id, StatesTypesEnum.Solved));
+
             return response;
         }
 

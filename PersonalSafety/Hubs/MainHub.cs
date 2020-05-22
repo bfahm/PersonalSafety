@@ -41,7 +41,7 @@ namespace PersonalSafety.Hubs
             TrackerHandler.AllConnectionInfoSet.Add(currentConnection);
 
             // Log to the consoles
-            _logger?.LogInformation(HubConsoleHelper.ConsoleFormater(currentConnection.UserEmail, currentConnection.ConnectionId, false));
+            _logger?.LogInformation(ConsoleFormatter.onConnectionStateChanged(currentConnection.UserEmail, currentConnection.ConnectionId, false));
 
             // Automatically send client data to him after connection.
             await Clients.Caller.SendAsync(ConnectionInfoChannel, currentConnection.ConnectionId, currentConnection.UserEmail);
@@ -56,7 +56,7 @@ namespace PersonalSafety.Hubs
             if (currentDisconnection != null)
             {
                 TrackerHandler.AllConnectionInfoSet.RemoveWhere(c=> c.UserEmail == currentDisconnection.UserEmail);
-                _logger?.LogInformation(HubConsoleHelper.ConsoleFormater(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true));
+                _logger?.LogInformation(ConsoleFormatter.onConnectionStateChanged(currentDisconnection.UserEmail, currentDisconnection.ConnectionId, true));
             }
 
             await base.OnDisconnectedAsync(ex);
