@@ -9,6 +9,7 @@ using PersonalSafety.Services;
 
 namespace PersonalSafety.Controllers.Views
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class EmailPreviewController : Controller
     {
         private readonly IEmailService _emailService;
