@@ -214,6 +214,34 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
+        /// This function uses the token that was sent to the email to be able to update user's password to a new one. 
+        /// </summary>
+        /// <remarks>
+        /// ## Main Functionality
+        /// *All the JSON object values **are** required and must follow these rules*
+        /// 
+        /// ### Important Notes
+        /// - The new password must be complex.
+        /// - This is a one time use token and it expires once used.
+        /// - Confirm Password **MUST** match New Password
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[-1]**: Invalid Request
+        /// - Email was not registered before
+        /// - Confirm Password does not match New Password
+        /// 
+        /// #### **[-2]**: Identity Error
+        /// This is a generic error code resembles something went wrong inside the Identity Framework and can be diagnosed using the response Messages list.
+        /// </remarks>
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel request)
+        {
+            var response = await _accountBusiness.SubmitResetPasswordAsync(request);
+
+            return Ok(response);
+        }
+
+        /// <summary>
         /// This method sends a verification email to a registered user using the provided email.
         /// </summary>
         /// <remarks>
