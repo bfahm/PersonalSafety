@@ -4,8 +4,12 @@ import { loginViaAjax } from "../lib/app_lib.js";
 "use strict";
 
 var connection;
+var locationConnection;
 var token;
 var scrollTo = "";
+var dpt = ""
+
+var textarea = document.getElementById('location_result_msg');
 
 $(document).ready(function () {
     $("#btn_connect").click(function () {
@@ -24,13 +28,32 @@ $(document).ready(function () {
     $("#link_reconnect").click(function () {
         connection.stop();
         connection = null;
+
+        locationConnection.stop();
+        locationConnection = null;
+
         toggleSpinnerAnimation(true);
         loginAndStartConnection();
+
+        $("#location_result_msg").val("");
+        $("#send_msg").val("");
     });
 
     $("#link_disconnect").click(function () {
         connection.stop();
         connection = null;
+
+        locationConnection.stop();
+        locationConnection = null;
+
+        $("#location_result_msg").val("");
+        $("#send_msg").val("");
+    });
+
+    //Allow for enter keypress to submit entries
+    $('#ip_email, #ip_password').keypress(function (e) {
+        if (e.keyCode === 13)
+            $('#btn_connect').click();
     });
 
     $("#a_scroll_to_docs").click(function () {
@@ -79,6 +102,8 @@ function startConnection(token) {
         if (role.indexOf("Agent") !== -1) {
 
             scrollTo = "personnel_docs";
+            $("#location_chat_div").attr("hidden", true);
+            $("#location_response_div").attr("hidden", false);
 
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/agent", {
@@ -101,10 +126,33 @@ function startConnection(token) {
                 $("#result_msg").val(outputMsg);
             });
 
+            locationConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/location", {
+                    accessTokenFactory: () => token
+                })
+                .build();
+
+            locationConnection.start().catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            locationConnection.on("LocationChannel", function (message) {
+                appendLocationMsg(message)
+            });
+
+            locationConnection.on("InfoChannel", function (message) {
+                appendLocationMsg(message)
+            });
+
+            locationConnection.on("AlertsChannel", function (message) {
+                appendLocationMsg(message)
+            });
         }
         else if (role.indexOf("Rescuer") !== -1) {
 
             scrollTo = "rescuer_docs";
+            $("#location_chat_div").attr("hidden", false);
+            $("#location_response_div").attr("hidden", false);
 
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/rescuer", {
@@ -119,6 +167,34 @@ function startConnection(token) {
                 $("#result_msg").val(outputMsg);
             });
 
+            locationConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/location", {
+                    accessTokenFactory: () => token
+                })
+                .build();
+
+            locationConnection.start().catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            locationConnection.on("LocationChannel", function (message) {
+                appendLocationMsg(message)
+            });
+
+            
+
+            locationConnection.on("InfoChannel", function (message) {
+                dpt = message;
+                appendLocationMsg(message)
+            });
+
+            locationConnection.on("AlertsChannel", function (message) {
+                appendLocationMsg(message)
+            });
+
+            $("#btn_send").click(function () {
+                locationConnection.invoke("ShareLocation", dpt,$("#send_msg").val());
+            });
 
         }
 
@@ -126,6 +202,8 @@ function startConnection(token) {
         $("#samp_role").html("GeneralUser");
         
         scrollTo = "client_docs";
+        $("#location_chat_div").attr("hidden", true);
+        $("#location_response_div").attr("hidden", true);
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl("/hubs/client", {
@@ -210,6 +288,17 @@ function startConnection(token) {
             scrollTop: 0
         }, 500);
     });
+}
+
+function appendLocationMsg(message) {
+    var current = $("#location_result_msg").val();
+    if (current.length != 0) {
+        current += "\n";
+    }
+    var newMsg = current + new Date().toLocaleTimeString() + " | " + message;
+    $("#location_result_msg").val(newMsg);
+
+    textarea.scrollTop = textarea.scrollHeight;
 }
 
 function toggleSpinnerAnimation(startAnimation)

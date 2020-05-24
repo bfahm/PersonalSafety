@@ -79,6 +79,15 @@
                                         <button id="btn_clear" class="btn btn-secondary" type="button" autocomplete="off">Clear</button>
                                     </div>
                                 </div>
+                                <div class="input-group mb-3" id="location_chat_div" hidden>
+                                    <input id="send_msg" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Send location to your department">
+                                    <div class="input-group-append">
+                                        <button id="btn_send" class="btn btn-primary" type="button" autocomplete="off">Send</button>
+                                    </div>
+                                </div>
+                                <div class="input-group mb-3" id="location_response_div" hidden>
+                                    <textarea id="location_result_msg" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Messages received from the server appears here" disabled></textarea>
+                                </div>
 
                             </div>
                             <div class="row justify-content-center align-items-center">
@@ -233,7 +242,7 @@
                                     <li>Request is accepted by an agent and is assigned to the rescuer</li>
                                     <li>Request is canceled by the owner user and was assigned to the rescuer</li>
                                 </ul>
-                                
+
 
                                 <h3 class="mt-2 mb-2 heading">General Notes: </h3>
                                 <ul class="text-sans-serif pb_font-14">
@@ -242,6 +251,62 @@
                                     <li>A rescuer can go offline anytime, and when he becomes online again the request would be reassigned to him.</li>
                                 </ul>
 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col">
+                        <h2 id="rescuer_docs">Realtime Location Tracking</h2>
+                    </div>
+                </div>
+                <div class="row" id="LocationHubDocs">
+                    <div class="col-lg">
+                        <div class="media pb_feature-v2 text-left mb-1 mt-1">
+                            <div class="media-body">
+                                <p class="text-sans-serif pb_font-16">
+                                    Tracking the location of Rescuers in a department is done under the supervision of an online Agent
+                                    in the department. At least one Agent is required to be online for a <samp>SignalR Group</samp> to
+                                    be created, containing Agent(s) of the department and any other rescuer.
+                                </p>
+                                <p class="text-sans-serif pb_font-16">
+                                    Creating the group is flexible and the order of the users (Agent or Resucer) to become online does
+                                    not affect the process of establishing the connection. When an Agent first connects to the Hub, a new
+                                    group is created, any current online rescuer would be automatically added to the group, and any new
+                                    rescuer connection is added to the group (if they are in the same department).
+
+                                    <br />
+
+                                    <strong>
+                                        Note that for this feature to work, agents and rescuers must first connect to their hubs
+                                        before connecting to the Location Tracking Hub.
+                                    </strong>
+                                </p>
+                                <p class="text-sans-serif pb_font-16">
+                                    When (all) Agents become offline, the group is deleted and removed from the trackers, even if there
+                                    were active rescuers.
+                                </p>
+
+                                <h3 class="mt-2 mb-2 heading">Technicals</h3>
+
+                                <p class="text-sans-serif pb_font-16">
+                                    To start the tracking process, connect to <samp>/hubs/location</samp> and listen to
+                                    incoming messages from these channels:
+                                </p>
+
+                                <ul class="text-sans-serif pb_font-16">
+                                    <li>
+                                        <samp>InfoChannel</samp>: Responsible for receiving information about the department of the user.
+                                        <ul class="pb_font-14">
+                                            <li>This is important and should be used by <strong>rescuers</strong> to identify them and add them to the appropriate <samp>SignalR Group</samp></li>
+                                        </ul>
+                                    </li>
+                                    <li><samp>AlertsChannel</samp>: Responsible for receiving notifications about who connected / disconnected from the channel.</li>
+                                    <li><samp>LocationChannel</samp>: The main channel, and is the one responsible for tracking the Rescuers in the deparment  of an Agent</li>
+                                </ul>
                             </div>
                         </div>
                     </div>

@@ -3,13 +3,10 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PersonalSafety.Hubs;
-using SignalRChatServer.Hubs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using PersonalSafety.Hubs.Services;
-using PersonalSafety.Hubs.Helpers;
 
 namespace PersonalSafety.Installers
 {
@@ -30,7 +27,7 @@ namespace PersonalSafety.Installers
             {nameof(AdminHub), "/hubs/Admin"},
             {nameof(AgentHub), "/hubs/Agent"},
             {nameof(RescuerHub), "/hubs/Rescuer"},
-            {nameof(RealtimeHub), "/hubs/Realtime"}
+            {nameof(LocationHub), "/hubs/Location"},
         };
 
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
@@ -51,11 +48,11 @@ namespace PersonalSafety.Installers
 
         public static void MapToEndpoints(IEndpointRouteBuilder endpoints)
         {
-            endpoints.MapHub<RealtimeHub>(urls.FirstOrDefault(u => u.Key == nameof(RealtimeHub)).Value);
             endpoints.MapHub<ClientHub>(urls.FirstOrDefault(u => u.Key == nameof(ClientHub)).Value);
             endpoints.MapHub<AdminHub>(urls.FirstOrDefault(u => u.Key == nameof(AdminHub)).Value);
             endpoints.MapHub<AgentHub>(urls.FirstOrDefault(u => u.Key == nameof(AgentHub)).Value);
             endpoints.MapHub<RescuerHub>(urls.FirstOrDefault(u => u.Key == nameof(RescuerHub)).Value);
+            endpoints.MapHub<LocationHub>(urls.FirstOrDefault(u => u.Key == nameof(LocationHub)).Value);
         }
     }
 }

@@ -73,11 +73,23 @@
 
                             <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
                                 <div>
+                                    <p class="text-primary"><strong>Realtime Location Tracking</strong></p>
+                                    <p>
+                                        New SignalRHub at <samp>hubs/location</samp>. Created for tracking the locations of rescuers in the departments.
+                                        <br />
+                                        More info and docs available <a href="/RealtimeClient#LocationHubDocs">here</a>.
+                                    </p>
+                                </div>
+                                <span class="badge badge-success badge-pill">NEW!</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
                                     <p class="text-primary"><strong>Emails and Profiles</strong></p>
                                     <ul>
                                         <li>
-                                            <samp>EditProfile</samp> (previously <samp>CompleteProfile</samp>) now supports modifying the client's Fullname, PhoneNumber, and NationalId. 
-                                            This method can now be used in various ways: 
+                                            <samp>EditProfile</samp> (previously <samp>CompleteProfile</samp>) now supports modifying the client's Fullname, PhoneNumber, and NationalId.
+                                            This method can now be used in various ways:
                                             <ul>
                                                 <li>Providing client information the first time he logs in</li>
                                                 <li>Editing his profile</li>
@@ -88,18 +100,6 @@
                                         <li>All account actions, specially sensitive ones will result in a unique email to be sent. <a href="~/PreviewEmails">Here is the current full list of email templates</a> sent out to users. </li>
                                     </ul>
                                 </div>
-                                <span class="badge badge-success badge-pill">NEW!</span>
-                            </li>
-
-                            <li class="list-group-item d-flex justify-content-between align-items-center new_content new_content_animation">
-                                <div>
-                                    <p class="text-primary"><strong>Endpoint Renames</strong></p>
-                                    <ul>
-                                        <li><samp>Client/Registration/CompleteProfile</samp> &#8594; <samp>Client/Registration/EditProfile</samp></li>
-                                        <li><samp>Account/ConfirmMail</samp> &#8594; <samp>Account/SubmitConfirmation</samp></li>
-                                    </ul>
-                                </div>
-                                <span class="badge badge-danger badge-pill">BREAKING CHANGES</span>
                             </li>
 
                             <li class="list-group-item d-flex justify-content-between align-items-center">

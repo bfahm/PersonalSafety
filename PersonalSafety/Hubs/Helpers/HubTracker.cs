@@ -12,6 +12,8 @@ namespace PersonalSafety.Hubs.HubTracker
         public static HashSet<RescuerConnectionInfo> RescuerWithPendingMissionsSet;
         public static HashSet<ConnectionInfo> AllConnectionInfoSet;
 
+        public static HashSet<ActiveGroup> ActiveGroups;
+
         static TrackerHandler()
         {
             InitializeConsoleLog();
@@ -30,6 +32,8 @@ namespace PersonalSafety.Hubs.HubTracker
             RescuerConnectionInfoSet = new HashSet<RescuerConnectionInfo>();
             RescuerWithPendingMissionsSet = new HashSet<RescuerConnectionInfo>();
             AllConnectionInfoSet = new HashSet<ConnectionInfo>();
+
+            ActiveGroups = new HashSet<ActiveGroup>();
         }
     }
 
@@ -56,5 +60,13 @@ namespace PersonalSafety.Hubs.HubTracker
     public class AgentConnectionInfo : ConnectionInfo
     {
         public int DepartmentId { get; set; }
+    }
+
+    public class ActiveGroup
+    {
+        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; }
+        public int ActiveRescuers { get; set; }
+        public int ActiveAgents { get; set; }
     }
 }
