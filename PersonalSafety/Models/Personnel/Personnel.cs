@@ -19,6 +19,7 @@ namespace PersonalSafety.Models
 
         public bool IsRescuer { get; set; } // False means he is an agent
 
-        public float Rate { get; set; }
+        public int RateCount { get; set; }
+        public float RateAverage { get; set; }
     }
 }

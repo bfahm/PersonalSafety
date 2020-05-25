@@ -13,7 +13,8 @@ namespace PersonalSafety.Models
         public string ClientId { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
 
-        public float Rate { get; set; }
+        public int RateCount { get; set; }
+        public float RateAverage { get; set; }
 
         // Uniqueness enforced in [AppDbContext]
         [Required]

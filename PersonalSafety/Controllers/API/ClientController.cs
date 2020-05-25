@@ -321,6 +321,37 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
+        /// This method updates the rate of the assigned rescuer.
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Remarks
+        /// User must provide the id of the request that was just solved. Ids of requests in other states will not be processed.
+        ///
+        /// Maximum Bounds: 5
+        /// Minimum Bounds: 1
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// #### **[400]**: BadRequest
+        /// The provided SOSRequestId does not map to a [Solved] Request.
+        /// #### **[401]**: Unauthorized
+        /// User does not have access to the provided SOS request.
+        /// #### **[404]**: Notfound
+        /// Could happen if the provided Id does not match an existing request.
+        /// #### **[500]**: ServerError
+        /// Could happen if the Solved Request was not assigne to a rescuer. This should not happen in usual scenarios, and is marked as a system error.
+        /// </remarks>
+        [HttpPost(ApiRoutes.Client.SOS)]
+        public IActionResult RateRescuer([FromQuery] int requestId, [FromQuery] int rate)
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response =  _sosBusiness.RateRescuerAsync(currentlyLoggedInUserId, requestId, rate);
+
+            return Ok(response);
+        }
+
+        /// <summary>
         /// Cancel any request that's waiting an outcome.
         /// </summary>
         /// <remarks>

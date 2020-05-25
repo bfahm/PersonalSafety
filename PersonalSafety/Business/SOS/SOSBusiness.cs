@@ -13,6 +13,7 @@ using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Services.Location;
 using Microsoft.Extensions.Logging;
 using PersonalSafety.Hubs.Helpers;
+using PersonalSafety.Services.Rate;
 
 namespace PersonalSafety.Business
 {
@@ -147,7 +148,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Pending, false);
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Pending, true);
             if (sosCorrectStateCheckResult != null)
             {
                 response.WrapResponseData(sosCorrectStateCheckResult);
@@ -247,7 +248,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Solved, true);
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Solved, false);
             if (sosCorrectStateCheckResult != null)
             {
                 response.WrapResponseData(sosCorrectStateCheckResult);
@@ -335,7 +336,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Accepted, false);
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Accepted, true);
             if (sosCorrectStateCheckResult != null)
             {
                 response.WrapResponseData(sosCorrectStateCheckResult);
@@ -410,6 +411,71 @@ namespace PersonalSafety.Business
             }
 
             response.Result = true;
+            return response;
+        }
+
+        public APIResponse<bool> RateRescuerAsync(string userId, int requestId, int rate)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullSOSCheckResult = CheckForNullSOS(requestId, out SOSRequest sosRequest);
+            if (nullSOSCheckResult != null)
+            {
+                response.WrapResponseData(nullSOSCheckResult);
+                return response;
+            }
+
+            var authorizedUserCheck = CheckClientHaveAccessToSOS(sosRequest, userId);
+            if (authorizedUserCheck != null)
+            {
+                response.WrapResponseData(authorizedUserCheck);
+                return response;
+            }
+
+            var sosCorrectStateCheckResult = CheckSOSState(sosRequest, (int)StatesTypesEnum.Solved, true);
+            if (sosCorrectStateCheckResult != null)
+            {
+                response.WrapResponseData(sosCorrectStateCheckResult);
+                return response;
+            }
+
+            var rescuerData = _personnelRepository.GetById(sosRequest.AssignedRescuerId);
+            if(rescuerData == null)
+            {
+                response.Status = (int)APIResponseCodesEnum.ServerError;
+                response.HasErrors = true;
+                response.Messages.Add("An error occured while retrieving the assigned Rescuer account data.");
+                return response;
+            }
+
+            var rescuerRate = new Rate
+            {
+                RateAverage = rescuerData.RateAverage,
+                RateCount = rescuerData.RateCount
+            };
+
+            if (rate > 5)
+            {
+                rate = 5;
+                response.Messages.Add("WARNING: Out of bounds rating score. Your rating was adjusted to the maximum bounds.");
+            } else if(rate < 1)
+            {
+                rate = 1;
+                response.Messages.Add("WARNING: Out of bounds rating score. Your rating was adjusted to the minimum bounds.");
+            }
+
+            RateHelper.UpdateUserRate(ref rescuerRate, rate);
+
+            rescuerData.RateAverage = rescuerRate.RateAverage;
+            rescuerData.RateCount = rescuerRate.RateCount;
+
+            _personnelRepository.Update(rescuerData);
+            _personnelRepository.Save();
+            
+            response.Status = (int)APIResponseCodesEnum.Ok;
+            response.Result = true;
+            response.Messages.Add($"Rescuer rate updated. His new rate is {rescuerData.RateAverage}.");
+
             return response;
         }
 
@@ -563,7 +629,7 @@ namespace PersonalSafety.Business
 
         private APIResponseData CheckSOSState(SOSRequest sosRequest, int state, bool isInTheState)
         {
-            if(!isInTheState && sosRequest.State != state)
+            if(isInTheState && sosRequest.State != state)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
@@ -571,7 +637,7 @@ namespace PersonalSafety.Business
 
             }
             
-            if (isInTheState && sosRequest.State == state)
+            if (!isInTheState && sosRequest.State == state)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
