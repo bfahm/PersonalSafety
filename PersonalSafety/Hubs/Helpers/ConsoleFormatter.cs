@@ -11,9 +11,6 @@ namespace PersonalSafety.Hubs.Helpers
             return email + consoleLineIntermediate + connectionId;
         }
 
-        /// <summary>
-        /// NOTE: Keep role parameter null to mark the user of the function as a "CLIENT"
-        /// </summary>
         public static string onSOSStateChanged(string email, int sosId, StatesTypesEnum sosState, string deparment = null)
         {
             string consoleText = "";
@@ -44,9 +41,40 @@ namespace PersonalSafety.Hubs.Helpers
             return WrapSOSBusiness(consoleText);
         }
 
+        public static string onEventStateChanged(string email, int eventId, StatesTypesEnum eventState)
+        {
+            string consoleText = "";
+            switch (eventState)
+            {
+                case StatesTypesEnum.Pending:
+                    {
+                        consoleText = $"Client {email} created a new event with id: {eventId}.";
+                        break;
+                    }
+                case StatesTypesEnum.Canceled:
+                    {
+                        consoleText = $"A client canceled his event holding SOSId: {eventId}";
+                        break;
+                    }
+                case StatesTypesEnum.Solved:
+                    {
+                        consoleText = $"An event with id: {eventId} was recently marked as solved.";
+                        break;
+                    }
+            }
+
+            return WrapEventBusiness(consoleText);
+        }
+
         public static string WrapSOSBusiness(string message)
         {
             message = "SOSREQUEST / " + message;
+            return message;
+        }
+
+        public static string WrapEventBusiness(string message)
+        {
+            message = "EVENTS / " + message;
             return message;
         }
 

@@ -16,7 +16,7 @@ namespace PersonalSafety.Models
         public string Description { get; set; }
 
         [ForeignKey("EventCategory")]
-        public int EventCategoryId { get; set; }
+        public int? EventCategoryId { get; set; }
         public virtual EventCategory EventCategory { get; set; }
 
         public double Longitude { get; set; }

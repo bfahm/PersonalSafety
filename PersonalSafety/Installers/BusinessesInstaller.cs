@@ -18,6 +18,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<IRescuerBusiness, RescuerBusiness>();
             services.AddScoped<IManagerBusiness, ManagerBusiness>();
             services.AddScoped<ICategoryBusiness, CategoryBusiness>();
+            services.AddScoped<IEventsBusiness, EventBusiness>();
         }
     }
 }

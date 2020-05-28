@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
 using PersonalSafety.Models.ViewModels;
+using PersonalSafety.Models.ViewModels.ClientVM;
 
 namespace PersonalSafety.Controllers.API
 {
@@ -15,13 +16,18 @@ namespace PersonalSafety.Controllers.API
         private readonly IClientBusiness _clientBusiness;
         private readonly ISOSBusiness _sosBusiness;
         private readonly ICategoryBusiness _categoryBusiness;
+        private readonly IEventsBusiness _eventsBusiness;
 
-        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ICategoryBusiness categoryBusiness)
+        public ClientController(IClientBusiness clientBusiness, ISOSBusiness sosBusiness, ICategoryBusiness categoryBusiness, IEventsBusiness eventsBusiness)
         {
             _clientBusiness = clientBusiness;
             _sosBusiness = sosBusiness;
             _categoryBusiness = categoryBusiness;
+            _eventsBusiness = eventsBusiness;
         }
+
+
+        #region Registraion and Accounting
 
         /// <summary>
         /// Create a new client account to be able to access his services.
@@ -264,6 +270,10 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        #endregion
+
+        #region SOSRequests
+
         /// <summary>
         /// This method sends an SOS request for the current user.
         /// </summary>
@@ -368,6 +378,10 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        #endregion
+
+        #region Events
+
         /// <summary>
         /// Gets all Categories of Events along there thumbnails (if available)
         /// </summary>
@@ -383,5 +397,23 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(response);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpPost(ApiRoutes.Client.Events)]
+        public IActionResult PostEvent([FromBody] PostEventRequestViewModel request)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = _eventsBusiness.PostEventAsync(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
+        #endregion
     }
 }
