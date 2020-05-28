@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
+using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Models.ViewModels.ClientVM;
 
@@ -406,11 +407,28 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// </remarks>
         [HttpPost(ApiRoutes.Client.Events)]
-        public IActionResult PostEvent([FromBody] PostEventRequestViewModel request)
+        public async Task<IActionResult> PostEvent([FromBody] PostEventRequestViewModel request)
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = _eventsBusiness.PostEventAsync(currentlyLoggedInUserId, request);
+            var response = await _eventsBusiness.PostEventAsync(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpGet(ApiRoutes.Client.Events)]
+        public async Task<IActionResult> GetEventsMinified()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _eventsBusiness.GetEventsAsync(currentlyLoggedInUserId, EventFiltersEnum.ALL_EVENTS, null);
 
             return Ok(response);
         }

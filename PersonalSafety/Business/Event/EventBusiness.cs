@@ -126,6 +126,42 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public async Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsAsync(string userId, EventFiltersEnum filter, int? cateogryId)
+        {
+            APIResponse<List<EventMinifiedViewModel>> response = new APIResponse<List<EventMinifiedViewModel>>();
+
+            var nullClientCheckResult = CheckForNullClient(userId, out Client client);
+            if (nullClientCheckResult != null)
+            {
+                response.WrapResponseData(nullClientCheckResult);
+                return response;
+            }
+
+            var databaseResult = _eventRepository.GetFilteredEvents(userId, filter, cateogryId);
+            var viewModelResult = new List<EventMinifiedViewModel>();
+
+            foreach(var result in databaseResult)
+            {
+                var eventOwner = await _userManager.FindByIdAsync(result.UserId);
+
+                viewModelResult.Add(new EventMinifiedViewModel
+                {
+                    Title = result.Title,
+                    Description = result.Description,
+                    UserName = eventOwner?.FullName,
+                    IsPublicHelp = result.IsPublicHelp,
+                    IsValidated = result.IsValidated,
+                    Votes = result.Votes
+                    //TODO: ThumbnailUrl = 
+                });
+            }
+
+            response.Result = viewModelResult;
+            return response;
+        }
+
+        #region Private Checkers
+
         private APIResponseData CheckForNullClient(string clientUsedId, out Client client)
         {
             client = _clientRepository.GetById(clientUsedId);
@@ -151,5 +187,7 @@ namespace PersonalSafety.Business
 
             return null;
         }
+
+        #endregion
     }
 }
