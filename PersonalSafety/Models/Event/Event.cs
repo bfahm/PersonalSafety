@@ -28,6 +28,8 @@ namespace PersonalSafety.Models
         public bool IsPublicHelp { get; set; }
         public int Votes { get; set; }
 
+        public string ThumbnailUrl { get; set; }
+
         public DateTime CreationDate { get; set; } = DateTime.Now;
         public DateTime LastModified { get; set; } = DateTime.Now;
     }

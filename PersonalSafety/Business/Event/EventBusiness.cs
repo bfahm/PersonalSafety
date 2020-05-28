@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using PersonalSafety.Contracts;
@@ -6,6 +7,7 @@ using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Hubs.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Models.ViewModels.ClientVM;
+using PersonalSafety.Services.FileManager;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,14 +19,16 @@ namespace PersonalSafety.Business
         private readonly IClientRepository _clientRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IEventCategoryRepository _eventCategoryRepository;
+        private readonly IFileManagerService _fileManager;
         private readonly ILogger<EventBusiness> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager)
+        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager)
         {
             _clientRepository = clientRepository;
             _eventRepository = eventRepository;
             _eventCategoryRepository = eventCategoryRepository;
+            _fileManager = fileManager;
             _logger = logger;
             _userManager = userManager;
         }
@@ -68,6 +72,24 @@ namespace PersonalSafety.Business
             //var nearestDepartment = _locationService.GetNearestDepartment(new Location(request.Longitude, request.Latitude),
             //    request.AuthorityType);
 
+            string uploadResult = null;
+
+            if (request.Thumbnail != null)
+            {
+                var uploadResults = _fileManager.UploadImages(new List<IFormFile> { request.Thumbnail });
+                if (uploadResults.Count != 1)
+                {
+                    response.HasErrors = true;
+                    response.Messages.Add("An error occured while trying to upload the attachment.");
+                    response.Status = (int)APIResponseCodesEnum.BadRequest;
+                    return response;
+                }
+                else
+                {
+                    uploadResult = uploadResults[0];
+                }
+            }
+
             Event newEvent = new Event
             {
                 UserId = userId,
@@ -79,7 +101,8 @@ namespace PersonalSafety.Business
                 Latitude = request.Latitude,
                 State = (int)StatesTypesEnum.Pending,
                 CreationDate = DateTime.Now,
-                LastModified = DateTime.Now
+                LastModified = DateTime.Now,
+                ThumbnailUrl = uploadResult
             };
 
             _eventRepository.Add(newEvent);
@@ -147,12 +170,11 @@ namespace PersonalSafety.Business
                 viewModelResult.Add(new EventMinifiedViewModel
                 {
                     Title = result.Title,
-                    Description = result.Description,
                     UserName = eventOwner?.FullName,
                     IsPublicHelp = result.IsPublicHelp,
                     IsValidated = result.IsValidated,
-                    Votes = result.Votes
-                    //TODO: ThumbnailUrl = 
+                    Votes = result.Votes,
+                    ThumbnailUrl = result.ThumbnailUrl
                 });
             }
 

@@ -407,7 +407,7 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// </remarks>
         [HttpPost(ApiRoutes.Client.Events)]
-        public async Task<IActionResult> PostEvent([FromBody] PostEventRequestViewModel request)
+        public async Task<IActionResult> PostEvent([FromForm] PostEventRequestViewModel request)
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 

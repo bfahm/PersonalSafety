@@ -8,7 +8,6 @@ namespace PersonalSafety.Models.ViewModels.ClientVM
     public class EventMinifiedViewModel
     {
         public string Title { get; set; }
-        public string Description { get; set; }
         public string UserName { get; set; }
 
         public bool IsValidated { get; set; }
