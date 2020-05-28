@@ -13,19 +13,14 @@ namespace PersonalSafety.Models
             this.context = context;
         }
 
-        public List<Event> GetFilteredEvents(string userId, EventFiltersEnum filter, int? cateogryId)
+        public List<Event> GetFilteredEvents(int cateogryId)
         {
-            switch (filter)
-            {
-                case EventFiltersEnum.ALL_EVENTS:
-                    return GetAll().ToList();
+            return context.Events.Where(e => e.EventCategoryId == cateogryId).ToList();
+        }
 
-                case EventFiltersEnum.USER_EVENTS:
-                    return GetAll().Where(e => e.UserId == userId).ToList();
-
-                default:
-                    return GetAll().Where(e => e.EventCategoryId == cateogryId).ToList();
-            }
+        public List<Event> GetUserEvents(string userId)
+        {
+            return context.Events.Where(e => e.UserId == userId).ToList();
         }
     }
 }

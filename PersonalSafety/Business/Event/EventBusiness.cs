@@ -10,6 +10,7 @@ using PersonalSafety.Models.ViewModels.ClientVM;
 using PersonalSafety.Services.FileManager;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PersonalSafety.Business
@@ -149,7 +150,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsAsync(string userId, EventFiltersEnum filter, int? cateogryId)
+        public async Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsAsync(string userId, int? filter)
         {
             APIResponse<List<EventMinifiedViewModel>> response = new APIResponse<List<EventMinifiedViewModel>>();
 
@@ -160,7 +161,33 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var databaseResult = _eventRepository.GetFilteredEvents(userId, filter, cateogryId);
+            EventCategory eventCategory = (filter != null) ? _eventCategoryRepository.GetById(filter.ToString()) : null;
+
+
+            List<Event> databaseResult;
+            if (eventCategory != null)
+            {
+                if (eventCategory.Title == "Your Stories")
+                {
+                    databaseResult = _eventRepository.GetUserEvents(userId);
+                }
+                else if (eventCategory.Title == "Nearby Stories")
+                {
+                    // TODO: Implement location logic here
+                    databaseResult = new List<Event>();
+                }
+                else
+                {
+                    databaseResult = _eventRepository.GetFilteredEvents(eventCategory.Id);
+                }
+            }
+            else
+            {
+                // Event Category was invalid or not found, so get all events instead
+                databaseResult = _eventRepository.GetAll().ToList();
+            }
+
+
             var viewModelResult = new List<EventMinifiedViewModel>();
 
             foreach(var result in databaseResult)

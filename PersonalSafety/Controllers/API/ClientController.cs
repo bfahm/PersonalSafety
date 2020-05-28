@@ -424,14 +424,15 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// </remarks>
         [HttpGet(ApiRoutes.Client.Events)]
-        public async Task<IActionResult> GetEventsMinified()
+        public async Task<IActionResult> GetEventsMinified([FromQuery] int filter)
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _eventsBusiness.GetEventsAsync(currentlyLoggedInUserId, EventFiltersEnum.ALL_EVENTS, null);
+            var response = await _eventsBusiness.GetEventsAsync(currentlyLoggedInUserId, filter);
 
             return Ok(response);
         }
+
         #endregion
     }
 }

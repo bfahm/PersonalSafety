@@ -8,6 +8,7 @@ namespace PersonalSafety.Models
 {
     public interface IEventRepository : IBaseRepository<Event>
     {
-        List<Event> GetFilteredEvents(string userId, EventFiltersEnum filter, int? cateogryId);
+        List<Event> GetFilteredEvents(int cateogryId);
+        List<Event> GetUserEvents(string userId);
     }
 }
