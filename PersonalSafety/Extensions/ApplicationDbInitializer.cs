@@ -207,30 +207,30 @@ namespace PersonalSafety.Extensions
             {
                 List<double> locations = new List<double>()
                 {
-                    {30.785576},                // Tanta        Police      Long
-                    {30.997374},                // Tanta        Police      Lat
-                    {30.055563},                // Cairo        Police      Long
-                    {31.219640},                // Cairo        Police      Lat
-                    {31.242536},                // Alexandria   Police      Long
-                    {31.804148},                // Alexandria   Police      Lat
-                    {30.785576},                // Tanta        Tow (Same as Police)    Long
-                    {30.997374},                // Tanta        Tow (Same as Police)    Lat
-                    {30.055563},                // Cairo        Tow (Same as Police)    Long
-                    {31.219640 },               // Cairo        Tow (Same as Police)    Lat
-                    {31.242536},                // Alexandria   Tow (Same as Police)    Long
-                    {31.804148 },               // Alexandria   Tow (Same as Police)    Lat
-                    {30.785660},                // Tanta        FireFighting            Long
-                    {30.989420 },               // Tanta        FireFighting            Lat
-                    {30.033687},                // Cairo        FireFighting            Long
-                    {31.201933 },               // Cairo        FireFighting            Lat
-                    {31.210805},                // Alexandria   FireFighting            Long
-                    {29.916305 },               // Alexandria   FireFighting            Lat
-                    {30.807549},                // Tanta        Ambulance            Long
-                    {30.998694 },               // Tanta        Ambulance            Lat
-                    {30.053779},                // Cairo        Ambulance            Long
-                    {31.238588 },               // Cairo        Ambulance            Lat
-                    {31.213648},                // Alexandria   Ambulance            Long
-                    {29.950524 }                // Alexandria   Ambulance            Lat
+                    {30.997374},                // Tanta        Police      Long
+                    {30.785576},                // Tanta        Police      Lat
+                    {31.219640},                // Cairo        Police      Long
+                    {30.055563},                // Cairo        Police      Lat
+                    {31.804148},                // Alexandria   Police      Long
+                    {31.242536},                // Alexandria   Police      Lat
+                    {30.997374},                // Tanta        Tow (Same as Police)    Long
+                    {30.785576},                // Tanta        Tow (Same as Police)    Lat
+                    {31.219640 },               // Cairo        Tow (Same as Police)    Long
+                    {30.055563},                // Cairo        Tow (Same as Police)    Lat
+                    {31.804148 },               // Alexandria   Tow (Same as Police)    Long
+                    {31.242536},                // Alexandria   Tow (Same as Police)    Lat
+                    {30.989420 },               // Tanta        FireFighting            Long
+                    {30.785660},                // Tanta        FireFighting            Lat
+                    {31.201933 },               // Cairo        FireFighting            Long
+                    {30.033687},                // Cairo        FireFighting            Lat
+                    {29.916305 },               // Alexandria   FireFighting            Long
+                    {31.210805},                // Alexandria   FireFighting            Lat
+                    {30.998694 },               // Tanta        Ambulance            Long
+                    {30.807549},                // Tanta        Ambulance            Lat
+                    {31.238588 },               // Cairo        Ambulance            Long
+                    {30.053779},                // Cairo        Ambulance            Lat
+                    {29.950524 },                // Alexandria   Ambulance            Long
+                    {31.213648}                  // Alexandria   Ambulance            Lat
                 };
 
                 var cities = _distributionRepository.GetCities().Take(3);
