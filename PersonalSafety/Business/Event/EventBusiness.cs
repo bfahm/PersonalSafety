@@ -202,6 +202,7 @@ namespace PersonalSafety.Business
 
                 viewModelResult.Add(new EventMinifiedViewModel
                 {
+                    Id = result.Id,
                     Title = result.Title,
                     UserName = eventOwner?.FullName,
                     IsPublicHelp = result.IsPublicHelp,
