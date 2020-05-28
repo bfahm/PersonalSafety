@@ -8,7 +8,7 @@ namespace PersonalSafety.Business
     public interface IClientBusiness
     {
         Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
-        APIResponse<ProfileViewModel> GetEmergencyInfo(string userId);
+        APIResponse<ProfileViewModel> GetProfile(string userId);
         APIResponse<bool> EditProfile(string userId, ProfileViewModel request);
         Task<APIResponse<LoginResponseViewModel>> LoginWithFacebookAsync(string accessToken);
         Task<APIResponse<bool>> RegisterWithFacebookAsync(RegistrationWithFacebookViewModel request);

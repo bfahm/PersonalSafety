@@ -129,22 +129,22 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// This method returns a list of the current user emergency contacts
+        /// This method returns the profile of a logged in user
         /// </summary>
         /// <remarks>
         /// # **`AuthenticatedRequest`**
         /// ## Main Functionality
-        /// This method should be called before `Api/User/CompleteProfile` or any other calls that shows the list to the user before being able to modify them.
+        /// This method should be called before `Api/User/EditProfile` or any other calls that shows the list to the user before being able to modify them.
         /// 
         /// ## Possible Result Codes in case of Errors:
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet(ApiRoutes.Client.Registration)]
-        public IActionResult GetEmergencyInfo()
+        public IActionResult GetProfile()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = _clientBusiness.GetEmergencyInfo(currentlyLoggedInUserId);
+            var response = _clientBusiness.GetProfile(currentlyLoggedInUserId);
 
             return Ok(response);
         }

@@ -121,7 +121,7 @@ namespace PersonalSafety.Business
             return await _registrationService.RegisterClientAsync(newUser, null, client);
         }
 
-        public APIResponse<ProfileViewModel> GetEmergencyInfo(string userId)
+        public APIResponse<ProfileViewModel> GetProfile(string userId)
         {
             APIResponse<ProfileViewModel> response = new APIResponse<ProfileViewModel>();
 
