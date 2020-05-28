@@ -10,5 +10,6 @@ namespace PersonalSafety.Models
     {
         List<Event> GetFilteredEvents(int cateogryId);
         List<Event> GetUserEvents(string userId);
+        new Event GetById(string eventId);
     }
 }

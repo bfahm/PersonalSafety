@@ -1,4 +1,5 @@
-﻿using PersonalSafety.Contracts.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using PersonalSafety.Contracts.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,6 +22,11 @@ namespace PersonalSafety.Models
         public List<Event> GetUserEvents(string userId)
         {
             return context.Events.Where(e => e.UserId == userId).ToList();
+        }
+
+        new public Event GetById(string eventId)
+        {
+            return context.Events.Include(d => d.EventCategory).FirstOrDefault(e => e.Id == int.Parse(eventId));
         }
     }
 }

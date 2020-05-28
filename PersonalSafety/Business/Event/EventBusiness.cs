@@ -45,6 +45,13 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            var validEventTitleCheckResult = CheckForNullTitle(ref request);
+            if (validEventTitleCheckResult != null)
+            {
+                response.WrapResponseData(validEventTitleCheckResult);
+                return response;
+            }
+
             var validCategoryCheckResult = CheckEventCategoryId(request.EventCategoryId);
             if (validCategoryCheckResult != null)
             {
@@ -154,7 +161,7 @@ namespace PersonalSafety.Business
         {
             APIResponse<List<EventMinifiedViewModel>> response = new APIResponse<List<EventMinifiedViewModel>>();
 
-            var nullClientCheckResult = CheckForNullClient(userId, out Client client);
+            var nullClientCheckResult = CheckForNullClient(userId, out _);
             if (nullClientCheckResult != null)
             {
                 response.WrapResponseData(nullClientCheckResult);
@@ -162,7 +169,6 @@ namespace PersonalSafety.Business
             }
 
             EventCategory eventCategory = (filter != null) ? _eventCategoryRepository.GetById(filter.ToString()) : null;
-
 
             List<Event> databaseResult;
             if (eventCategory != null)
@@ -209,6 +215,47 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public async Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(int eventId)
+        {
+            var response = new APIResponse<EventDetailedViewModel>();
+            
+            var databaseResult = _eventRepository.GetById(eventId.ToString());
+
+            var nullDbResultCheck = CheckForNullDatabaseResult(ref databaseResult);
+            if (nullDbResultCheck != null)
+            {
+                response.WrapResponseData(nullDbResultCheck);
+                return response;
+            }
+
+            var eventOwner = await _userManager.FindByIdAsync(databaseResult.UserId);
+            var viewModelResult = new EventDetailedViewModel 
+            {
+                Id = databaseResult.Id,
+                Title = databaseResult.Title,
+                Description = databaseResult.Description,
+                UserName = eventOwner?.FullName,
+
+                IsPublicHelp = databaseResult.IsPublicHelp,
+                IsValidated = databaseResult.IsValidated,
+                Votes = databaseResult.Votes,
+
+                ThumbnailUrl = databaseResult.ThumbnailUrl,
+                
+                CreationDate = databaseResult.CreationDate,
+                LastModified = databaseResult.LastModified,
+                
+                EventCategoryId = databaseResult.EventCategoryId,
+                EventCategoryName = databaseResult.EventCategory?.Title,
+                
+                Latitude = databaseResult.Latitude,
+                Longitude = databaseResult.Longitude
+            };
+
+            response.Result = viewModelResult;
+            return response;
+        }
+
         #region Private Checkers
 
         private APIResponseData CheckForNullClient(string clientUsedId, out Client client)
@@ -232,6 +279,30 @@ namespace PersonalSafety.Business
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
                         {"Error. Provide a correct category Id or leave the field null to mark as a General Event."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForNullTitle(ref PostEventRequestViewModel request)
+        {
+            if (request.Title == null || request.Title.Length == 0)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                    new List<string>()
+                        {"Error. You must provide a title for your event."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForNullDatabaseResult(ref Event requestedEvent)
+        {
+            if (requestedEvent == null)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.NotFound,
+                    new List<string>()
+                        {"Error. The requested event was not found."});
             }
 
             return null;

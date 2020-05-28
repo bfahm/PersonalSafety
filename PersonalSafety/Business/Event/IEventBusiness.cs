@@ -12,5 +12,6 @@ namespace PersonalSafety.Business
     {
         Task<APIResponse<PostEventResponseViewModel>> PostEventAsync(string userId, PostEventRequestViewModel request);
         Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsAsync(string userId, int? filter);
+        Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(int eventId);
     }
 }

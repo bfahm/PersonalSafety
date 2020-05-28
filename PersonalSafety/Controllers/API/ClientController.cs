@@ -433,6 +433,21 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpGet(ApiRoutes.Client.Events)]
+        public async Task<IActionResult> GetEventById([FromQuery] int eventId)
+        {
+            var response = await _eventsBusiness.GetEventByIdAsync(eventId);
+
+            return Ok(response);
+        }
+
         #endregion
     }
 }
