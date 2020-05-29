@@ -4,15 +4,24 @@ using System.Threading.Tasks;
 using PersonalSafety.Contracts;
 using PersonalSafety.Hubs.HubTracker;
 using System.Collections.Specialized;
+using PersonalSafety.Services.PushNotification;
 
 namespace PersonalSafety.Hubs
 {
     [Authorize(Roles = Roles.ROLE_ADMIN)]
     public class AdminHub : MainHub
     {
-        public AdminHub()
+        private readonly IPushNotificationsService _pushNotificationsService;
+
+        public AdminHub(IPushNotificationsService pushNotificationsService)
         {
             TrackerHandler.ConsoleSet.CollectionChanged += ConsoleSetOnChanged;
+            _pushNotificationsService = pushNotificationsService;
+        }
+
+        public async Task SendTestNotification(string registrationToken, string title, string body)
+        {
+            await _pushNotificationsService.TrySendNotification(registrationToken, title, body);
         }
 
         private void PrintToOnlineConsole(string text)

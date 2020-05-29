@@ -382,6 +382,14 @@ function startConnection(token) {
 
         $("#alert_container_disconnected").removeAttr('hidden');
     });
+
+    $("#btn_send_notification").click(function () {
+        animateProgressBar("send_notification_bar");
+        var registration = $("#field_device_registration").val();
+        var title = $("#field_notification_title").val();
+        var body = $("#field_notification_body").val();
+        connection.invoke("SendTestNotification", registration, title, body);
+    });
 }
 
 function joinDepartmentRoom(token, roomName) {
@@ -406,6 +414,7 @@ function joinDepartmentRoom(token, roomName) {
     // Start connection after finishing all the settings
     roomConnection.start()
         .then(function () {
+            animateProgressBar("monitor_rescuers_bar");
             $("#chat_container_wrapper").attr("hidden", false);
             roomConnection.invoke("EnterDepartmentRoom", roomName);
         })

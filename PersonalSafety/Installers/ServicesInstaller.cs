@@ -1,12 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PersonalSafety.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using PersonalSafety.Services.Location;
 using PersonalSafety.Services.FileManager;
+using PersonalSafety.Services.PushNotification;
 
 namespace PersonalSafety.Installers
 {
@@ -22,6 +19,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileManagerService, FileManagerService>();
+            services.AddSingleton<IPushNotificationsService, PushNotificationsService>();
         }
     }
 }
