@@ -9,10 +9,12 @@ namespace PersonalSafety.Services.Location
     public class LocationService : ILocationService
     {
         private readonly IDepartmentRepository _departmentRepository;
+        private readonly IDistributionRepository _distributionRepository;
 
-        public LocationService(IDepartmentRepository departmentRepository)
+        public LocationService(IDepartmentRepository departmentRepository, IDistributionRepository distributionRepository)
         {
             _departmentRepository = departmentRepository;
+            _distributionRepository = distributionRepository;
         }
 
         public Department GetNearestDepartment(Location requestLocation, int authorityType)
@@ -30,6 +32,23 @@ namespace PersonalSafety.Services.Location
             var nearestDepartmentEntry = dictOfDepartmentDistances.OrderBy(d => d.Value).FirstOrDefault();
 
             return _departmentRepository.GetById(nearestDepartmentEntry.Key.ToString());
+        }
+
+        public Distribution GetNearestCity(Location eventLocation)
+        {
+            var listOfCites = _distributionRepository.GetCities();
+            var dictOfCityDistances = new Dictionary<int, double>();
+
+            foreach (var city in listOfCites)
+            {
+                var cityLocation = new Location(city.CenterLongitude ?? 0, city.CenterLatitude ?? 0);
+                var distance = CalculateDistance(eventLocation, cityLocation);
+                dictOfCityDistances.Add(city.Id, distance);
+            }
+
+            var nearestCityEntry = dictOfCityDistances.OrderBy(d => d.Value).FirstOrDefault();
+
+            return _distributionRepository.GetById(nearestCityEntry.Key.ToString());
         }
 
         private double CalculateDistance(Location p1, Location p2)

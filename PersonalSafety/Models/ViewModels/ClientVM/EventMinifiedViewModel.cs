@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Models.ViewModels.ClientVM
 {
@@ -17,5 +14,7 @@ namespace PersonalSafety.Models.ViewModels.ClientVM
         public int Votes { get; set; }
 
         public string ThumbnailUrl { get; set; }
+
+        public DateTime CreationDate { get; set; }
     }
 }

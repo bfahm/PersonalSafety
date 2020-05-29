@@ -16,6 +16,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20200424094255_InitialMigration.cs" />
     <Compile Remove="Migrations\20200424094255_InitialMigration.Designer.cs" />
+    <Compile Remove="Migrations\20200529220127_AssignClientAndEventToCity.cs" />
+    <Compile Remove="Migrations\20200529220127_AssignClientAndEventToCity.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

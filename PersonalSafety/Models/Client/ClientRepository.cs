@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PersonalSafety.Models
@@ -20,6 +21,11 @@ namespace PersonalSafety.Models
         new public Client GetById(string Id)
         {
             return context.Clients.Include(c => c.ApplicationUser).FirstOrDefault(c => c.ClientId == Id);
+        }
+
+        public IEnumerable<Client> GetClientsByCityId(int cityId)
+        {
+            return context.Clients.Where(c => c.LastKnownCityId == cityId);
         }
     }
 }

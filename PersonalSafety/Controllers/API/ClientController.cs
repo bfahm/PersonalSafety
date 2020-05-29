@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PersonalSafety.Business;
 using PersonalSafety.Contracts;
-using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Models.ViewModels.ClientVM;
 
@@ -382,6 +381,40 @@ namespace PersonalSafety.Controllers.API
         #endregion
 
         #region Events
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpPost(ApiRoutes.Client.Events)]
+        public IActionResult UpdateLastKnownLocation([FromBody] LocationViewModel request)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = _eventsBusiness.UpdateLastKnownLocation(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpPost(ApiRoutes.Client.Events)]
+        public IActionResult UpdateDeviceRegistraionKey([FromBody] DeviceRegistrationViewModel request)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = _eventsBusiness.UpdateDeviceRegistraionKey(currentlyLoggedInUserId, request);
+
+            return Ok(response);
+        }
 
         /// <summary>
         /// Gets all Categories of Events along there thumbnails (if available)

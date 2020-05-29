@@ -8,5 +8,7 @@ namespace PersonalSafety.Models.ViewModels.ClientVM
     public class PostEventResponseViewModel
     {
         public int EventCategoryId { get; set; }
+        public int AssignedCityId { get; set; }
+        public string AssignedCityName { get; set; }
     }
 }

@@ -3,7 +3,9 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using PersonalSafety.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -57,9 +59,34 @@ namespace PersonalSafety.Services.PushNotification
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("FCM / ERROR: Wrong Registration Token.");
+                _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
+                _logger.LogError("FCM /" +  ex.Message);
+                return false;
+            }
+        }
+
+        public async Task<bool> TrySendData(string registrationToken, Dictionary<string, string> data)
+        {
+            try
+            {
+                // See documentation on defining a message payload.
+                var message = new Message()
+                {
+                    Data = data,
+                    Token = registrationToken,
+                };
+
+                string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                _logger.LogInformation($"FCM / SUCCESS: {response}.");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
+                _logger.LogError("FCM /" + ex.Message);
                 return false;
             }
         }

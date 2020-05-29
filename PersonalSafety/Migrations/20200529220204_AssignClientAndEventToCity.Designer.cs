@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalSafety.Models;
 
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200529220204_AssignClientAndEventToCity")]
+    partial class AssignClientAndEventToCity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,9 +260,6 @@ namespace PersonalSafety.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CurrentAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeviceRegistrationKey")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("LastKnownCityId")

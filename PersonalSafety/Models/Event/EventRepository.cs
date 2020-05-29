@@ -28,5 +28,15 @@ namespace PersonalSafety.Models
         {
             return context.Events.Include(d => d.EventCategory).FirstOrDefault(e => e.Id == int.Parse(eventId));
         }
+
+        public List<Event> GetEventsByCityId(int cityId)
+        {
+            return context.Events.Where(e => e.NearestCityId == cityId).ToList();
+        }
+
+        public List<Event> GetPublicEventsByCityId(int cityId)
+        {
+            return context.Events.Where(e => e.NearestCityId == cityId && e.IsPublicHelp).ToList();
+        }
     }
 }

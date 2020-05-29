@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PersonalSafety.Models
 {
@@ -28,12 +25,10 @@ namespace PersonalSafety.Models
 
         public string CurrentAddress { get; set; }
 
-        [ForeignKey("Event")]
-        public int? PublicEventId { get; set; }
-        public virtual Event PublicEvent { get; set; }
+        [ForeignKey("LastKnownCity")]
+        public int? LastKnownCityId { get; set; }
+        public virtual Distribution LastKnownCity { get; set; }
 
-        [ForeignKey("Event")]
-        public int? InvolvedInEventId { get; set; }
-        public virtual Event InvolvedInEvent { get; set; }
+        public string DeviceRegistrationKey { get; set; }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 using PersonalSafety.Contracts;
 using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Hubs.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Models.ViewModels.ClientVM;
 using PersonalSafety.Services.FileManager;
+using PersonalSafety.Services.Location;
+using PersonalSafety.Services.PushNotification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,17 +22,65 @@ namespace PersonalSafety.Business
         private readonly IEventRepository _eventRepository;
         private readonly IEventCategoryRepository _eventCategoryRepository;
         private readonly IFileManagerService _fileManager;
+        private readonly ILocationService _locationService;
+        private readonly IPushNotificationsService _pushNotificationsService;
         private readonly ILogger<EventBusiness> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager)
+        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager)
         {
             _clientRepository = clientRepository;
             _eventRepository = eventRepository;
             _eventCategoryRepository = eventCategoryRepository;
             _fileManager = fileManager;
+            _locationService = locationService;
+            _pushNotificationsService = pushNotificationsService;
             _logger = logger;
             _userManager = userManager;
+        }
+
+        public APIResponse<string> UpdateLastKnownLocation(string userId, LocationViewModel request)
+        {
+            APIResponse<string> response = new APIResponse<string>();
+
+            var nullClientCheckResult = CheckForNullClient(userId, out Client client);
+            if (nullClientCheckResult != null)
+            {
+                response.WrapResponseData(nullClientCheckResult);
+                return response;
+            }
+
+            var nearestCity = _locationService.GetNearestCity(new Location(request.Longitude, request.Latitude));
+
+            client.LastKnownCityId = nearestCity.Id;
+            _clientRepository.Update(client);
+            _clientRepository.Save();
+
+            response.Result = nearestCity.ToString();
+            response.Messages.Add($"Your assigned city was updated to {nearestCity.Value}.");
+
+            return response;
+        }
+
+        public APIResponse<bool> UpdateDeviceRegistraionKey(string userId, DeviceRegistrationViewModel request)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullClientCheckResult = CheckForNullClient(userId, out Client client);
+            if (nullClientCheckResult != null)
+            {
+                response.WrapResponseData(nullClientCheckResult);
+                return response;
+            }
+
+            client.DeviceRegistrationKey = request.DeviceRegistrationKey;
+            _clientRepository.Update(client);
+            _clientRepository.Save();
+
+            response.Result = true;
+            response.Messages.Add($"Your device key was updated. You are currently subscribed for future notifications.");
+
+            return response;
         }
 
         public async Task<APIResponse<PostEventResponseViewModel>> PostEventAsync(string userId, PostEventRequestViewModel request)
@@ -59,26 +108,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            // TODO: uncomment after implementing SignalR - if user needs to have only on ongoing event
-            //if (_sosRequestRepository.UserHasOngoingRequest(userId))
-            //{
-            //    response.Messages.Add("You currently have ongoing requests, attempting to canceling them automatically.");
-            //    var cancelResult = await CancelPendingRequestsAsync(userId, false);
-            //    response.Messages.AddRange(cancelResult.Messages);
-            //}
-
-            // TODO: uncomment after implementing SignalR
-            //if (!_clientHub.isConnected(userId))
-            //{
-            //    response.Status = (int)APIResponseCodesEnum.SignalRError;
-            //    response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
-            //    response.HasErrors = true;
-            //    return response;
-            //}
-
-            // TODO: 
-            //var nearestDepartment = _locationService.GetNearestDepartment(new Location(request.Longitude, request.Latitude),
-            //    request.AuthorityType);
+            var nearestCity = _locationService.GetNearestCity(new Location(request.Longitude, request.Latitude));
 
             string uploadResult = null;
 
@@ -107,6 +137,7 @@ namespace PersonalSafety.Business
                 IsPublicHelp = request.IsPublicHelp,
                 Longitude = request.Longitude,
                 Latitude = request.Latitude,
+                NearestCityId = nearestCity.Id,
                 State = (int)StatesTypesEnum.Pending,
                 CreationDate = DateTime.Now,
                 LastModified = DateTime.Now,
@@ -117,38 +148,15 @@ namespace PersonalSafety.Business
             _eventRepository.Save();
 
             ApplicationUser userAccount = await _userManager.FindByIdAsync(userId);
-            // TODO: uncomment after implementing SignalR
-            //var trackingResult = _clientHub.TrackSOSIdForClient(userAccount.Email, sosRequest.Id);
 
-            //if (!trackingResult)
-            //{
-            //    _clientHub.RemoveClientFromTrackers(userId);
-
-            //    // Was not able to reach the user:
-            //    // revert changes:
-            //    _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
-            //    _sosRequestRepository.Save();
-
-            //    var errorMessage1 = "A system error occured while trying to maintain connection with the client.";
-            //    var errorMessage2 = "The request was removed. Please have another try.";
-
-            //    _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage1));
-            //    _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage2));
-
-            //    response.Messages.Add(errorMessage1);
-            //    response.Messages.Add(errorMessage2);
-            //    response.Status = (int)APIResponseCodesEnum.ServerError;
-            //    response.HasErrors = true;
-
-            //    return response;
-            //}
-
-            //_clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
-            //_agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequest.AssignedDepartmentId);
-
+            if (newEvent.IsPublicHelp)
+                await NotifyNearbyClients(newEvent.NearestCityId);
+            
             response.Result = new PostEventResponseViewModel
             {
-                EventCategoryId = newEvent.Id
+                EventCategoryId = newEvent.Id,
+                AssignedCityId = nearestCity.Id,
+                AssignedCityName = nearestCity.ToString()
             };
 
             _logger.LogInformation(ConsoleFormatter.onEventStateChanged(userAccount.Email, newEvent.Id, StatesTypesEnum.Pending));
@@ -179,8 +187,8 @@ namespace PersonalSafety.Business
                 }
                 else if (eventCategory.Title == "Nearby Stories")
                 {
-                    // TODO: Implement location logic here
-                    databaseResult = new List<Event>();
+                    // If user did not have a last known city, he would get all events instead.
+                    databaseResult = _eventRepository.GetEventsByCityId(_clientRepository.GetById(userId).LastKnownCityId ?? 0);
                 }
                 else
                 {
@@ -208,7 +216,8 @@ namespace PersonalSafety.Business
                     IsPublicHelp = result.IsPublicHelp,
                     IsValidated = result.IsValidated,
                     Votes = result.Votes,
-                    ThumbnailUrl = result.ThumbnailUrl
+                    ThumbnailUrl = result.ThumbnailUrl,
+                    CreationDate = result.CreationDate
                 });
             }
 
@@ -310,5 +319,93 @@ namespace PersonalSafety.Business
         }
 
         #endregion
+
+        #region Private Helpers
+
+        private async Task NotifyNearbyClients(int nearestCityId)
+        {
+            var nearbyClients = _clientRepository.GetClientsByCityId(nearestCityId);
+
+            var publicEventsInCity = _eventRepository.GetPublicEventsByCityId(nearestCityId);
+
+            //var publicEventsInCityJson = JsonSerializer.Serialize(publicEventsInCity);
+            var publicEventsInCityDictionary = ConvertToDictionary(publicEventsInCity);
+
+            foreach (var client in nearbyClients)
+            {
+                var registraionKey = client.DeviceRegistrationKey;
+                if (registraionKey != null && registraionKey.Length > 0)
+                {
+                    await _pushNotificationsService.TrySendData(registraionKey, publicEventsInCityDictionary);
+                }
+            }
+        }
+
+        private Dictionary<string, string> ConvertToDictionary(List<Event> listOfEvents)
+        {
+            var returnDictionary = new Dictionary<string, string>();
+            
+            foreach(var _event in listOfEvents)
+            {
+                returnDictionary.Add(_event.Id.ToString(), $"{_event.Latitude}_{_event.Longitude}");
+            }
+
+            return returnDictionary;
+        }
+
+        #endregion
+
+        #region To Be Used With SignalR
+
+        // TODO: uncomment after implementing SignalR - if user needs to have only on ongoing event
+        //if (_sosRequestRepository.UserHasOngoingRequest(userId))
+        //{
+        //    response.Messages.Add("You currently have ongoing requests, attempting to canceling them automatically.");
+        //    var cancelResult = await CancelPendingRequestsAsync(userId, false);
+        //    response.Messages.AddRange(cancelResult.Messages);
+        //}
+
+        // TODO: uncomment after implementing SignalR
+        //if (!_clientHub.isConnected(userId))
+        //{
+        //    response.Status = (int)APIResponseCodesEnum.SignalRError;
+        //    response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
+        //    response.HasErrors = true;
+        //    return response;
+        //}
+
+        //---------------------------------------------------------------------------------------------
+
+        // TODO: uncomment after implementing SignalR
+        //var trackingResult = _clientHub.TrackSOSIdForClient(userAccount.Email, sosRequest.Id);
+
+        //if (!trackingResult)
+        //{
+        //    _clientHub.RemoveClientFromTrackers(userId);
+
+        //    // Was not able to reach the user:
+        //    // revert changes:
+        //    _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
+        //    _sosRequestRepository.Save();
+
+        //    var errorMessage1 = "A system error occured while trying to maintain connection with the client.";
+        //    var errorMessage2 = "The request was removed. Please have another try.";
+
+        //    _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage1));
+        //    _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage2));
+
+        //    response.Messages.Add(errorMessage1);
+        //    response.Messages.Add(errorMessage2);
+        //    response.Status = (int)APIResponseCodesEnum.ServerError;
+        //    response.HasErrors = true;
+
+        //    return response;
+        //}
+
+        //_clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
+        //_agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequest.AssignedDepartmentId);
+
+        #endregion
+
     }
 }

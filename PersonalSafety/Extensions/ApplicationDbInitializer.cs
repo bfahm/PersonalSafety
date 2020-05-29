@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PersonalSafety.Models;
 using PersonalSafety.Contracts.Enums;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -338,12 +337,12 @@ namespace PersonalSafety.Extensions
                     new Distribution { Id = 5, Type = (int)DistributionTypesEnum.Province, Value = "Cairo", ParentId = 2 },
                     new Distribution { Id = 6, Type = (int)DistributionTypesEnum.Province, Value = "Alexandria", ParentId = 2 },
                     new Distribution { Id = 7, Type = (int)DistributionTypesEnum.Province, Value = "Aswan", ParentId = 3 },
-                    new Distribution { Id = 8, Type = (int)DistributionTypesEnum.City, Value = "Tanta", ParentId = 4 },
-                    new Distribution { Id = 9, Type = (int)DistributionTypesEnum.City, Value = "Cairo", ParentId = 5 },
-                    new Distribution { Id = 10, Type = (int)DistributionTypesEnum.City, Value = "Alexandria", ParentId = 6 },
-                    new Distribution { Id = 11, Type = (int)DistributionTypesEnum.City, Value = "Mahala", ParentId = 4 },
-                    new Distribution { Id = 12, Type = (int)DistributionTypesEnum.City, Value = "Aswan", ParentId = 7 },
-                    new Distribution { Id = 13, Type = (int)DistributionTypesEnum.City, Value = "Idfo", ParentId = 7 },
+                    new Distribution { Id = 8, Type = (int)DistributionTypesEnum.City, Value = "Tanta", ParentId = 4, CenterLatitude = 30.794025, CenterLongitude = 30.998292 },
+                    new Distribution { Id = 9, Type = (int)DistributionTypesEnum.City, Value = "Cairo", ParentId = 5, CenterLatitude = 30.024034, CenterLongitude = 31.106439 },
+                    new Distribution { Id = 10, Type = (int)DistributionTypesEnum.City, Value = "Alexandria", ParentId = 6, CenterLatitude = 31.211116, CenterLongitude = 29.919170 },
+                    new Distribution { Id = 11, Type = (int)DistributionTypesEnum.City, Value = "Mahala", ParentId = 4, CenterLatitude = 30.970276, CenterLongitude = 31.163253 },
+                    new Distribution { Id = 12, Type = (int)DistributionTypesEnum.City, Value = "Aswan", ParentId = 7, CenterLatitude = 24.089905, CenterLongitude = 32.901823 },
+                    new Distribution { Id = 13, Type = (int)DistributionTypesEnum.City, Value = "Idfo", ParentId = 7 , CenterLatitude = 24.974077, CenterLongitude = 32.876068},
                 };
 
                 _distributionRepository.AddWithIdentityInsert(distributions);

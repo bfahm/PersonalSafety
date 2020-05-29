@@ -19,6 +19,8 @@ namespace PersonalSafety.Models
         public int? ParentId { get; set; }
         public virtual Distribution Parent { get; set; }
 
+        public double? CenterLatitude { get; set; }
+        public double? CenterLongitude { get; set; }
 
         public override string ToString()
         {

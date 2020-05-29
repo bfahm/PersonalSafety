@@ -22,6 +22,10 @@ namespace PersonalSafety.Models
         public double Longitude { get; set; }
         public double Latitude { get; set; }
 
+        [ForeignKey("NearestCity")]
+        public int NearestCityId { get; set; }
+        public virtual Distribution NearestCity { get; set; }
+
         public int State { get; set; }
 
         public bool IsValidated { get; set; }
