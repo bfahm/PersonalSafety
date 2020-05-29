@@ -59,6 +59,7 @@ namespace PersonalSafety.Business
                 responseResult.Add(new GetDepartmentDataViewModel
                 {
                     Id = department.Id,
+                    DepartmentName = department.ToString(),
                     AuthorityType = department.AuthorityType,
                     AuthorityTypeName = ((AuthorityTypesEnum)department.AuthorityType).ToString(),
                     DistributionId = department.DistributionId,

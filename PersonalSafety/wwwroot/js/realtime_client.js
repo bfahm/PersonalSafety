@@ -136,8 +136,8 @@ function startConnection(token) {
                 return console.error(err.toString());
             });
 
-            locationConnection.on("LocationChannel", function (message) {
-                appendLocationMsg(message)
+            locationConnection.on("LocationChannel", function (email, lat, long) {
+                appendLocationMsg(email + " | " + lat + ", " + long)
             });
 
             locationConnection.on("InfoChannel", function (message) {

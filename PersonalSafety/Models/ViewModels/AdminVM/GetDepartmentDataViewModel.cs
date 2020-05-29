@@ -8,6 +8,7 @@ namespace PersonalSafety.Models.ViewModels.AdminVM
     public class GetDepartmentDataViewModel
     {
         public int Id { get; set; }
+        public string DepartmentName { get; set; }
         public int AuthorityType { get; set; }
         public string AuthorityTypeName { get; set; }
         public int DistributionId { get; set; }
