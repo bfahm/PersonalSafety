@@ -22,6 +22,7 @@ namespace PersonalSafety.Business
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IPersonnelRepository _personnelRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IDepartmentRepository _departmentRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IRescuerHub _rescuerHub;
         private readonly IAgentHub _agentHub;
@@ -29,11 +30,12 @@ namespace PersonalSafety.Business
         private readonly ILocationService _locationService;
         private readonly ILogger<SOSBusiness> _logger;
 
-        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IPersonnelRepository personnelRepository, IClientRepository clientRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService, ILogger<SOSBusiness> logger)
+        public SOSBusiness(ISOSRequestRepository sosRequestRepository, IPersonnelRepository personnelRepository, IClientRepository clientRepository, IDepartmentRepository departmentRepository, UserManager<ApplicationUser> userManager, IRescuerHub rescuerHub, IAgentHub agentHub, IClientHub clientHub, ILocationService locationService, ILogger<SOSBusiness> logger)
         {
             _sosRequestRepository = sosRequestRepository;
             _personnelRepository = personnelRepository;
             _clientRepository = clientRepository;
+            _departmentRepository = departmentRepository;
             _userManager = userManager;
             _rescuerHub = rescuerHub;
             _agentHub = agentHub;
@@ -41,6 +43,7 @@ namespace PersonalSafety.Business
             _locationService = locationService;
             _logger = logger;
         }
+
 
         #region Main Methods
 
@@ -89,7 +92,8 @@ namespace PersonalSafety.Business
                 Latitude = request.Latitude,
                 AssignedDepartmentId = nearestDepartment.Id
             };
-
+            Department sosRequestDepartment = _departmentRepository.GetById(sosRequest.AssignedDepartmentId.ToString());
+            
             _sosRequestRepository.Add(sosRequest);
             _sosRequestRepository.Save();
 
@@ -120,7 +124,7 @@ namespace PersonalSafety.Business
             }
 
             _clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
-            _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequest.AssignedDepartmentId);
+            _agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequestDepartment.ToString());
 
             response.Result = new SendSOSResponseViewModel
             {
@@ -487,8 +491,8 @@ namespace PersonalSafety.Business
 
         private void TryNotifyAgent(ref SOSRequest sosRequest, int newStatus)
         {
-            // TODO: add here checks related to specifying agent by department
-            _agentHub.NotifyNewChanges(sosRequest.Id, newStatus, sosRequest.AssignedDepartmentId);
+            var sosRequestDepartment = _departmentRepository.GetById(sosRequest.AssignedDepartmentId.ToString());
+            _agentHub.NotifyNewChanges(sosRequest.Id, newStatus, sosRequestDepartment.ToString());
         }
 
         private APIResponseData TryNotifyRescuer(int requestId, string rescuerEmail)

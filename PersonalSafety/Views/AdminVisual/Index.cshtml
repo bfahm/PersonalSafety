@@ -7,7 +7,7 @@
         table {font-size: 14px;}
         th {color: darkslategray;}
         td {color: olivedrab;}
-        #console_container {
+        .console_container {
             font-family: Consolas, monaco, monospace;
             background-color: black;
             color: white;
@@ -15,12 +15,12 @@
             padding: 12px 15px 12px;
             border-radius: 7px;
         }
-        #console_container > p {
+        .console_container > p {
             margin-top: 5px;
             margin-bottom: 5px;
         }
         
-        #console_container ::selection {
+        .console_container ::selection {
           color: red;
           background: yellow;
         }
@@ -112,10 +112,10 @@
             <div class="col-lg-12 col-md- col-sm-12">
                 <div class="media d-block pb_feature-v1 text-left">
                     <div class="media-body">
-                        <div class="row justify-content-center">
+                        <div class="justify-content-center">
 
-                            <div class="col-md-12">
-                                <div id="retrieve_main_container" class="pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
+                            <div class="row">
+                                <div id="retrieve_main_container" class="col-12 pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
                                     <h3>Current Connections</h3>
 
                                     <div class="pb_height-10" style="visibility:hidden"></div>
@@ -146,8 +146,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12">
-                                <div id="console_main_container" class="pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
+                            <div class="row">
+                                <div id="console_main_container" class="col-12 pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
                                     <h3>Readonly Console</h3>
 
                                     <div class="pb_height-10" style="visibility:hidden"></div>
@@ -170,20 +170,88 @@
                                     <br />
                                     <br />
 
-                                    <div id="console_container" class="text-left" hidden>
+                                    <div id="console_container" class="text-left console_container" hidden>
 
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div id="reset_client_main_container" class="pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
-                                    <h3>Reset Client Connection</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="reset_client_main_container" class="pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
+                                        <h3>Reset Client Connection</h3>
+
+                                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                        <div class="row justify-content-center">
+                                            <div class="progress" style="width:40%; height:10px">
+                                                <div id="progress_bar_reset_client" class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                     aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                                                    <span class="sr-only">70% Complete</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                        <p class="pb_font-15">Reset the trackers for a particular client.</p>
+
+                                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                        <div class="form-group row d-flex justify-content-center">
+                                            <div class="col-8">
+                                                <input id="field_reset_client" class="form-control py-3" type="email" placeholder="Client email goes here..">
+                                            </div>
+
+                                            <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                            <input id="btn_reset_client" type="button" class="btn btn-secondary col-3" value="Reset" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div id="reset_rescuer_main_container" class="pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
+                                        <h3>Reset Rescuer Connection</h3>
+
+                                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                        <div class="row justify-content-center">
+                                            <div class="progress" style="width:40%; height:10px">
+                                                <div id="progress_bar_reset_rescuer" class="progress-bar" role="progressbar" aria-valuenow="0"
+                                                     aria-valuemin="0" aria-valuemax="100" style="width:0%">
+                                                    <span class="sr-only">70% Complete</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                        <p class="pb_font-15">Reset the trackers for a particular rescuer.</p>
+
+                                        <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                        <div class="form-group row d-flex justify-content-center">
+                                            <div class="col-8">
+                                                <input id="field_reset_rescuer" class="form-control py-3" type="email" placeholder="Rescuer email goes here..">
+                                            </div>
+
+                                            <div class="pb_height-10" style="visibility:hidden"></div>
+
+                                            <input id="btn_reset_rescuer" type="button" class="btn btn-secondary col-3" value="Reset" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div id="console_main_container" class="col-12 pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
+                                    <h3>Monitor Rescuers</h3>
 
                                     <div class="pb_height-10" style="visibility:hidden"></div>
 
                                     <div class="row justify-content-center">
-                                        <div class="progress" style="width:40%; height:10px">
-                                            <div id="progress_bar_reset_client" class="progress-bar" role="progressbar" aria-valuenow="0"
+                                        <div class="progress" style="width:20%; height:10px">
+                                            <div id="monitor_rescuers_bar" class="progress-bar" role="progressbar" aria-valuenow="0"
                                                  aria-valuemin="0" aria-valuemax="100" style="width:0%">
                                                 <span class="sr-only">70% Complete</span>
                                             </div>
@@ -192,55 +260,30 @@
 
                                     <div class="pb_height-10" style="visibility:hidden"></div>
 
-                                    <p class="pb_font-15">Reset the trackers for a particular client.</p>
-
-                                    <div class="pb_height-10" style="visibility:hidden"></div>
+                                    <p class="pb_font-15">Watch the SignalR chat messages that is being sent from recuers in a particualr department.</p>
 
                                     <div class="form-group row d-flex justify-content-center">
-                                        <div class="col-8">
-                                            <input id="field_reset_client" class="form-control py-3" type="email" placeholder="Client email goes here..">
+                                        <div class="col-7">
+                                            <input id="field_department_name" class="form-control py-3" type="email" placeholder="Enter the name of department chat room..">
                                         </div>
 
                                         <div class="pb_height-10" style="visibility:hidden"></div>
 
-                                        <input id="btn_reset_client" type="button" class="btn btn-secondary col-3" value="Reset" />
+                                        <input id="btn_join" type="button" class="btn btn-primary col-2" value="Join" />
+                                        &nbsp;
+                                        <input id="btn_Leave" type="button" class="btn btn-outline-secondary col-2" value="Leave" />
+                                    </div>
+
+                                    <br />
+                                    <br />
+
+                                    <div id="chat_container_wrapper" style="display: flex; flex-direction: column; overflow: hidden; max-height: 200px;" hidden>
+                                        <div id="chat_container" class="text-left console_container" style="overflow-y: auto;">
+                                            
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <div id="reset_rescuer_main_container" class="pb_pricing_v1 p-5 border text-center bg-white text-sans-serif">
-                                    <h3>Reset Rescuer Connection</h3>
-
-                                    <div class="pb_height-10" style="visibility:hidden"></div>
-
-                                    <div class="row justify-content-center">
-                                        <div class="progress" style="width:40%; height:10px">
-                                            <div id="progress_bar_reset_rescuer" class="progress-bar" role="progressbar" aria-valuenow="0"
-                                                 aria-valuemin="0" aria-valuemax="100" style="width:0%">
-                                                <span class="sr-only">70% Complete</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="pb_height-10" style="visibility:hidden"></div>
-
-                                    <p class="pb_font-15">Reset the trackers for a particular rescuer.</p>
-
-                                    <div class="pb_height-10" style="visibility:hidden"></div>
-
-                                    <div class="form-group row d-flex justify-content-center">
-                                        <div class="col-8">
-                                            <input id="field_reset_rescuer" class="form-control py-3" type="email" placeholder="Rescuer email goes here..">
-                                        </div>
-
-                                        <div class="pb_height-10" style="visibility:hidden"></div>
-
-                                        <input id="btn_reset_rescuer" type="button" class="btn btn-secondary col-3" value="Reset" />
-                                    </div>
-                                </div>
-                            </div>
-
 
                         </div>
                     </div>

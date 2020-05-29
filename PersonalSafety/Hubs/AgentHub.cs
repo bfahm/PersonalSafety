@@ -29,19 +29,19 @@ namespace PersonalSafety.Hubs
             _hubContext = hubContext;
         }
 
-        public void NotifyNewChanges(int requestId, int requestState, int departmentId)
+        public void NotifyNewChanges(int requestId, int requestState, string departmentName)
         {
             var jsonMsg = JsonSerializer.Serialize(new { requestId = requestId, requestState = ((StatesTypesEnum)requestState).ToString() });
 
-            var onlineAgent = TrackerHandler.AgentConnectionInfoSet.FirstOrDefault(a => a.DepartmentId == departmentId);
+            var onlineAgent = TrackerHandler.AgentConnectionInfoSet.FirstOrDefault(a => a.DepartmentName == departmentName);
 
             if (onlineAgent != null)
                 _hubContext.Clients.Client(onlineAgent.ConnectionId).SendAsync(RequestsChannelName, jsonMsg);
         }
 
-        public void NotifyChangeInRescuers(int departmentId)
+        public void NotifyChangeInRescuers(string departmentName)
         {
-            var onlineAgent = TrackerHandler.AgentConnectionInfoSet.FirstOrDefault(a => a.DepartmentId == departmentId);
+            var onlineAgent = TrackerHandler.AgentConnectionInfoSet.FirstOrDefault(a => a.DepartmentName == departmentName);
 
             if (onlineAgent != null)
                 _hubContext.Clients.Client(onlineAgent.ConnectionId).SendAsync(RescuersChannelName);
@@ -56,7 +56,7 @@ namespace PersonalSafety.Hubs
                 ConnectionId = Context.ConnectionId,
                 UserId = userId,
                 UserEmail = Context.User.FindFirst(ClaimTypes.Email).Value,
-                DepartmentId = _personnelRepository.GetPersonnelDepartment(userId).Id
+                DepartmentName = _personnelRepository.GetPersonnelDepartment(userId).ToString()
             };
 
             TrackerHandler.AgentConnectionInfoSet.Add(currentConnection);

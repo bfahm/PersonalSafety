@@ -53,20 +53,18 @@ namespace PersonalSafety.Hubs.HubTracker
 
     public class RescuerConnectionInfo : ConnectionInfo
     {
-        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; }
         public int CurrentJob { get; set; }
     }
 
     public class AgentConnectionInfo : ConnectionInfo
     {
-        public int DepartmentId { get; set; }
+        public string DepartmentName { get; set; }
     }
 
     public class ActiveGroup
     {
-        public int DepartmentId { get; set; }
         public string DepartmentName { get; set; }
         public int ActiveRescuers { get; set; }
-        public int ActiveAgents { get; set; }
     }
 }

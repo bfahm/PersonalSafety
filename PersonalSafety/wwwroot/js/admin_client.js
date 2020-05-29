@@ -8,7 +8,7 @@ import { simplePut } from "../lib/app_lib.js";
 
 "use strict";
 
-var connection;
+var roomConnection;
 var cookieDetails = {
     cookieTokenKey: "token",
     cookieRefreshTokenKey: "refreshToken"
@@ -209,6 +209,23 @@ function initializeButtons() {
         $(this).addClass("btn-primary");
         $("#reset_rescuer_main_container").addClass("border-primary");
     });
+
+    $("#btn_join").click(function () {
+        var roomName = $("#field_department_name").val();
+        $("#btn_Leave").click();
+
+        tokenFactory(cookieDetails)
+            .then(function (token) {
+                joinDepartmentRoom(token, roomName)
+            })
+    });
+
+    $("#btn_Leave").click(function () {
+        $('#chat_container').empty();
+        $('#field_department_name').val('');
+        $("#chat_container_wrapper").attr("hidden", true);
+        leaveDepartmentRoom();
+    });
 }
 
 function loginUiHandler(token) {
@@ -328,9 +345,20 @@ function addToConsoleContents(text, toScroll) {
     }
 }
 
+function addToRoomContents(text) {
+    var datePart = new Date().toLocaleTimeString();
+    var datePartSpan = `<span style='color: Chartreuse'> ${datePart} </span>`
+
+    var pElemenetId = `p_${datePart}`
+    $('#chat_container').append(`<p id="${pElemenetId}"> > ${datePartSpan} | ${text} </p>`);
+
+    var chatArea = document.getElementById('chat_container');
+    chatArea.scrollTop = chatArea.scrollHeight
+}
+
 // SignalR related code..
 function startConnection(token) {
-    connection = new signalR.HubConnectionBuilder()
+    var connection = new signalR.HubConnectionBuilder()
         .withUrl("/hubs/admin", {
             accessTokenFactory: () => token
         })
@@ -354,4 +382,41 @@ function startConnection(token) {
 
         $("#alert_container_disconnected").removeAttr('hidden');
     });
+}
+
+function joinDepartmentRoom(token, roomName) {
+    roomConnection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/location ", {
+            accessTokenFactory: () => token
+        })
+        .build();
+
+    roomConnection.on("LocationChannel", function (email, lat, long) {
+        addToRoomContents(email + " | " + lat + ", " + long)
+    });
+
+    roomConnection.on("InfoChannel", function (message) {
+        addToRoomContents(message)
+    });
+
+    roomConnection.on("AlertsChannel", function (message) {
+        addToRoomContents(message)
+    });
+
+    // Start connection after finishing all the settings
+    roomConnection.start()
+        .then(function () {
+            $("#chat_container_wrapper").attr("hidden", false);
+            roomConnection.invoke("EnterDepartmentRoom", roomName);
+        })
+        .catch(function (err) {
+            return console.error(err.toString());
+        });
+}
+
+function leaveDepartmentRoom() {
+    if (roomConnection != null) {
+        roomConnection.stop();
+        roomConnection = null;
+    }
 }

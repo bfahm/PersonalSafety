@@ -71,7 +71,7 @@ namespace PersonalSafety.Business
         public APIResponse<List<RescuerConnectionInfo>> GetDepartmentOnlineRescuers(string userId)
         {
             var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
-            var result = TrackerHandler.RescuerConnectionInfoSet.Where(r => r.DepartmentId == currentAgentDepartment.Id)
+            var result = TrackerHandler.RescuerConnectionInfoSet.Where(r => r.DepartmentName == currentAgentDepartment.ToString())
                 .ToList();
 
             return new APIResponse<List<RescuerConnectionInfo>>
@@ -85,7 +85,7 @@ namespace PersonalSafety.Business
         {
             var currentAgentDepartment = _personnelRepository.GetPersonnelDepartment(userId);
 
-            var result = TrackerHandler.RescuerWithPendingMissionsSet.Where(r => r.DepartmentId == currentAgentDepartment.Id)
+            var result = TrackerHandler.RescuerWithPendingMissionsSet.Where(r => r.DepartmentName == currentAgentDepartment.ToString())
                 .ToList();
 
             return new APIResponse<List<RescuerConnectionInfo>>

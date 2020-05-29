@@ -41,10 +41,10 @@ $(document).ready(function () {
 
     $("#link_disconnect").click(function () {
         connection.stop();
-        connection = null;
+        //connection = null;
 
         locationConnection.stop();
-        locationConnection = null;
+        //locationConnection = null;
 
         $("#location_result_msg").val("");
         $("#send_msg").val("");
@@ -177,8 +177,8 @@ function startConnection(token) {
                 return console.error(err.toString());
             });
 
-            locationConnection.on("LocationChannel", function (message) {
-                appendLocationMsg(message)
+            locationConnection.on("LocationChannel", function (email, lat, long) {
+                appendLocationMsg(email + " | " + lat + ", " + long);
             });
 
             
@@ -193,7 +193,7 @@ function startConnection(token) {
             });
 
             $("#btn_send").click(function () {
-                locationConnection.invoke("ShareLocation", dpt,$("#send_msg").val());
+                locationConnection.invoke("ShareLocation", dpt, $("#result_email").val(), 30.12345, 30.12345);
             });
 
         }
@@ -271,6 +271,9 @@ function startConnection(token) {
         $("#result_email").val("");
         $("#result_connectionId").val("");
         $("#result_msg").val("");
+
+        $("#location_result_msg").val("");
+        $("#send_msg").val("");
 
         $("#hidden_div_till_connected").attr("hidden", true);
         $("#btn_connect").removeClass("btn-success");
