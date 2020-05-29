@@ -221,8 +221,8 @@ namespace PersonalSafety.Extensions
                     {
                         new Department{
                             DistributionId = cities.First(c => c.Value == "Tanta").Id,
-                            Latitude = 30.785576,
-                            Longitude = 30.997374,
+                            Latitude = 30.796410,
+                            Longitude = 31.010563,
                             AuthorityType = (int)AuthorityTypesEnum.TowTruck
                         }
                     },
@@ -256,8 +256,8 @@ namespace PersonalSafety.Extensions
                     {
                         new Department{
                             DistributionId = cities.First(c => c.Value == "Cairo").Id,
-                            Latitude = 30.055563,
-                            Longitude = 31.219640,
+                            Latitude = 29.992153,
+                            Longitude = 31.310135,
                             AuthorityType = (int)AuthorityTypesEnum.TowTruck
                         }
                     },
@@ -291,8 +291,8 @@ namespace PersonalSafety.Extensions
                     {
                         new Department{
                             DistributionId = cities.First(c => c.Value == "Alexandria").Id,
-                            Latitude = 31.268075,
-                            Longitude = 29.988351,
+                            Latitude = 31.261083,
+                            Longitude = 29.989100,
                             AuthorityType = (int)AuthorityTypesEnum.TowTruck
                         }
                     },
