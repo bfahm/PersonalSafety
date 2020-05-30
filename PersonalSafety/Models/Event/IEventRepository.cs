@@ -13,6 +13,8 @@ namespace PersonalSafety.Models
         
         List<Event> GetEventsByCityId(int cityId);
         List<Event> GetPublicEventsByCityId(int cityId);
+
+        new List<Event> GetAll();
         
         new Event GetById(string eventId);
     }

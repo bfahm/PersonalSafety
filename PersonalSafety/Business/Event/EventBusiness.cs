@@ -165,7 +165,7 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsAsync(string userId, int? filter)
+        public async Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsMinifiedAsync(string userId, int? filter)
         {
             APIResponse<List<EventMinifiedViewModel>> response = new APIResponse<List<EventMinifiedViewModel>>();
 
@@ -218,6 +218,72 @@ namespace PersonalSafety.Business
                     Votes = result.Votes,
                     ThumbnailUrl = result.ThumbnailUrl,
                     CreationDate = result.CreationDate
+                });
+            }
+
+            response.Result = viewModelResult;
+            return response;
+        }
+
+        public async Task<APIResponse<List<EventDetailedViewModel>>> GetEventsDetailedAsync(string userId, int? filter)
+        {
+            APIResponse<List<EventDetailedViewModel>> response = new APIResponse<List<EventDetailedViewModel>>();
+
+            var nullClientCheckResult = CheckForNullClient(userId, out _);
+            if (nullClientCheckResult != null)
+            {
+                response.WrapResponseData(nullClientCheckResult);
+                return response;
+            }
+
+            EventCategory eventCategory = (filter != null) ? _eventCategoryRepository.GetById(filter.ToString()) : null;
+
+            List<Event> databaseResult;
+            if (eventCategory != null)
+            {
+                if (eventCategory.Title == "Your Stories")
+                {
+                    databaseResult = _eventRepository.GetUserEvents(userId);
+                }
+                else if (eventCategory.Title == "Nearby Stories")
+                {
+                    // If user did not have a last known city, he would get all events instead.
+                    databaseResult = _eventRepository.GetEventsByCityId(_clientRepository.GetById(userId).LastKnownCityId ?? 0);
+                }
+                else
+                {
+                    databaseResult = _eventRepository.GetFilteredEvents(eventCategory.Id);
+                }
+            }
+            else
+            {
+                // Event Category was invalid or not found, so get all events instead
+                databaseResult = _eventRepository.GetAll().ToList();
+            }
+
+
+            var viewModelResult = new List<EventDetailedViewModel>();
+
+            foreach (var result in databaseResult)
+            {
+                var eventOwner = await _userManager.FindByIdAsync(result.UserId);
+
+                viewModelResult.Add(new EventDetailedViewModel
+                {
+                    Id = result.Id,
+                    Title = result.Title,
+                    UserName = eventOwner?.FullName,
+                    IsPublicHelp = result.IsPublicHelp,
+                    IsValidated = result.IsValidated,
+                    Votes = result.Votes,
+                    ThumbnailUrl = result.ThumbnailUrl,
+                    CreationDate = result.CreationDate,
+                    Description = result.Description,
+                    EventCategoryId = result.EventCategoryId,
+                    EventCategoryName = result.EventCategory?.Title,
+                    LastModified = result.LastModified,
+                    Latitude = result.Latitude,
+                    Longitude = result.Longitude
                 });
             }
 

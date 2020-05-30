@@ -461,7 +461,24 @@ namespace PersonalSafety.Controllers.API
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = await _eventsBusiness.GetEventsAsync(currentlyLoggedInUserId, filter);
+            var response = await _eventsBusiness.GetEventsMinifiedAsync(currentlyLoggedInUserId, filter);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpGet(ApiRoutes.Client.Events)]
+        public async Task<IActionResult> GetEventsDetailed([FromQuery] int filter)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _eventsBusiness.GetEventsDetailedAsync(currentlyLoggedInUserId, filter);
 
             return Ok(response);
         }

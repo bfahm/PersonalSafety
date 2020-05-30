@@ -24,7 +24,6 @@ namespace PersonalSafety.Services.PushNotification
             try
             {
                 string jsonPath = Path.Combine(_hostingEnvironment.ContentRootPath, "fcm_key.json");
-                _logger.LogInformation($"FCM / Path of JSON is {jsonPath}.");
 
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", jsonPath);
 
@@ -32,6 +31,8 @@ namespace PersonalSafety.Services.PushNotification
                 {
                     Credential = GoogleCredential.GetApplicationDefault(),
                 });
+
+                _logger.LogInformation($"FCM / Authentication Success!");
             }
             catch
             {
@@ -62,7 +63,7 @@ namespace PersonalSafety.Services.PushNotification
             catch (Exception ex)
             {
                 _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
-                _logger.LogError("FCM /" +  ex.Message);
+                _logger.LogError("FCM / " +  ex.Message);
                 return false;
             }
         }
@@ -86,7 +87,7 @@ namespace PersonalSafety.Services.PushNotification
             catch (Exception ex)
             {
                 _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
-                _logger.LogError("FCM /" + ex.Message);
+                _logger.LogError("FCM / " + ex.Message);
                 return false;
             }
         }

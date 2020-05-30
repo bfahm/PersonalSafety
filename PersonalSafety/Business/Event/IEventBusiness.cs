@@ -11,7 +11,8 @@ namespace PersonalSafety.Business
         APIResponse<bool> UpdateDeviceRegistraionKey(string userId, DeviceRegistrationViewModel request);
 
         Task<APIResponse<PostEventResponseViewModel>> PostEventAsync(string userId, PostEventRequestViewModel request);
-        Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsAsync(string userId, int? filter);
+        Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsMinifiedAsync(string userId, int? filter);
+        Task<APIResponse<List<EventDetailedViewModel>>> GetEventsDetailedAsync(string userId, int? filter);
         Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(int eventId);
     }
 }
