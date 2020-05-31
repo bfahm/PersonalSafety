@@ -498,6 +498,40 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpPut(ApiRoutes.Client.Events)]
+        public async Task<IActionResult> CancelEventById([FromQuery] int eventId)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _eventsBusiness.CancelEventByIdAsync(currentlyLoggedInUserId, eventId);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// ### Remarks:
+        /// 
+        /// </remarks>
+        [HttpPut(ApiRoutes.Client.Events)]
+        public async Task<IActionResult> SolveEventById([FromQuery] int eventId)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _eventsBusiness.SolveEventByIdAsync(currentlyLoggedInUserId, eventId);
+
+            return Ok(response);
+        }
+
         #endregion
     }
 }

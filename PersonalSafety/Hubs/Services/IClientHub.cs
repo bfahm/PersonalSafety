@@ -10,5 +10,7 @@ namespace PersonalSafety.Hubs
         bool NotifyUserSOSState(int sosRequestId, int sosRequestState);
         bool TrackSOSIdForClient(string clientEmail, int sosRequestId);
         void RemoveClientFromTrackers(string userId);
+
+        Task SendToEventRoom(string userEmail, int eventId, double latitude, double longitude);
     }
 }

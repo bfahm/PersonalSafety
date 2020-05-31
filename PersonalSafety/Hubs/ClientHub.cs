@@ -12,6 +12,7 @@ namespace PersonalSafety.Hubs
     public class ClientHub : MainHub, IClientHub
     {
         private readonly string channelName = "ClientChannel";
+        private readonly string eventsChannelName = "ClientEventsChannel";
         private readonly IHubContext<ClientHub> _hubContext;
 
         public ClientHub(IHubContext<ClientHub> hubContext, ILogger<ClientHub> logger) : base(logger)
@@ -55,6 +56,41 @@ namespace PersonalSafety.Hubs
                 return true;
             }
             return false;
+        }
+
+        public async Task JoinEventRoom(string userEmail, int eventId)
+        {
+            var roomName = GenerateRoomName(eventId);
+            var connectionInfo = TrackerHandler.ClientConnectionInfoSet.FirstOrDefault(c => c.UserEmail == userEmail);
+
+            if(connectionInfo != null)
+            {
+                await _hubContext.Groups.AddToGroupAsync(connectionInfo.ConnectionId, roomName);
+                await _hubContext.Clients.Group(roomName).SendAsync(eventsChannelName, $"CLIENT {connectionInfo.UserEmail} JOINED {roomName}.");
+            }
+        }
+
+        public async Task LeaveEventRoom(string userEmail, int eventId)
+        {
+            var roomName = GenerateRoomName(eventId);
+            var connectionInfo = TrackerHandler.ClientConnectionInfoSet.FirstOrDefault(c => c.UserEmail == userEmail);
+
+            if (connectionInfo != null)
+            {
+                await _hubContext.Groups.RemoveFromGroupAsync(connectionInfo.ConnectionId, roomName);
+                await _hubContext.Clients.Group(roomName).SendAsync(eventsChannelName, $"CLIENT {connectionInfo.UserEmail} LEFT {roomName}.");
+            }
+        }
+
+        public async Task SendToEventRoom(string userEmail, int eventId, double latitude, double longitude)
+        {
+            var roomName = GenerateRoomName(eventId);
+            await _hubContext.Clients.Group(roomName).SendAsync(eventsChannelName, userEmail, latitude, longitude);
+        }
+
+        private string GenerateRoomName(int eventId)
+        {
+            return $"EVENT_ROOM_{eventId}";
         }
 
 

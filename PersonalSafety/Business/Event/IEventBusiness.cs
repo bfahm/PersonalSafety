@@ -14,5 +14,8 @@ namespace PersonalSafety.Business
         Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsMinifiedAsync(string userId, int? filter);
         Task<APIResponse<List<EventDetailedViewModel>>> GetEventsDetailedAsync(string userId, int? filter);
         Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(int eventId);
+        
+        Task<APIResponse<bool>> CancelEventByIdAsync(string userId, int eventId);
+        Task<APIResponse<bool>> SolveEventByIdAsync(string userId, int eventId);
     }
 }

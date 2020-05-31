@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using PersonalSafety.Contracts;
 using PersonalSafety.Contracts.Enums;
+using PersonalSafety.Hubs;
 using PersonalSafety.Hubs.Helpers;
 using PersonalSafety.Models;
 using PersonalSafety.Models.ViewModels.ClientVM;
@@ -26,8 +27,9 @@ namespace PersonalSafety.Business
         private readonly IPushNotificationsService _pushNotificationsService;
         private readonly ILogger<EventBusiness> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IClientHub _clientHub;
 
-        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager)
+        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager, IClientHub clientHub)
         {
             _clientRepository = clientRepository;
             _eventRepository = eventRepository;
@@ -37,6 +39,7 @@ namespace PersonalSafety.Business
             _pushNotificationsService = pushNotificationsService;
             _logger = logger;
             _userManager = userManager;
+            _clientHub = clientHub;
         }
 
         public APIResponse<string> UpdateLastKnownLocation(string userId, LocationViewModel request)
@@ -332,6 +335,75 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public async Task<APIResponse<bool>> CancelEventByIdAsync(string userId, int eventId)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var updateResult = await UpdateEventAsync(userId, eventId, StatesTypesEnum.Canceled);
+
+            if(updateResult != null)
+            {
+                response.WrapResponseData(updateResult);
+                return response;
+            }
+
+            response.Result = true;
+            response.Messages.Add("Your event was successfully canceled.");
+
+            return response;
+        }
+
+        public async Task<APIResponse<bool>> SolveEventByIdAsync(string userId, int eventId)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var updateResult = await UpdateEventAsync(userId, eventId, StatesTypesEnum.Solved);
+
+            if (updateResult != null)
+            {
+                response.WrapResponseData(updateResult);
+                return response;
+            }
+
+            response.Result = true;
+            response.Messages.Add("Your event was successfully solved.");
+
+            return response;
+        }
+
+        private async Task<APIResponseData> UpdateEventAsync(string userId, int eventId, StatesTypesEnum newState)
+        {
+            var nullClientCheckResult = CheckForNullClient(userId, out _);
+            if (nullClientCheckResult != null)
+                return nullClientCheckResult;
+
+            var nullCEventCheckResult = CheckForNullEvent(eventId, out Event existingEvent);
+            if (nullCEventCheckResult != null)
+                return nullCEventCheckResult;
+
+            // If the to-be-updated-to state is solved, check if the event is not canceled, and vice versa
+            var correctStateCheckResult = CheckForEventCorrectState(existingEvent, 
+                (newState == StatesTypesEnum.Solved) ? StatesTypesEnum.Canceled : StatesTypesEnum.Solved);
+            if (correctStateCheckResult != null)
+                return correctStateCheckResult;
+
+            existingEvent.State = (int)newState;
+
+            _eventRepository.Update(existingEvent);
+            _eventRepository.Save();
+
+            ApplicationUser userAccount = await _userManager.FindByIdAsync(userId);
+
+            await NotifyNearbyClients(existingEvent.NearestCityId);
+
+            var signalRSignal = (newState == StatesTypesEnum.Canceled) ? -1 : -2;
+            await _clientHub.SendToEventRoom(userAccount.Email, eventId, signalRSignal, signalRSignal);
+
+            _logger.LogInformation(ConsoleFormatter.onEventStateChanged(userAccount.Email, existingEvent.Id, StatesTypesEnum.Canceled));
+            
+            return null;
+        }
+
         #region Private Checkers
 
         private APIResponseData CheckForNullClient(string clientUsedId, out Client client)
@@ -343,6 +415,32 @@ namespace PersonalSafety.Business
                 return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
                     new List<string>()
                         {"Error. Client unauthorized."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForNullEvent(int eventId, out Event existingEvent)
+        {
+            existingEvent = _eventRepository.GetById(eventId.ToString());
+
+            if (existingEvent == null)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.NotFound,
+                    new List<string>()
+                        {"Error. Event Not Found."});
+            }
+
+            return null;
+        }
+
+        private APIResponseData CheckForEventCorrectState(Event existingEvent, StatesTypesEnum neededState)
+        {
+            if (existingEvent.State != (int)neededState)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                    new List<string>()
+                        {$"Error. The event is already {(StatesTypesEnum)existingEvent.State}."});
             }
 
             return null;
@@ -420,58 +518,5 @@ namespace PersonalSafety.Business
         }
 
         #endregion
-
-        #region To Be Used With SignalR
-
-        // TODO: uncomment after implementing SignalR - if user needs to have only on ongoing event
-        //if (_sosRequestRepository.UserHasOngoingRequest(userId))
-        //{
-        //    response.Messages.Add("You currently have ongoing requests, attempting to canceling them automatically.");
-        //    var cancelResult = await CancelPendingRequestsAsync(userId, false);
-        //    response.Messages.AddRange(cancelResult.Messages);
-        //}
-
-        // TODO: uncomment after implementing SignalR
-        //if (!_clientHub.isConnected(userId))
-        //{
-        //    response.Status = (int)APIResponseCodesEnum.SignalRError;
-        //    response.Messages.Add("Invalid Attempt. You do not have a valid realtime connection.");
-        //    response.HasErrors = true;
-        //    return response;
-        //}
-
-        //---------------------------------------------------------------------------------------------
-
-        // TODO: uncomment after implementing SignalR
-        //var trackingResult = _clientHub.TrackSOSIdForClient(userAccount.Email, sosRequest.Id);
-
-        //if (!trackingResult)
-        //{
-        //    _clientHub.RemoveClientFromTrackers(userId);
-
-        //    // Was not able to reach the user:
-        //    // revert changes:
-        //    _sosRequestRepository.RemoveById(sosRequest.Id.ToString());
-        //    _sosRequestRepository.Save();
-
-        //    var errorMessage1 = "A system error occured while trying to maintain connection with the client.";
-        //    var errorMessage2 = "The request was removed. Please have another try.";
-
-        //    _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage1));
-        //    _logger.LogError(ConsoleFormatter.WrapSOSBusiness(errorMessage2));
-
-        //    response.Messages.Add(errorMessage1);
-        //    response.Messages.Add(errorMessage2);
-        //    response.Status = (int)APIResponseCodesEnum.ServerError;
-        //    response.HasErrors = true;
-
-        //    return response;
-        //}
-
-        //_clientHub.NotifyUserSOSState(sosRequest.Id, (int)StatesTypesEnum.Pending);
-        //_agentHub.NotifyNewChanges(sosRequest.Id, (int)StatesTypesEnum.Pending, sosRequest.AssignedDepartmentId);
-
-        #endregion
-
     }
 }

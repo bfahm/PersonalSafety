@@ -27,27 +27,41 @@ $(document).ready(function () {
 
     $("#link_reconnect").click(function () {
         connection.stop();
-        connection = null;
 
-        locationConnection.stop();
-        locationConnection = null;
+        if (locationConnection != null) {
+            locationConnection.stop();
+        }
 
         toggleSpinnerAnimation(true);
         loginAndStartConnection();
 
         $("#location_result_msg").val("");
-        $("#send_msg").val("");
+
+        $("#button_event_join").addClass('btn-secondary');
+        $("#button_event_join").removeClass('btn-warning');
+        $("#button_event_join").prop('disabled', false);
+        $("#field_event_id").prop('disabled', false);
+        $("#field_event_id").val("");
+        $("#field_event_latitude").val("");
+        $("#field_event_longitude").val("");
     });
 
     $("#link_disconnect").click(function () {
         connection.stop();
-        //connection = null;
 
-        locationConnection.stop();
-        //locationConnection = null;
+        if (locationConnection != null) {
+            locationConnection.stop();
+        }
 
         $("#location_result_msg").val("");
-        $("#send_msg").val("");
+
+        $("#button_event_join").addClass('btn-secondary');
+        $("#button_event_join").removeClass('btn-warning');
+        $("#button_event_join").prop('disabled', false);
+        $("#field_event_id").prop('disabled', false);
+        $("#field_event_id").val("");
+        $("#field_event_latitude").val("");
+        $("#field_event_longitude").val("");
     });
 
     //Allow for enter keypress to submit entries
@@ -105,6 +119,8 @@ function startConnection(token) {
             $("#location_chat_div").attr("hidden", true);
             $("#location_response_div").attr("hidden", false);
 
+            $("#client_event_div").attr("hidden", true);
+
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/agent", {
                     accessTokenFactory: () => token
@@ -137,15 +153,15 @@ function startConnection(token) {
             });
 
             locationConnection.on("LocationChannel", function (email, lat, long) {
-                appendLocationMsg(email + " | " + lat + ", " + long)
+                appendLocationMsg("location_result_msg", email + " | " + lat + ", " + long)
             });
 
             locationConnection.on("InfoChannel", function (message) {
-                appendLocationMsg(message)
+                appendLocationMsg("location_result_msg", message)
             });
 
             locationConnection.on("AlertsChannel", function (message) {
-                appendLocationMsg(message)
+                appendLocationMsg("location_result_msg", message)
             });
         }
         else if (role.indexOf("Rescuer") !== -1) {
@@ -153,6 +169,8 @@ function startConnection(token) {
             scrollTo = "rescuer_docs";
             $("#location_chat_div").attr("hidden", false);
             $("#location_response_div").attr("hidden", false);
+
+            $("#client_event_div").attr("hidden", true);
 
             connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/rescuer", {
@@ -178,18 +196,18 @@ function startConnection(token) {
             });
 
             locationConnection.on("LocationChannel", function (email, lat, long) {
-                appendLocationMsg(email + " | " + lat + ", " + long);
+                appendLocationMsg("location_result_msg", email + " | " + lat + ", " + long);
             });
 
             
 
             locationConnection.on("InfoChannel", function (message) {
                 dpt = message;
-                appendLocationMsg(message)
+                appendLocationMsg("location_result_msg", message)
             });
 
             locationConnection.on("AlertsChannel", function (message) {
-                appendLocationMsg(message)
+                appendLocationMsg("location_result_msg", message)
             });
 
             $("#btn_send").click(function () {
@@ -204,6 +222,8 @@ function startConnection(token) {
         scrollTo = "client_docs";
         $("#location_chat_div").attr("hidden", true);
         $("#location_response_div").attr("hidden", true);
+
+        $("#client_event_div").attr("hidden", false);
 
         connection = new signalR.HubConnectionBuilder()
             .withUrl("/hubs/client", {
@@ -233,6 +253,50 @@ function startConnection(token) {
             }
 
             $("#result_msg").val(outputMsg);
+        });
+
+        connection.on("ClientEventsChannel", function (userEmail, latitude, longitude) {
+            appendLocationMsg("area_location_log", userEmail + " | " + latitude + ", " + longitude)
+        });
+
+
+        var eventId = -1;
+
+        $("#button_event_join").click(function () {
+            if (eventId === -1) {
+                var currentEmail = $("#ip_email").val();
+                var selectedEventId = $("#field_event_id").val();
+                eventId = parseInt(selectedEventId);
+
+                connection.invoke("JoinEventRoom", currentEmail, eventId);
+
+                $("#button_event_join").removeClass('btn-secondary');
+                $("#button_event_join").addClass('btn-warning');
+
+                $("#field_event_id").prop('disabled', true);
+
+                $("#button_event_join").html("Leave")
+            } else {
+                connection.invoke("LeaveEventRoom", currentEmail, eventId);
+
+                $("#button_event_join").addClass('btn-secondary');
+                $("#button_event_join").removeClass('btn-warning');
+
+                $("#field_event_id").prop('disabled', false);
+
+                $("#button_event_join").html("Join")
+
+                eventId = -1;
+            }
+        });
+
+        $("#button_send_event_location").click(function () {
+            var currentEmail = $("#ip_email").val();
+
+            var latString = $("#field_event_latitude").val();
+            var longString = $("#field_event_longitude").val();
+
+            connection.invoke("SendToEventRoom", currentEmail, eventId, parseFloat(latString.toString()), parseFloat(longString.toString()));
         });
     }
 
@@ -293,13 +357,13 @@ function startConnection(token) {
     });
 }
 
-function appendLocationMsg(message) {
-    var current = $("#location_result_msg").val();
+function appendLocationMsg(elementId, message) {
+    var current = $("#" + elementId).val();
     if (current.length != 0) {
         current += "\n";
     }
     var newMsg = current + new Date().toLocaleTimeString() + " | " + message;
-    $("#location_result_msg").val(newMsg);
+    $("#" + elementId).val(newMsg);
 
     textarea.scrollTop = textarea.scrollHeight;
 }

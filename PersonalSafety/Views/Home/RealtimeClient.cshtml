@@ -89,6 +89,29 @@
                                     <textarea id="location_result_msg" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Messages received from the server appears here" disabled></textarea>
                                 </div>
 
+                                <div id="client_event_div" hidden>
+                                    <hr />
+
+                                    <div class="input-group mb-3">
+                                        <input id="field_event_id" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Event Id goes here">
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-secondary" id="button_event_join">Join</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group mb-3">
+                                        <input id="field_event_latitude" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Latitude">
+                                        <input id="field_event_longitude" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Longitude">
+                                        <div class="input-group-append">
+                                            <button type="button" id="button_send_event_location" class="btn btn-secondary">Send</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group mb-3" id="event_response_div">
+                                        <textarea id="area_location_log" type="text" class="form-control py-3 reverse pb_color-primary" placeholder="Messages received from the server appears here" disabled></textarea>
+                                    </div>
+                                </div>
+
                             </div>
                             <div class="row justify-content-center align-items-center">
                                 <a id="link_reconnect" href="#" class="text-danger">Reconnect</a>
