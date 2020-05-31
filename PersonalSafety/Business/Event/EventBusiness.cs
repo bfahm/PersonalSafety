@@ -157,7 +157,7 @@ namespace PersonalSafety.Business
             
             response.Result = new PostEventResponseViewModel
             {
-                EventCategoryId = newEvent.Id,
+                EventId = newEvent.Id,
                 AssignedCityId = nearestCity.Id,
                 AssignedCityName = nearestCity.ToString()
             };
