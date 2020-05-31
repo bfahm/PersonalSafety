@@ -383,11 +383,11 @@ namespace PersonalSafety.Controllers.API
         #region Events
 
         /// <summary>
-        /// 
+        /// Update user location for tracking him and assigning him to a city cluster.
         /// </summary>
         /// <remarks>
         /// ### Remarks:
-        /// 
+        /// This function should be called periodically, with the Longitude and Latitude of the user. The city where the user resides is then updated so he could be subscribed to notifications within the city or residancy.
         /// </remarks>
         [HttpPost(ApiRoutes.Client.Events)]
         public IActionResult UpdateLastKnownLocation([FromBody] LocationViewModel request)
@@ -400,11 +400,11 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Update user's application registration for Firebase Notification
         /// </summary>
         /// <remarks>
         /// ### Remarks:
-        /// 
+        /// This function should be called regularly whenever the app is updated / user logs in / registration key changes / etc.
         /// </remarks>
         [HttpPost(ApiRoutes.Client.Events)]
         public IActionResult UpdateDeviceRegistraionKey([FromBody] DeviceRegistrationViewModel request)
@@ -419,11 +419,6 @@ namespace PersonalSafety.Controllers.API
         /// <summary>
         /// Gets all Categories of Events along there thumbnails (if available)
         /// </summary>
-        /// <remarks>
-        /// ### Remarks:
-        /// Please note that access to the thumbnail contents also requires user authorization via a normal get request
-        /// with the `Bearer` token attached.
-        /// </remarks>
         [HttpGet(ApiRoutes.Client.Events)]
         public IActionResult GetEventsCategories()
         {
@@ -433,11 +428,31 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Create a new event entry
         /// </summary>
         /// <remarks>
         /// ### Remarks:
         /// 
+        /// #### Structure of the request
+        /// - The title of the Event cannot be null.
+        /// - The location of the Event cannot be null.
+        /// 
+        /// #### Event Category
+        /// - A valid EventCategoryId can be retrieve from /GetEventsCategories()
+        /// - EventCategoryId can be null if the event does not belong to a category
+        /// - Using "Your Stories" and "Nearby Events" as categories is invalid and will result in nullified eventCategoryId field
+        /// - Using an invalid category will result in a failed request.
+        /// 
+        /// #### File Upload
+        /// - This function uses a Form instead of Raw Json as the Body of the request to support image upload.
+        /// - Supported file types are: JPG, JPEG, PNG
+        /// 
+        /// #### Notification System
+        /// - If an event is posted in city X (determined using the longitude and the latitude of the request), all residents of the city will get a push notification containing Data Payload, namely, a Silent Notification.
+        /// - The payload will hold an updated state of all events in the city including the new one that was just posted in the form of dictionary.
+        /// - The format of one item in the payload would be:
+        ///     - KEY: "[Id]" of the event
+        ///     - VALUE: "[latitude]_[longitude]"
         /// </remarks>
         [HttpPost(ApiRoutes.Client.Events)]
         public async Task<IActionResult> PostEvent([FromForm] PostEventRequestViewModel request)
@@ -450,28 +465,13 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Gets a list of events that can be filtered by a category
         /// </summary>
         /// <remarks>
         /// ### Remarks:
-        /// 
-        /// </remarks>
-        [HttpGet(ApiRoutes.Client.Events)]
-        public async Task<IActionResult> GetEventsMinified([FromQuery] int filter)
-        {
-            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
-
-            var response = await _eventsBusiness.GetEventsMinifiedAsync(currentlyLoggedInUserId, filter);
-
-            return Ok(response);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>
-        /// ### Remarks:
-        /// 
+        /// - Filter is not a required parameter, and leaving it with a zero / null value will result in retreiving all the Events.
+        /// - A valid filter value can by retreived by /GetEventsCategories
+        /// - An invalid filter value will result in disregarding the filter and getting all events instead.
         /// </remarks>
         [HttpGet(ApiRoutes.Client.Events)]
         public async Task<IActionResult> GetEventsDetailed([FromQuery] int filter)
@@ -484,12 +484,8 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Gets a single event using its Id
         /// </summary>
-        /// <remarks>
-        /// ### Remarks:
-        /// 
-        /// </remarks>
         [HttpGet(ApiRoutes.Client.Events)]
         public async Task<IActionResult> GetEventById([FromQuery] int eventId)
         {
@@ -499,11 +495,17 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Cancels an event by its id
         /// </summary>
         /// <remarks>
         /// ### Remarks:
         /// 
+        /// #### Notification System
+        /// - If the event was posted in city X (determined using the longitude and the latitude of the request), all residents of the city will get a push notification containing Data Payload, namely, a Silent Notification.
+        /// - The payload will hold an updated state of all events in the city including the new one that was just posted in the form of dictionary.
+        /// - The format of one item in the payload would be:
+        ///     - KEY: "[Id]" of the event
+        ///     - VALUE: "[latitude]_[longitude]"
         /// </remarks>
         [HttpPut(ApiRoutes.Client.Events)]
         public async Task<IActionResult> CancelEventById([FromQuery] int eventId)
@@ -516,11 +518,17 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Marks an event as Solved
         /// </summary>
         /// <remarks>
         /// ### Remarks:
         /// 
+        /// #### Notification System
+        /// - If the event was posted in city X (determined using the longitude and the latitude of the request), all residents of the city will get a push notification containing Data Payload, namely, a Silent Notification.
+        /// - The payload will hold an updated state of all events in the city including the new one that was just posted in the form of dictionary.
+        /// - The format of one item in the payload would be:
+        ///     - KEY: "[Id]" of the event
+        ///     - VALUE: "[latitude]_[longitude]"
         /// </remarks>
         [HttpPut(ApiRoutes.Client.Events)]
         public async Task<IActionResult> SolveEventById([FromQuery] int eventId)

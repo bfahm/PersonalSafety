@@ -104,7 +104,7 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var validCategoryCheckResult = CheckEventCategoryId(request.EventCategoryId);
+            var validCategoryCheckResult = CheckEventCategoryId(ref request);
             if (validCategoryCheckResult != null)
             {
                 response.WrapResponseData(validCategoryCheckResult);
@@ -165,66 +165,6 @@ namespace PersonalSafety.Business
             _logger.LogInformation(ConsoleFormatter.onEventStateChanged(userAccount.Email, newEvent.Id, StatesTypesEnum.Pending));
             response.Messages.Add("Your event was posted successfully.");
 
-            return response;
-        }
-
-        public async Task<APIResponse<List<EventMinifiedViewModel>>> GetEventsMinifiedAsync(string userId, int? filter)
-        {
-            APIResponse<List<EventMinifiedViewModel>> response = new APIResponse<List<EventMinifiedViewModel>>();
-
-            var nullClientCheckResult = CheckForNullClient(userId, out _);
-            if (nullClientCheckResult != null)
-            {
-                response.WrapResponseData(nullClientCheckResult);
-                return response;
-            }
-
-            EventCategory eventCategory = (filter != null) ? _eventCategoryRepository.GetById(filter.ToString()) : null;
-
-            List<Event> databaseResult;
-            if (eventCategory != null)
-            {
-                if (eventCategory.Title == "Your Stories")
-                {
-                    databaseResult = _eventRepository.GetUserEvents(userId);
-                }
-                else if (eventCategory.Title == "Nearby Stories")
-                {
-                    // If user did not have a last known city, he would get all events instead.
-                    databaseResult = _eventRepository.GetEventsByCityId(_clientRepository.GetById(userId).LastKnownCityId ?? 0);
-                }
-                else
-                {
-                    databaseResult = _eventRepository.GetFilteredEvents(eventCategory.Id);
-                }
-            }
-            else
-            {
-                // Event Category was invalid or not found, so get all events instead
-                databaseResult = _eventRepository.GetAll().ToList();
-            }
-
-
-            var viewModelResult = new List<EventMinifiedViewModel>();
-
-            foreach(var result in databaseResult)
-            {
-                var eventOwner = await _userManager.FindByIdAsync(result.UserId);
-
-                viewModelResult.Add(new EventMinifiedViewModel
-                {
-                    Id = result.Id,
-                    Title = result.Title,
-                    UserName = eventOwner?.FullName,
-                    IsPublicHelp = result.IsPublicHelp,
-                    IsValidated = result.IsValidated,
-                    Votes = result.Votes,
-                    ThumbnailUrl = result.ThumbnailUrl,
-                    CreationDate = result.CreationDate
-                });
-            }
-
-            response.Result = viewModelResult;
             return response;
         }
 
@@ -446,13 +386,23 @@ namespace PersonalSafety.Business
             return null;
         }
 
-        private APIResponseData CheckEventCategoryId(int? categoryId)
+        private APIResponseData CheckEventCategoryId(ref PostEventRequestViewModel request)
         {
-            if (categoryId != null && _eventCategoryRepository.GetById(categoryId.ToString()) == null)
+            var requestCategoryId = request.EventCategoryId;
+            var requestCategory = _eventCategoryRepository.GetById(requestCategoryId.ToString());
+
+            if (requestCategoryId != null)
             {
-                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                if(requestCategory == null)
+                {
+                    return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
                         {"Error. Provide a correct category Id or leave the field null to mark as a General Event."});
+                }else if (requestCategory != null && (requestCategory.Title == "Your Stories"
+                        || requestCategory.Title == "Nearby Stories"))
+                {
+                    request.EventCategoryId = null;
+                }
             }
 
             return null;

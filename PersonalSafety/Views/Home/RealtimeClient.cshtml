@@ -1,4 +1,4 @@
-﻿
+﻿Realtime Location Tracking
 @{
     ViewData["Title"] = "Realtime Client";
 }
@@ -193,6 +193,42 @@
                                     <li>Trying to mark the request as Solved by the assigned Rescuer doesn't need the client to be online, and would process normally anyways, so, Rescuers would become idle again and Agents would be notified to update their front end tables.</li>
                                 </ul>
 
+                                <h3 class="mt-2 mb-2 heading"><code>ClientEventsChannel</code></h3>
+                                <p class="text-sans-serif pb_font-16"><strong>Usage: </strong> This channel is responsible for passing locations between victims and volunteers within an active Event.</p>
+
+                                <p class="text-sans-serif pb_font-16"><strong>Methods that can be Invoked: </strong></p>
+                                <ul class="text-sans-serif pb_font-14">
+                                    <li>
+                                        JoinEventRoom
+                                        <ul class="text-sans-serif pb_font-12">
+                                            <li><samp>arg1: string userEmail</samp></li>
+                                            <li><samp>arg2: int eventId</samp></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        LeaveEventRoom
+                                        <ul class="text-sans-serif pb_font-12">
+                                            <li><samp>arg1: string userEmail</samp></li>
+                                            <li><samp>arg2: int eventId</samp></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        SendToEventRoom
+                                        <ul class="text-sans-serif pb_font-12">
+                                            <li><samp>arg1: userEmail</samp></li>
+                                            <li><samp>arg2: eventId</samp></li>
+                                            <li><samp>arg3: double latitude</samp></li>
+                                            <li><samp>arg4: double longitude</samp></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <h3 class="mt-2 mb-2 heading">General Notes: </h3>
+                                <ul class="text-sans-serif pb_font-14">
+                                    <li> <samp>SendToEventRoom</samp> will be automatically called by the server whenever the event is update (Solved / Canceled) by the user.</li>
+                                    <li> When the user cancels the event, all group members will get a special longitude and latitude value of [-1]</li>
+                                    <li> When the user solves the event, all group members will get a special longitude and latitude value of [-2]</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -284,6 +320,7 @@
                 <div class="row">
                     <div class="col">
                         <h2 id="rescuer_docs">Realtime Location Tracking</h2>
+                        <i>Available between Agents and Resuers</i>
                     </div>
                 </div>
                 <div class="row" id="LocationHubDocs">
