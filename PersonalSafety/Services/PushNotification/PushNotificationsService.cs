@@ -3,7 +3,6 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using PersonalSafety.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,6 +14,7 @@ namespace PersonalSafety.Services.PushNotification
     {
         private readonly ILogger<PushNotificationsService> _logger;
         private IWebHostEnvironment _hostingEnvironment;
+        private static bool MasterSwitch = true;
 
         public PushNotificationsService(ILogger<PushNotificationsService> logger, IWebHostEnvironment hostingEnvironment)
         {
@@ -40,55 +40,64 @@ namespace PersonalSafety.Services.PushNotification
             }
         }
 
-        public async Task<bool> TrySendNotification(string registrationToken, string title, string body)
+        public async Task SendNotification(string registrationToken, string title, string body)
         {
-            try
+            var message = new Message()
             {
-                // See documentation on defining a message payload.
-                var message = new Message()
+                Notification = new Notification()
                 {
-                    Notification = new Notification()
-                    {
-                        Title = title,
-                        Body = body,
-                    },
-                    Token = registrationToken,
-                };
+                    Title = title,
+                    Body = body,
+                },
+                Token = registrationToken,
+            };
 
-                string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-                _logger.LogInformation($"FCM / SUCCESS: {response}.");
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
-                _logger.LogError("FCM / " +  ex.Message);
-                return false;
-            }
+            await TryPushNotification(message);
         }
 
-        public async Task<bool> TrySendData(string registrationToken, Dictionary<string, string> data)
+        public async Task SendNotification(string registrationToken, Dictionary<string, string> data)
         {
-            try
+            var message = new Message()
             {
-                // See documentation on defining a message payload.
-                var message = new Message()
+                Data = data,
+                Token = registrationToken,
+            };
+
+            await TryPushNotification(message);
+        }
+
+        public bool ToggleMasterSwitch()
+        {
+            MasterSwitch = !MasterSwitch;
+
+            _logger.LogInformation($"FCM / MasterSwitch: {MasterSwitch}.");
+
+            return MasterSwitch;
+        }
+
+        public bool GetMasterSwitch()
+        {
+            return MasterSwitch;
+        }
+
+        private async Task TryPushNotification(Message payload)
+        {
+            if (MasterSwitch)
+            {
+                try
                 {
-                    Data = data,
-                    Token = registrationToken,
-                };
-
-                string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-                _logger.LogInformation($"FCM / SUCCESS: {response}.");
-
-                return true;
+                    string response = await FirebaseMessaging.DefaultInstance.SendAsync(payload);
+                    _logger.LogInformation($"FCM / SUCCESS: {response}.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
+                    _logger.LogError("FCM / " + ex.Message);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
-                _logger.LogError("FCM / " + ex.Message);
-                return false;
+                _logger.LogWarning("FCM / MasterSwitch is turned off, activate the service first.");
             }
         }
     }

@@ -450,7 +450,7 @@ namespace PersonalSafety.Business
                 var registraionKey = client.DeviceRegistrationKey;
                 if (registraionKey != null && registraionKey.Length > 0)
                 {
-                    await _pushNotificationsService.TrySendData(registraionKey, publicEventsInCityDictionary);
+                    await _pushNotificationsService.SendNotification(registraionKey, publicEventsInCityDictionary);
                 }
             }
         }

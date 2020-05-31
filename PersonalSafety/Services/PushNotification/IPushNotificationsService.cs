@@ -7,7 +7,9 @@ namespace PersonalSafety.Services.PushNotification
 {
     public interface IPushNotificationsService
     {
-        Task<bool> TrySendNotification(string registrationToken, string title, string body);
-        Task<bool> TrySendData(string registrationToken, Dictionary<string, string> data);
+        Task SendNotification(string registrationToken, string title, string body);
+        Task SendNotification(string registrationToken, Dictionary<string, string> data);
+        bool ToggleMasterSwitch();
+        bool GetMasterSwitch();
     }
 }

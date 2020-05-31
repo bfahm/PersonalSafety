@@ -12,6 +12,8 @@ namespace PersonalSafety.Hubs
     public class AdminHub : MainHub
     {
         private readonly IPushNotificationsService _pushNotificationsService;
+        private const string AdminConsoleChannel = "AdminConsoleChanges";
+        private const string AdminFCMChannel = "AdminFCMChannel";
 
         public AdminHub(IPushNotificationsService pushNotificationsService)
         {
@@ -19,14 +21,26 @@ namespace PersonalSafety.Hubs
             _pushNotificationsService = pushNotificationsService;
         }
 
+        public async Task ToggleFCMMasterSwitch()
+        {
+            var newValue = _pushNotificationsService.ToggleMasterSwitch();
+            await Clients.All.SendAsync(AdminFCMChannel, newValue);
+        }
+
+        public async Task GetFCMMasterSwitchValue()
+        {
+            var currentValue = _pushNotificationsService.GetMasterSwitch();
+            await Clients.All.SendAsync(AdminFCMChannel, currentValue);
+        }
+
         public async Task SendTestNotification(string registrationToken, string title, string body)
         {
-            await _pushNotificationsService.TrySendNotification(registrationToken, title, body);
+            await _pushNotificationsService.SendNotification(registrationToken, title, body);
         }
 
         private void PrintToOnlineConsole(string text)
         {
-            Clients.All.SendAsync("AdminConsoleChanges", text);
+            Clients.All.SendAsync(AdminConsoleChannel, text);
         }
 
 
@@ -36,6 +50,12 @@ namespace PersonalSafety.Hubs
             {
                 PrintToOnlineConsole(item.ToString());
             }
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            await GetFCMMasterSwitchValue();
+            await base.OnConnectedAsync();
         }
     }
 }

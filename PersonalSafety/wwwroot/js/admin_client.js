@@ -369,6 +369,35 @@ function startConnection(token) {
         addToConsoleContents(message, true);
     });
 
+    connection.on("AdminFCMChannel", function (message) {
+        if (message === true) {
+            $("#fcm_master_switch_on").removeClass("btn-secondary")
+            $("#fcm_master_switch_on").addClass("btn-success")
+            $("#fcm_master_switch_on").html("Service Up")
+
+            $("#fcm_master_switch_off").removeClass("btn-danger")
+            $("#fcm_master_switch_off").addClass("btn-secondary")
+            $("#fcm_master_switch_off").html("Turn Off")
+
+        } else if (message === false) {
+            $("#fcm_master_switch_on").removeClass("btn-success")
+            $("#fcm_master_switch_on").addClass("btn-secondary")
+            $("#fcm_master_switch_on").html("Turn On")
+
+            $("#fcm_master_switch_off").removeClass("btn-secondary")
+            $("#fcm_master_switch_off").addClass("btn-danger")
+            $("#fcm_master_switch_off").html("Service Down")
+        }
+    });
+
+    $("#fcm_master_switch_on").click(function () {
+        connection.invoke("ToggleFCMMasterSwitch");
+    });
+
+    $("#fcm_master_switch_off   ").click(function () {
+        connection.invoke("ToggleFCMMasterSwitch");
+    });
+
     // Start connection after finishing all the settings
     connection.start()
         .catch(function (err) {
