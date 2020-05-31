@@ -18,6 +18,9 @@ namespace PersonalSafety.Models.ViewModels
         public int BloodType { get; set; }
         public string MedicalHistoryNotes { get; set; }
         public DateTime Birthday { get; set; }
+
+        public float UserRate { get; set; }
+
         public List<EmergencyContact> EmergencyContacts { get; set; }
     }
 }

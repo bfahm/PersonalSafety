@@ -121,7 +121,7 @@ namespace PersonalSafety.Business
             return await _registrationService.RegisterClientAsync(newUser, null, client);
         }
 
-        public APIResponse<ProfileViewModel> GetProfile(string userId)
+        public async Task<APIResponse<ProfileViewModel>> GetProfileAsync(string userId)
         {
             APIResponse<ProfileViewModel> response = new APIResponse<ProfileViewModel>();
 
@@ -134,8 +134,14 @@ namespace PersonalSafety.Business
                 return response;
             }
 
+            ApplicationUser userAccount = await _userManager.FindByIdAsync(user.ClientId);
+
             ProfileViewModel viewModel = new ProfileViewModel
             {
+                Birthday = user.Birthday,
+                FullName = userAccount.FullName,
+                NationalId = user.NationalId,
+                PhoneNumber = userAccount.PhoneNumber,
                 BloodType = user.BloodType,
                 CurrentAddress = user.CurrentAddress,
                 MedicalHistoryNotes = user.MedicalHistoryNotes

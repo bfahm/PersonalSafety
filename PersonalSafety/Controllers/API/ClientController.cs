@@ -146,11 +146,11 @@ namespace PersonalSafety.Controllers.API
         /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
         /// </remarks>
         [HttpGet(ApiRoutes.Client.Registration)]
-        public IActionResult GetProfile()
+        public async Task<IActionResult> GetProfile()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
 
-            var response = _clientBusiness.GetProfile(currentlyLoggedInUserId);
+            var response = await _clientBusiness.GetProfileAsync(currentlyLoggedInUserId);
 
             return Ok(response);
         }
