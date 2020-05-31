@@ -16,22 +16,42 @@ namespace PersonalSafety.Models
 
         public List<Event> GetFilteredEvents(int cateogryId)
         {
-            return context.Events.Include(d => d.EventCategory).Where(e => e.EventCategoryId == cateogryId).ToList();
+            var events = context.Events.Include(d => d.EventCategory).Where(e => e.EventCategoryId == cateogryId).AsEnumerable();
+            FilterAndOrderEvents(ref events);
+            
+            return events.ToList();
         }
 
         public List<Event> GetUserEvents(string userId)
         {
-            return context.Events.Include(d => d.EventCategory).Where(e => e.UserId == userId).ToList();
+            var events = context.Events.Include(d => d.EventCategory).Where(e => e.UserId == userId).AsEnumerable();
+            FilterAndOrderEvents(ref events);
+
+            return events.ToList();
         }
 
         public List<Event> GetEventsByCityId(int cityId)
         {
-            return context.Events.Include(d => d.EventCategory).Where(e => e.NearestCityId == cityId).ToList();
+            var events = context.Events.Include(d => d.EventCategory).Where(e => e.NearestCityId == cityId).AsEnumerable();
+            FilterAndOrderEvents(ref events);
+
+            return events.ToList();
         }
 
         public List<Event> GetPublicEventsByCityId(int cityId)
         {
-            return context.Events.Include(d => d.EventCategory).Where(e => e.NearestCityId == cityId && e.IsPublicHelp).ToList();
+            var events = context.Events.Include(d => d.EventCategory).Where(e => e.NearestCityId == cityId && e.IsPublicHelp).AsEnumerable();
+            FilterAndOrderEvents(ref events);
+
+            return events.ToList();
+        }
+
+        new public List<Event> GetAll()
+        {
+            var events = context.Events.Include(d => d.EventCategory).AsEnumerable();
+            FilterAndOrderEvents(ref events);
+
+            return events.ToList();
         }
 
         new public Event GetById(string eventId)
@@ -39,9 +59,10 @@ namespace PersonalSafety.Models
             return context.Events.Include(d => d.EventCategory).FirstOrDefault(e => e.Id == int.Parse(eventId));
         }
 
-        new public List<Event> GetAll()
+        private void FilterAndOrderEvents(ref IEnumerable<Event> events)
         {
-            return context.Events.Include(d => d.EventCategory).ToList();
+            events = events.Where(e => e.State == (int)StatesTypesEnum.Pending);
+            events = events.OrderByDescending(r => r.CreationDate);
         }
     }
 }
