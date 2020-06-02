@@ -51,7 +51,7 @@ namespace PersonalSafety.Models
             return context.Distributions.Where(d => d.Type == (int)DistributionTypesEnum.City);
         }
 
-        public List<Distribution> GetGrantedDistributions(int distributionId)
+        public List<Distribution> GetGrantedCities(int distributionId)
         {
             var result = new List<Distribution>();
 

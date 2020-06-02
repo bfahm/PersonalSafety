@@ -13,7 +13,7 @@ namespace PersonalSafety.Models
         Distribution GetRootDistribution();
         Distribution GetCityByName(string name);
         IEnumerable<Distribution> GetCities();
-        List<Distribution> GetGrantedDistributions(int distributionId);
+        List<Distribution> GetGrantedCities(int distributionId);
         DistributionTreeViewModel GetDistributionTree(int startingNode, bool recursive);
         
         // General Functions

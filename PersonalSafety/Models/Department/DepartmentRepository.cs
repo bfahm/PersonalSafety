@@ -43,7 +43,7 @@ namespace PersonalSafety.Models
 
         public List<Department> GetAll(int distributionFilter)
         {
-            var allowedCities = _distributionRepository.GetGrantedDistributions(distributionFilter);
+            var allowedCities = _distributionRepository.GetGrantedCities(distributionFilter);
             var returnDepartments = new List<Department>();
 
             foreach(var city in allowedCities)

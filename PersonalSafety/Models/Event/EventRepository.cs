@@ -46,6 +46,14 @@ namespace PersonalSafety.Models
             return events.ToList();
         }
 
+        public List<Event> GetEventsByCities(List<int> cityIds)
+        {
+            var events = context.Events.Include(d => d.EventCategory).Where(e => cityIds.Contains(e.NearestCityId)).AsEnumerable();
+            FilterAndOrderEvents(ref events);
+
+            return events.ToList();
+        }
+
         new public List<Event> GetAll()
         {
             var events = context.Events.Include(d => d.EventCategory).AsEnumerable();

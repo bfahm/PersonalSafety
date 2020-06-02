@@ -14,11 +14,13 @@ namespace PersonalSafety.Controllers.API
     {
         private readonly IManagerBusiness _managerBusiness;
         private readonly ICategoryBusiness _categoryBusiness;
+        private readonly IEventsBusiness _eventsBusiness;
 
-        public ManagerController(IManagerBusiness managerBusiness, ICategoryBusiness categoryBusiness)
+        public ManagerController(IManagerBusiness managerBusiness, ICategoryBusiness categoryBusiness, IEventsBusiness eventsBusiness)
         {
             _managerBusiness = managerBusiness;
             _categoryBusiness = categoryBusiness;
+            _eventsBusiness = eventsBusiness;
         }
 
         /// <summary>
@@ -120,6 +122,45 @@ namespace PersonalSafety.Controllers.API
         public IActionResult DeleteEventCategory([FromQuery]int categoryId)
         {
             var authResponse = _categoryBusiness.DeleteEventCategory(categoryId);
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
+        /// Get a list of events in your region of management
+        /// </summary>
+        [HttpGet(ApiRoutes.Manager.Events)]
+        public async Task<IActionResult> GetEvents()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var authResponse = await _eventsBusiness.GetEventsForManagerAsync(currentlyLoggedInUserId);
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
+        /// Mark an event in your region as Valid
+        /// </summary>
+        [HttpPut(ApiRoutes.Manager.Events)]
+        public async Task<IActionResult> ValidateEvent([FromQuery] int eventId)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var authResponse = await _eventsBusiness.UpdateEventValidity(currentlyLoggedInUserId, eventId, true);
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
+        /// Mark an event in your region as Invalid
+        /// </summary>
+        [HttpPut(ApiRoutes.Manager.Events)]
+        public async Task<IActionResult> InvalidateEvent([FromQuery] int eventId)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var authResponse = await _eventsBusiness.UpdateEventValidity(currentlyLoggedInUserId, eventId, false);
 
             return Ok(authResponse);
         }

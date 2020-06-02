@@ -38,6 +38,7 @@
         {
             public const string Departments = DefaultBasic + nameof(Departments) + TrailingAction;
             public const string Categories = DefaultBasic + nameof(Categories) + TrailingAction;
+            public const string Events = DefaultBasic + nameof(Events) + TrailingAction;
         }
     }
 }

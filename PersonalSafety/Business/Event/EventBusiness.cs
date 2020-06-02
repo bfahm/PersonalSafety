@@ -28,8 +28,9 @@ namespace PersonalSafety.Business
         private readonly ILogger<EventBusiness> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IClientHub _clientHub;
+        private readonly IDistributionRepository _distributionRepository;
 
-        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager, IClientHub clientHub)
+        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager, IClientHub clientHub, IDistributionRepository distributionRepository)
         {
             _clientRepository = clientRepository;
             _eventRepository = eventRepository;
@@ -40,7 +41,10 @@ namespace PersonalSafety.Business
             _logger = logger;
             _userManager = userManager;
             _clientHub = clientHub;
+            _distributionRepository = distributionRepository;
         }
+
+        // Client Actions
 
         public APIResponse<string> UpdateLastKnownLocation(string userId, LocationViewModel request)
         {
@@ -344,6 +348,72 @@ namespace PersonalSafety.Business
             return null;
         }
 
+        // Managerial Actions
+
+        public async Task<APIResponse<List<EventDetailedViewModel>>> GetEventsForManagerAsync(string managerUserId)
+        {
+            APIResponse<List<EventDetailedViewModel>> response = new APIResponse<List<EventDetailedViewModel>>();
+
+            var allowedCities = await GetManagerAllowedCities(managerUserId);
+
+            var allowedEvents = _eventRepository.GetEventsByCities(allowedCities.Select(ac => ac.Id).ToList());
+
+            List<EventDetailedViewModel> viewModel = new List<EventDetailedViewModel>();
+            foreach(var _event in allowedEvents)
+            {
+                var eventOwner = await _userManager.FindByIdAsync(_event.UserId);
+
+                viewModel.Add(new EventDetailedViewModel
+                {
+                    Id = _event.Id,
+                    Title = _event.Title,
+                    UserName = eventOwner?.FullName,
+                    IsPublicHelp = _event.IsPublicHelp,
+                    IsValidated = _event.IsValidated,
+                    Votes = _event.Votes,
+                    ThumbnailUrl = _event.ThumbnailUrl,
+                    CreationDate = _event.CreationDate,
+                    Description = _event.Description,
+                    EventCategoryId = _event.EventCategoryId,
+                    EventCategoryName = _event.EventCategory?.Title,
+                    LastModified = _event.LastModified,
+                    Latitude = _event.Latitude,
+                    Longitude = _event.Longitude
+                });
+            }
+            
+            response.Result = viewModel;
+            return response;
+        }
+
+        public async Task<APIResponse<bool>> UpdateEventValidity(string managerUserId, int eventId, bool toValidate)
+        {
+            APIResponse<bool> response = new APIResponse<bool>();
+
+            var nullCEventCheckResult = CheckForNullEvent(eventId, out Event existingEvent);
+            if (nullCEventCheckResult != null)
+            {
+                response.WrapResponseData(nullCEventCheckResult);
+                return response;
+            }
+
+            var managerAccessCheckResult = await CheckManagerHaveAccessToEvent(managerUserId, existingEvent);
+            if (managerAccessCheckResult != null)
+            {
+                response.WrapResponseData(managerAccessCheckResult);
+                return response;
+            }
+
+            existingEvent.IsValidated = toValidate;
+            _eventRepository.Update(existingEvent);
+            _eventRepository.Save();
+
+            response.Result = true;
+            response.Messages.Add($"Success: Event with Id {existingEvent.Id} validation was changed to {existingEvent.IsValidated}.");
+
+            return response;
+        }
+
         #region Private Checkers
 
         private APIResponseData CheckForNullClient(string clientUsedId, out Client client)
@@ -432,6 +502,21 @@ namespace PersonalSafety.Business
             return null;
         }
 
+        private async Task<APIResponseData> CheckManagerHaveAccessToEvent(string managerUserId, Event requestedEvent)
+        {
+            var allowedCitites = await GetManagerAllowedCities(managerUserId);
+            var allowedCititesIds = allowedCitites.Select(ac => ac.Id);
+
+            if (!allowedCititesIds.Contains(requestedEvent.NearestCityId))
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
+                    new List<string>()
+                        {"Error. You don't have access to this event."});
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region Private Helpers
@@ -465,6 +550,15 @@ namespace PersonalSafety.Business
             }
 
             return returnDictionary;
+        }
+
+        private async Task<List<Distribution>> GetManagerAllowedCities(string managerUserId)
+        {
+            var managerAccount = await _userManager.FindByIdAsync(managerUserId);
+            var userAccessToDistribution = int.Parse((await _userManager.GetClaimsAsync(managerAccount))
+                                                .SingleOrDefault(c => c.Type == ClaimsStore.CLAIM_DISTRIBUTION_ACCESS).Value);
+
+            return _distributionRepository.GetGrantedCities(userAccessToDistribution);
         }
 
         #endregion
