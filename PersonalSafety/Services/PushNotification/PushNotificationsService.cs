@@ -91,7 +91,6 @@ namespace PersonalSafety.Services.PushNotification
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("FCM / ERROR: Registration Token might be wrong.");
                     _logger.LogError("FCM / " + ex.Message);
                 }
             }
