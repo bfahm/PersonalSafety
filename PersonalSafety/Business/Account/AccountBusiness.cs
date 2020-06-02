@@ -423,10 +423,13 @@ namespace PersonalSafety.Business
         {
             APIResponse<AccountBasicInfoViewModel> response = new APIResponse<AccountBasicInfoViewModel>();
 
+            var personnelDepartment = _personnelRepository.GetPersonnelDepartment(userId);
+
             AccountBasicInfoViewModel viewModel = new AccountBasicInfoViewModel
             {
                 AuthorityTypeName = _personnelRepository.GetPersonnelAuthorityTypeString(userId),
-                DepartmentName = _personnelRepository.GetPersonnelDepartment(userId)?.ToString()
+                DepartmentName = personnelDepartment?.ToString(),
+                DepartmentId = personnelDepartment?.Id
             };
 
             response.Result = viewModel;

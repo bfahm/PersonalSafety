@@ -7,6 +7,7 @@ namespace PersonalSafety.Models.ViewModels.AccountVM
 {
     public class AccountBasicInfoViewModel
     {
+        public int? DepartmentId { get; set; }
         public string DepartmentName { get; set; }
         public string AuthorityTypeName { get; set; }
     }
