@@ -344,3 +344,4 @@ healthchecksdb
 !/PersonalSafety/wwwroot/Uploads/.gitkeep
 !/PersonalSafety/wwwroot/Uploads/cat_corona.jpg
 !/PersonalSafety/wwwroot/Uploads/cat_nearby.jpg
+/PersonalSafety/fcm_key.json
