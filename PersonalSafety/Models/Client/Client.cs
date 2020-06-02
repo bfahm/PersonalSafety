@@ -30,5 +30,8 @@ namespace PersonalSafety.Models
         public virtual Distribution LastKnownCity { get; set; }
 
         public string DeviceRegistrationKey { get; set; }
+        
+        public bool IsCoronaVictim { get; set; }
+        public bool IsCoronaSusceptible { get; set; }
     }
 }

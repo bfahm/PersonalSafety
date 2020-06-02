@@ -38,6 +38,7 @@ namespace PersonalSafety.Models
         public DbSet<EventCategory> EventCategories { get; set; }
         public DbSet<SOSRequest> SOSRequests { get; set; }
         public DbSet<Client> Clients { get; set; }
+        public DbSet<ClientTracking> ClientTrackings { get; set; }
         public DbSet<Personnel> Personnels { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }

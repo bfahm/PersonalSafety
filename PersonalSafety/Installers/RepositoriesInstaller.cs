@@ -15,6 +15,7 @@ namespace PersonalSafety.Installers
             // Register here any Repositories that will be used:
             services.AddScoped<IEmergencyContactRepository, EmergencyContactRepository>();
             services.AddScoped<IClientRepository, ClientRepository>();
+            services.AddScoped<IClientTrackingRepository, ClientTrackingRepository>();
             services.AddScoped<IPersonnelRepository, PersonnelRepository>();
             services.AddScoped<ISOSRequestRepository, SOSRequestRepository>();
             services.AddScoped<IDepartmentRepository, DepartmentRepository>();

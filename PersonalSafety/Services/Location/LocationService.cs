@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using PersonalSafety.Models;
 
 namespace PersonalSafety.Services.Location
@@ -51,7 +50,13 @@ namespace PersonalSafety.Services.Location
             return _distributionRepository.GetById(nearestCityEntry.Key.ToString());
         }
 
-        private double CalculateDistance(Location p1, Location p2)
+        /// <summary>
+        /// Calculates the distance in meters between two pairs of Longitudes and Latitudes
+        /// </summary>
+        /// <param name="p1">Location of the first target</param>
+        /// <param name="p2">Location of the second target</param>
+        /// <returns>Distance in Meters</returns>
+        public double CalculateDistance(Location p1, Location p2)
         {
             var R = 6378137; // Earth’s mean radius in meter
             var dLat = ToRadian(p2.Latitude - p1.Latitude);

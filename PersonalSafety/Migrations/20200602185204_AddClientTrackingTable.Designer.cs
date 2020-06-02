@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalSafety.Models;
 
 namespace PersonalSafety.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200602185204_AddClientTrackingTable")]
+    partial class AddClientTrackingTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -297,11 +299,6 @@ namespace PersonalSafety.Migrations
 
             modelBuilder.Entity("PersonalSafety.Models.ClientTracking", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
                     b.Property<string>("ClientId")
                         .HasColumnType("nvarchar(450)");
 
@@ -314,9 +311,7 @@ namespace PersonalSafety.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
+                    b.HasKey("ClientId");
 
                     b.ToTable("ClientTrackings");
                 });
@@ -656,7 +651,9 @@ namespace PersonalSafety.Migrations
                 {
                     b.HasOne("PersonalSafety.Models.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ClientId");
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PersonalSafety.Models.Department", b =>
