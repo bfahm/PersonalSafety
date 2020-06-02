@@ -14,7 +14,7 @@ namespace PersonalSafety.Services.PushNotification
     {
         private readonly ILogger<PushNotificationsService> _logger;
         private IWebHostEnvironment _hostingEnvironment;
-        private static bool MasterSwitch = true;
+        private static bool MasterSwitch = false;
 
         public PushNotificationsService(ILogger<PushNotificationsService> logger, IWebHostEnvironment hostingEnvironment)
         {
