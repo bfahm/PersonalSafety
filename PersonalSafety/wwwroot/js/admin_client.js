@@ -390,12 +390,22 @@ function startConnection(token) {
         }
     });
 
-    $("#fcm_master_switch_on").click(function () {
-        connection.invoke("ToggleFCMMasterSwitch");
+    connection.on("AdminClientTrackingChannel", function (type, value) {
+        if (type === "minutes") {
+            $("#minutes_skew_ip").val(value);
+        } else if (type === "meters") {
+            $("#meters_skew_ip").val(value);
+        }
     });
 
-    $("#fcm_master_switch_off   ").click(function () {
-        connection.invoke("ToggleFCMMasterSwitch");
+    $("#minutes_skew_btn").click(function () {
+        var strValue = $("#minutes_skew_ip").val();
+        connection.invoke("SetMinutesSkew", parseInt(strValue));
+    });
+
+    $("#meters_skew_btn").click(function () {
+        var strValue = $("#meters_skew_ip").val();
+        connection.invoke("SetMetersSkew", parseInt(strValue));
     });
 
     // Start connection after finishing all the settings

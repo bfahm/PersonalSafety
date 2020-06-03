@@ -12,16 +12,14 @@ namespace PersonalSafety.Models
     {
         private readonly AppDbContext context;
         private readonly ILocationService _locationService;
-        private readonly ILogger<ClientTrackingRepository> _logger;
         
-        private int minutesSkew = 5;
-        private int metersSkew = 10;
+        public static int MinutesSkew = 5;
+        public static int MetersSkew = 10;
 
-        public ClientTrackingRepository(AppDbContext context, ILocationService locationService, ILogger<ClientTrackingRepository> logger) : base(context)
+        public ClientTrackingRepository(AppDbContext context, ILocationService locationService) : base(context)
         {
             this.context = context;
             _locationService = locationService;
-            _logger = logger;
         }
 
 
@@ -59,43 +57,18 @@ namespace PersonalSafety.Models
                                                        }).ToList();
 
             // Only select Records that happened within +-5 minutes of the victim's record
-            var susceptibleRecordsFilter = susceptibleRecordsJoin.Where(sj => sj.susceptibleTime > sj.victimTime.AddMinutes(-minutesSkew) &&
-                                                    sj.susceptibleTime < sj.victimTime.AddMinutes(minutesSkew)).ToList();
+            var susceptibleRecordsFilter = susceptibleRecordsJoin.Where(sj => sj.susceptibleTime > sj.victimTime.AddMinutes(-MinutesSkew) &&
+                                                    sj.susceptibleTime < sj.victimTime.AddMinutes(MinutesSkew)).ToList();
 
             // Records outside the range of 10 meters are removed.
             foreach (var record in susceptibleRecordsJoin)
             {
                 var distance = _locationService.CalculateDistance(record.victimLocation, record.susceptibleLocation);
-                if (distance > metersSkew)
+                if (distance > MetersSkew)
                     susceptibleRecordsFilter.Remove(record);
             }
 
             return susceptibleRecordsFilter.Select(snbrj => snbrj.susceptibleUserId).Distinct().ToList();
-        }
-
-        
-        // Adminstrative
-
-        public void SetMinutesSkew(int newValue)
-        {
-            minutesSkew = newValue;
-            _logger.LogInformation($"Minutes Skew set to {minutesSkew}");
-        }
-
-        public int GetMinutesSkew()
-        {
-            return minutesSkew;
-        }
-
-        public void SetMetersSkew(int newValue)
-        {
-            metersSkew = newValue;
-            _logger.LogInformation($"Meters Skew set to {minutesSkew}");
-        }
-
-        public int GetMetersSkew()
-        {
-            return metersSkew;
         }
     }
 }
