@@ -390,6 +390,14 @@ function startConnection(token) {
         }
     });
 
+    $("#fcm_master_switch_on").click(function () {
+        connection.invoke("ToggleFCMMasterSwitch");
+    });
+
+    $("#fcm_master_switch_off   ").click(function () {
+        connection.invoke("ToggleFCMMasterSwitch");
+    });
+
     connection.on("AdminClientTrackingChannel", function (type, value) {
         if (type === "minutes") {
             $("#minutes_skew_ip").val(value);

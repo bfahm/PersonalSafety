@@ -27,8 +27,8 @@ namespace PersonalSafety.Models
         /// <returns>The userIds that where in range of the victim in similar times, to be marked as susceptible</returns>
         public List<string> GetSusceptibleAccounts(string victimUserId)
         {
-            var test = Get2WeeksRecords(victimUserId);
-            return GetSusceptibleRecords(test);
+            var twoWeeksRecordForUser = Get2WeeksRecords(victimUserId);
+            return GetSusceptibleRecords(twoWeeksRecordForUser);
         }
 
         private List<ClientTracking> Get2WeeksRecords(string userId)

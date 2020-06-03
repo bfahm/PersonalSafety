@@ -35,5 +35,39 @@ namespace PersonalSafety.Controllers.API
 
             return Ok(response);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        ///
+        /// ### Flow:
+        ///
+        /// 
+        /// </remarks>
+        [HttpPut(ApiRoutes.Nurse.Main)]
+        public async Task<IActionResult> MarkClientAsPositive(string clientEmail)
+        {
+            var response = await _nurseBusiness.EditClientVictimState(clientEmail, true);
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        ///
+        /// ### Flow:
+        ///
+        /// 
+        /// </remarks>
+        [HttpPut(ApiRoutes.Nurse.Main)]
+        public async Task<IActionResult> MarkClientAsNegative(string clientEmail)
+        {
+            var response = await _nurseBusiness.EditClientVictimState(clientEmail, false);
+
+            return Ok(response);
+        }
     }
 }
