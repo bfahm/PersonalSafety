@@ -30,7 +30,7 @@ namespace PersonalSafety.Business.Nurse
         {
             APIResponse<GetUserDataViewModel> response = new APIResponse<GetUserDataViewModel>();
 
-            var clientAccount = await _userManager.FindByEmailAsync(clientEmail);
+            var clientAccount = await _userManager.FindByEmailAsync(clientEmail ?? "");
             if (clientAccount == null)
             {
                 var responseData = new APIResponseData((int)APIResponseCodesEnum.NotFound,
@@ -76,7 +76,7 @@ namespace PersonalSafety.Business.Nurse
             APIResponse<VictimStateViewModel> response = new APIResponse<VictimStateViewModel>();
             var responseViewModel = new VictimStateViewModel();
 
-            var clientAccount = await _userManager.FindByEmailAsync(clientEmail);
+            var clientAccount = await _userManager.FindByEmailAsync(clientEmail ?? "");
             if (clientAccount == null)
             {
                 var responseData = new APIResponseData((int)APIResponseCodesEnum.NotFound,
