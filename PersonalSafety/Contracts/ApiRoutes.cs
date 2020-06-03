@@ -40,5 +40,10 @@
             public const string Categories = DefaultBasic + nameof(Categories) + TrailingAction;
             public const string Events = DefaultBasic + nameof(Events) + TrailingAction;
         }
+
+        public static class Nurse
+        {
+            public const string Main = Default;
+        }
     }
 }

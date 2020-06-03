@@ -17,14 +17,12 @@ namespace PersonalSafety.Business
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IClientRepository _clientRepository;
-        private readonly ISOSBusiness _sosBusiness;
 
-        public RescuerBusiness(UserManager<ApplicationUser> userManager, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, ISOSBusiness sosBusiness)
+        public RescuerBusiness(UserManager<ApplicationUser> userManager, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository)
         {
             _userManager = userManager;
             _sosRequestRepository = sosRequestRepository;
             _clientRepository = clientRepository;
-            _sosBusiness = sosBusiness;
         }
 
         public async Task<APIResponse<GetSOSRequestViewModel>> GetSOSRequestDetailsAsync(string userId, int requestId)

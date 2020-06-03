@@ -16,6 +16,7 @@ namespace PersonalSafety.Contracts
         public const string ROLE_PERSONNEL = "Personnel";
         public const string ROLE_AGENT = "Agent";
         public const string ROLE_RESCUER = "Rescuer";
+        public const string ROLE_NURSE = "Nurse";
 
         public static List<string> GetRoles()
         {

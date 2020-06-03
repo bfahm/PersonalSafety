@@ -140,7 +140,7 @@ namespace PersonalSafety.Extensions
 
             #endregion
 
-            #region Create Police Agent
+            #region Create Police Rescuer
 
             ApplicationUser rescuer1User = new ApplicationUser
             {
@@ -165,6 +165,20 @@ namespace PersonalSafety.Extensions
                 _personnelRepository.Add(rescuer1);
                 _personnelRepository.Save();
             }
+
+            #endregion
+
+            #region Create Nurse
+
+            ApplicationUser nurseUser = new ApplicationUser
+            {
+                UserName = "nurse@test.com",
+                Email = "nurse@test.com",
+                FullName = "Nurse",
+                EmailConfirmed = true
+            };
+
+            CreateUserAndSetupRole(nurseUser, "Test@123", Roles.ROLE_NURSE);
 
             #endregion
 

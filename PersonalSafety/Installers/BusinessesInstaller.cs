@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using PersonalSafety.Business;
 using PersonalSafety.Business.Category;
+using PersonalSafety.Business.Nurse;
 
 namespace PersonalSafety.Installers
 {
@@ -19,6 +20,7 @@ namespace PersonalSafety.Installers
             services.AddScoped<IManagerBusiness, ManagerBusiness>();
             services.AddScoped<ICategoryBusiness, CategoryBusiness>();
             services.AddScoped<IEventsBusiness, EventBusiness>();
+            services.AddScoped<INurseBusiness, NurseBusiness>();
         }
     }
 }
