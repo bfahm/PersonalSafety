@@ -20,14 +20,8 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Get the data for a particular user as a confirmation before marking him as a victim
         /// </summary>
-        /// <remarks>
-        ///
-        /// ### Flow:
-        ///
-        /// 
-        /// </remarks>
         [HttpGet(ApiRoutes.Nurse.Main)]
         public async Task<IActionResult> GetClientDetails(string clientEmail)
         {
@@ -37,13 +31,11 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Mark a user as COVID victim
         /// </summary>
         /// <remarks>
-        ///
-        /// ### Flow:
-        ///
-        /// 
+        /// As a result of this action, all users that might have been in contact with this user would receive a
+        /// push notification stating that they have to stay home, and that they might be susceptible of carrying the disease.
         /// </remarks>
         [HttpPut(ApiRoutes.Nurse.Main)]
         public async Task<IActionResult> MarkClientAsPositive(string clientEmail)
@@ -54,13 +46,10 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Unmark a user from being COVID victim (undo)
         /// </summary>
         /// <remarks>
-        ///
-        /// ### Flow:
-        ///
-        /// 
+        /// This action doesn't result in any push notifications and can be used for debugging purposes.
         /// </remarks>
         [HttpPut(ApiRoutes.Nurse.Main)]
         public async Task<IActionResult> MarkClientAsNegative(string clientEmail)
