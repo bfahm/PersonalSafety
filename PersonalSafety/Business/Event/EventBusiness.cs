@@ -29,8 +29,9 @@ namespace PersonalSafety.Business
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IClientHub _clientHub;
         private readonly IDistributionRepository _distributionRepository;
+        private readonly IClientTrackingRepository _clientTrackingRepository;
 
-        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager, IClientHub clientHub, IDistributionRepository distributionRepository)
+        public EventBusiness(IClientRepository clientRepository, IEventRepository eventRepository, IEventCategoryRepository eventCategoryRepository, IFileManagerService fileManager, ILocationService locationService, IPushNotificationsService pushNotificationsService, ILogger<EventBusiness> logger, UserManager<ApplicationUser> userManager, IClientHub clientHub, IDistributionRepository distributionRepository, IClientTrackingRepository clientTrackingRepository)
         {
             _clientRepository = clientRepository;
             _eventRepository = eventRepository;
@@ -42,6 +43,7 @@ namespace PersonalSafety.Business
             _userManager = userManager;
             _clientHub = clientHub;
             _distributionRepository = distributionRepository;
+            _clientTrackingRepository = clientTrackingRepository;
         }
 
         // Client Actions
@@ -65,6 +67,17 @@ namespace PersonalSafety.Business
 
             response.Result = nearestCity.ToString();
             response.Messages.Add($"Your assigned city was updated to {nearestCity.Value}.");
+
+            _clientTrackingRepository.Add(new ClientTracking
+            {
+                ClientId = client.ClientId,
+                Latitude = request.Latitude,
+                Longitude = request.Longitude,
+                Time = DateTime.Now
+            });
+
+            _clientTrackingRepository.Save();
+            response.Messages.Add($"Your tracking log was saved.");
 
             return response;
         }
