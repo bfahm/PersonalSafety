@@ -471,24 +471,27 @@ namespace PersonalSafety.Business
 
         private APIResponseData CheckEventCategoryId(ref PostEventRequestViewModel request)
         {
-            var requestCategoryId = request.EventCategoryId;
-            var requestCategory = _eventCategoryRepository.GetById(requestCategoryId.ToString());
+            var requestCategoryId = request.EventCategoryId ?? 0;
 
-            if (requestCategoryId != null)
+            var categories = _eventCategoryRepository.GetAll();
+            var yourStoriesCategory = categories.First(c => c.Title == "Your Stories");
+            var nearbyStoriesCategory = categories.First(c => c.Title == "Nearby Stories");
+
+            if(requestCategoryId == 0 || requestCategoryId == yourStoriesCategory.Id 
+                || requestCategoryId == nearbyStoriesCategory.Id)
             {
-                if(requestCategory == null)
-                {
-                    return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
+                request.EventCategoryId = null;
+                return null;
+            }else if (categories.FirstOrDefault(c => c.Id == requestCategoryId) != null)
+            {
+                return null;
+            }
+            else
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
                         {"Error. Provide a correct category Id or leave the field null to mark as a General Event."});
-                }else if (requestCategory != null && (requestCategory.Title == "Your Stories"
-                        || requestCategory.Title == "Nearby Stories"))
-                {
-                    request.EventCategoryId = null;
-                }
             }
-
-            return null;
         }
 
         private APIResponseData CheckForNullTitle(ref PostEventRequestViewModel request)
