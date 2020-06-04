@@ -12,5 +12,6 @@ namespace PersonalSafety.Models
         IEnumerable<SOSRequest> GetRequestsInDepartments(List<int> dptIds);
         bool UserHasOngoingRequest(string userId);
         IEnumerable<SOSRequest> GetOngoingRequest(string userId);
+        IEnumerable<SOSRequest> GetRequestsForUser(string userId);
     }
 }

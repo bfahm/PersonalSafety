@@ -55,5 +55,13 @@ namespace PersonalSafety.Models
             var sosRequestForGivenClient = context.SOSRequests.Where(s => s.UserId == userId).ToList();
             return sosRequestForGivenClient.Where(s => s.State == (int)StatesTypesEnum.Pending || s.State == (int)StatesTypesEnum.Accepted);
         }
+
+        public IEnumerable<SOSRequest> GetRequestsForUser(string userId)
+        {
+            var sosRequestForGivenClient = context.SOSRequests.Where(s => s.UserId == userId).AsEnumerable();
+            OrderRequests(ref sosRequestForGivenClient);
+
+            return sosRequestForGivenClient;
+        }
     }
 }

@@ -483,6 +483,38 @@ namespace PersonalSafety.Business
             return response;
         }
 
+        public APIResponse<List<GetSOSRequestForUserViewModel>> GetSOSRequestsHistory(string userId)
+        {
+            var response = new APIResponse<List<GetSOSRequestForUserViewModel>>();
+            var responseViewModel = new List<GetSOSRequestForUserViewModel>(); 
+
+            var nullClientCheckResult = CheckForNullClient(userId, out Client client);
+            if (nullClientCheckResult != null)
+            {
+                response.WrapResponseData(nullClientCheckResult);
+                return response;
+            }
+
+            var userRequests = _sosRequestRepository.GetRequestsForUser(client.ClientId);
+
+            foreach(var request in userRequests)
+            {
+                responseViewModel.Add(new GetSOSRequestForUserViewModel
+                {
+                    RequestId = request.Id,
+                    RequestStateId = request.State,
+                    RequestStateName = ((StatesTypesEnum)request.State).ToString(),
+                    RequestCreationDate = request.CreationDate,
+                    RequestLastModified = request.LastModified,
+                    RequestLocationLatitude = request.Longitude,
+                    RequestLocationLongitude = request.Latitude
+                });
+            }
+
+            response.Result = responseViewModel;
+            return response;
+        }
+
         #endregion
 
         #region Private Helper Methods

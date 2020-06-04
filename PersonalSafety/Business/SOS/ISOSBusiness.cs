@@ -17,5 +17,7 @@ namespace PersonalSafety.Business
         APIResponse<bool> ResetSOSRequest(int requestId);
 
         APIResponse<bool> RateRescuerAsync(string userId, int requestId, int rate);
+
+        APIResponse<List<GetSOSRequestForUserViewModel>> GetSOSRequestsHistory(string userId);
     }
 }

@@ -378,6 +378,19 @@ namespace PersonalSafety.Controllers.API
             return Ok(response);
         }
 
+        /// <summary>
+        /// Gets all ordered requests for a logged in client
+        /// </summary>
+        [HttpGet(ApiRoutes.Client.SOS)]
+        public IActionResult GetSOSRequestsHistory()
+        {
+            string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
+
+            var response = _sosBusiness.GetSOSRequestsHistory(currentlyLoggedInUserId);
+
+            return Ok(response);
+        }
+
         #endregion
 
         #region Events
