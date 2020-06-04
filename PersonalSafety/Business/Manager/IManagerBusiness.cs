@@ -10,6 +10,10 @@ namespace PersonalSafety.Business
 {
     public interface IManagerBusiness
     {
+        // Stats Endpoint
+        Task<APIResponse<TopCardsDataViewModel>> GetTopCardsDataAsync(string userId);
+
+        // Departments Endpoint
         Task<APIResponse<List<GetDepartmentDataViewModel>>> GetDepartmentsAsync(string userId);
         Task<APIResponse<List<GetSOSRequestViewModel>>> GetDepartmentRequestsAsync(string userId, int departmentId, int? requestState, bool enforceClaims);
     }

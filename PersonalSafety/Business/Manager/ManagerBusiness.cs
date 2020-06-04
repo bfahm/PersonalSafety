@@ -18,14 +18,38 @@ namespace PersonalSafety.Business
         private readonly IPersonnelRepository _personnelRepository;
         private readonly ISOSRequestRepository _sosRequestRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IUserRepository _userRepository;
 
-        public ManagerBusiness(UserManager<ApplicationUser> userManager, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository)
+        public ManagerBusiness(UserManager<ApplicationUser> userManager, IDepartmentRepository departmentRepository, IPersonnelRepository personnelRepository, ISOSRequestRepository sosRequestRepository, IClientRepository clientRepository, IUserRepository userRepository)
         {
             _userManager = userManager;
             _departmentRepository = departmentRepository;
             _personnelRepository = personnelRepository;
             _sosRequestRepository = sosRequestRepository;
             _clientRepository = clientRepository;
+            _userRepository = userRepository;
+        }
+
+        public async Task<APIResponse<TopCardsDataViewModel>> GetTopCardsDataAsync(string userId)
+        {
+            var response = new APIResponse<TopCardsDataViewModel>();
+            var responeViewModel = new TopCardsDataViewModel();
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            var departments = await GetListOfAllowedDepartmentsAsync(user);
+            responeViewModel.DepartmentsNumber = departments.Count();
+
+            foreach(var department in departments)
+            {
+                responeViewModel.AgentsNumber += _personnelRepository.GetDepartmentAgentsEmails(department.Id).Count();
+                responeViewModel.RescuersNumber += _personnelRepository.GetDepartmentRescuersEmails(department.Id).Count();
+            }
+
+            responeViewModel.UsersNumber = _userRepository.GetAll().Count();
+
+            response.Result = responeViewModel;
+            return response;
         }
 
         public async Task<APIResponse<List<GetDepartmentDataViewModel>>> GetDepartmentsAsync(string userId)
