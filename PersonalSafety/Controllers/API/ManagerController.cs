@@ -24,11 +24,8 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Get the number of Departments, Agents, Rescuers, and Users in the manager's distribution
         /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
         [HttpGet(ApiRoutes.Manager.Stats)]
         public async Task<IActionResult> GetTopCardsData()
         {
@@ -40,11 +37,8 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Get the number of SOSRequests categorized by their states
         /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
         [HttpGet(ApiRoutes.Manager.Stats)]
         public async Task<IActionResult> GetSOSPieData()
         {
@@ -56,11 +50,8 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// 
+        /// Get the number of SOSRequests per month
         /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
         [HttpGet(ApiRoutes.Manager.Stats)]
         public async Task<IActionResult> GetSOSChartData()
         {
