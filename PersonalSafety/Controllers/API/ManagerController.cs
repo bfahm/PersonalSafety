@@ -46,6 +46,22 @@ namespace PersonalSafety.Controllers.API
         /// 
         /// </remarks>
         [HttpGet(ApiRoutes.Manager.Stats)]
+        public async Task<IActionResult> GetSOSPieData()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var authResponse = await _managerBusiness.GetSOSPieDataAsync(currentlyLoggedInUserId);
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        [HttpGet(ApiRoutes.Manager.Stats)]
         public async Task<IActionResult> GetSOSChartData()
         {
             string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;

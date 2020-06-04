@@ -34,6 +34,12 @@ namespace PersonalSafety.Models
             return requests;
         }
 
+        // Get all requests in any of these department Ids
+        public IEnumerable<SOSRequest> GetRequestsInDepartments(List<int> dptIds)
+        {
+            return context.SOSRequests.Where(r => dptIds.Contains(r.AssignedDepartmentId));
+        }
+
         private void OrderRequests(ref IEnumerable<SOSRequest> requests)
         {
             requests = requests.OrderBy(r => r.State).ThenBy(r => r.CreationDate);

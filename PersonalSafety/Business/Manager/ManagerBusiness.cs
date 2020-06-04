@@ -53,10 +53,10 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<SOSChartDataViewModel>> GetSOSChartDataAsync(string userId)
+        public async Task<APIResponse<SOSPieDataViewModel>> GetSOSPieDataAsync(string userId)
         {
-            var response = new APIResponse<SOSChartDataViewModel>();
-            var responeViewModel = new SOSChartDataViewModel();
+            var response = new APIResponse<SOSPieDataViewModel>();
+            var responeViewModel = new SOSPieDataViewModel();
 
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -73,6 +73,40 @@ namespace PersonalSafety.Business
                 responeViewModel.AcceptedRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Accepted).Count();
                 responeViewModel.SolvedRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Solved).Count();
                 responeViewModel.CanceledRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Canceled).Count();
+            }
+
+            response.Result = responeViewModel;
+            return response;
+        }
+
+        public async Task<APIResponse<List<SOSChartDataViewModel>>> GetSOSChartDataAsync(string userId)
+        {
+            var response = new APIResponse<List<SOSChartDataViewModel>>();
+            var responeViewModel = new List<SOSChartDataViewModel>();
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            var departments = await GetListOfAllowedDepartmentsAsync(user);
+
+            var allSOSRequests = _sosRequestRepository.GetAll();
+            var grantedSOSRequests = _sosRequestRepository.GetRequestsInDepartments(departments.Select(d => d.Id).ToList());
+            
+            var distinctDates = grantedSOSRequests.Select(r => new
+            {
+                r.CreationDate.Year,
+                r.CreationDate.Month
+            }).Distinct();
+
+            foreach (var date in distinctDates)
+            {
+                var requestsInThisMonth = grantedSOSRequests.Where(r => r.CreationDate.Year == date.Year
+                                                                    && r.CreationDate.Month == date.Month);
+
+                responeViewModel.Add(new SOSChartDataViewModel
+                {
+                    MonthYear = new DateTime(date.Year, date.Month, 1),
+                    TotalRequests = requestsInThisMonth.Count()
+                });
             }
 
             response.Result = responeViewModel;
