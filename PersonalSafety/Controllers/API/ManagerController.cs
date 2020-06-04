@@ -40,6 +40,22 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        [HttpGet(ApiRoutes.Manager.Stats)]
+        public async Task<IActionResult> GetSOSChartData()
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var authResponse = await _managerBusiness.GetSOSChartDataAsync(currentlyLoggedInUserId);
+
+            return Ok(authResponse);
+        }
+
+        /// <summary>
         /// Retrieve full information about registered departments
         /// </summary>
         /// <remarks>

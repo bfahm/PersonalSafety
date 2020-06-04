@@ -4,6 +4,7 @@ using PersonalSafety.Contracts.Enums;
 using PersonalSafety.Models;
 using PersonalSafety.Models.ViewModels;
 using PersonalSafety.Models.ViewModels.AdminVM;
+using PersonalSafety.Models.ViewModels.ManagerVM;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,32 @@ namespace PersonalSafety.Business
             }
 
             responeViewModel.UsersNumber = _userRepository.GetAll().Count();
+
+            response.Result = responeViewModel;
+            return response;
+        }
+
+        public async Task<APIResponse<SOSChartDataViewModel>> GetSOSChartDataAsync(string userId)
+        {
+            var response = new APIResponse<SOSChartDataViewModel>();
+            var responeViewModel = new SOSChartDataViewModel();
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            var departments = await GetListOfAllowedDepartmentsAsync(user);
+
+            var allSOSRequests = _sosRequestRepository.GetAll();
+
+            foreach (var department in departments)
+            {
+                var dptRequests = allSOSRequests.Where(r => r.AssignedDepartmentId == department.Id);
+
+                responeViewModel.TotalRequests += dptRequests.Count();
+                responeViewModel.PendingRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Pending).Count();
+                responeViewModel.AcceptedRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Accepted).Count();
+                responeViewModel.SolvedRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Solved).Count();
+                responeViewModel.CanceledRequests += dptRequests.Where(r => r.State == (int)StatesTypesEnum.Canceled).Count();
+            }
 
             response.Result = responeViewModel;
             return response;
