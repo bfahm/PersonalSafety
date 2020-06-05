@@ -338,9 +338,12 @@ namespace PersonalSafety.Business
             if (nullCEventCheckResult != null)
                 return nullCEventCheckResult;
 
+            var clientAccessToEventCheckResult = CheckClientHaveAccessToEvent(ref existingEvent, userId);
+            if (clientAccessToEventCheckResult != null)
+                return clientAccessToEventCheckResult;
+
             // If the to-be-updated-to state is solved, check if the event is not canceled, and vice versa
-            var correctStateCheckResult = CheckForEventCorrectState(existingEvent, 
-                (newState == StatesTypesEnum.Solved) ? StatesTypesEnum.Canceled : StatesTypesEnum.Solved);
+            var correctStateCheckResult = CheckForEventCorrectState(existingEvent, newState);
             if (correctStateCheckResult != null)
                 return correctStateCheckResult;
 
@@ -457,9 +460,21 @@ namespace PersonalSafety.Business
             return null;
         }
 
+        private APIResponseData CheckClientHaveAccessToEvent(ref Event _event, string clientUserId)
+        {
+            if (_event.UserId != clientUserId)
+            {
+                return new APIResponseData((int)APIResponseCodesEnum.Unauthorized,
+                    new List<string>()
+                        {"You are not authorized to modify this Event."});
+            }
+
+            return null;
+        }
+
         private APIResponseData CheckForEventCorrectState(Event existingEvent, StatesTypesEnum neededState)
         {
-            if (existingEvent.State != (int)neededState)
+            if (existingEvent.State == (int)neededState)
             {
                 return new APIResponseData((int)APIResponseCodesEnum.BadRequest,
                     new List<string>()
