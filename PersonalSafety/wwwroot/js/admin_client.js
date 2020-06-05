@@ -435,7 +435,9 @@ function startConnection(token) {
         var registration = $("#field_device_registration").val();
         var title = $("#field_notification_title").val();
         var body = $("#field_notification_body").val();
-        connection.invoke("SendTestNotification", registration, title, body);
+        var key = $("#field_notification_key").val();
+        var value = $("#field_notification_value").val();
+        connection.invoke("SendTestNotification", registration, title, body, key, value);
     });
 }
 

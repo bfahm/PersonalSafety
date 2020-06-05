@@ -66,6 +66,22 @@ namespace PersonalSafety.Services.PushNotification
             await TryPushNotification(message);
         }
 
+        public async Task SendNotification(string registrationToken, string title, string body, Dictionary<string, string> data)
+        {
+            var message = new Message()
+            {
+                Notification = new Notification()
+                {
+                    Title = title,
+                    Body = body,
+                },
+                Data = data,
+                Token = registrationToken,
+            };
+
+            await TryPushNotification(message);
+        }
+
         public bool ToggleMasterSwitch()
         {
             MasterSwitch = !MasterSwitch;

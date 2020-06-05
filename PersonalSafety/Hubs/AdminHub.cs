@@ -7,6 +7,7 @@ using System.Collections.Specialized;
 using PersonalSafety.Services.PushNotification;
 using PersonalSafety.Models;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace PersonalSafety.Hubs
 {
@@ -39,11 +40,27 @@ namespace PersonalSafety.Hubs
             await Clients.All.SendAsync(AdminFCMChannel, currentValue);
         }
 
-        public async Task SendTestNotification(string registrationToken, string title, string body)
+        public async Task SendTestNotification(string registrationToken, string title, string body, string key, string value)
         {
-            await _pushNotificationsService.SendNotification(registrationToken, title, body);
-        }
+            bool isFullNotification = !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(body) && !string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value);
+            bool isDataNotification = string.IsNullOrEmpty(title) && string.IsNullOrEmpty(body) && !string.IsNullOrEmpty(key) && !string.IsNullOrEmpty(value);
+            bool isSimpleNotification = !string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(body) && string.IsNullOrEmpty(key) && string.IsNullOrEmpty(value);
 
+            if (isFullNotification)
+            {
+                var dataDictionary = new Dictionary<string, string>();
+                dataDictionary.Add(key, value);
+                await _pushNotificationsService.SendNotification(registrationToken, title, body, dataDictionary);
+            }else if (isDataNotification)
+            {
+                var dataDictionary = new Dictionary<string, string>();
+                dataDictionary.Add(key, value);
+                await _pushNotificationsService.SendNotification(registrationToken, dataDictionary);
+            }else if (isSimpleNotification)
+            {
+                await _pushNotificationsService.SendNotification(registrationToken, title, body);
+            }
+        }
 
         public async Task SetMinutesSkew(int newValue)
         {

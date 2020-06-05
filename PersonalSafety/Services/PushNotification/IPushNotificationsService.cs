@@ -9,6 +9,7 @@ namespace PersonalSafety.Services.PushNotification
     {
         Task SendNotification(string registrationToken, string title, string body);
         Task SendNotification(string registrationToken, Dictionary<string, string> data);
+        Task SendNotification(string registrationToken, string title, string body, Dictionary<string, string> data);
         bool ToggleMasterSwitch();
         bool GetMasterSwitch();
     }
