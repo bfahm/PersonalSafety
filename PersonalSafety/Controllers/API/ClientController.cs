@@ -156,6 +156,27 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
+        /// This method returns the profile of a logged in user by his email
+        /// </summary>
+        /// <remarks>
+        /// # **`AuthenticatedRequest`**
+        /// ## Main Functionality
+        /// This method should be called before `Api/User/EditProfile` or any other calls that shows the list to the user before being able to modify them.
+        /// 
+        /// ## Possible Result Codes in case of Errors:
+        /// *This method doesn't return any erros unless user is **UNAUTHORIZED***
+        /// </remarks>
+        [HttpGet(ApiRoutes.Client.Registration)]
+        public async Task<IActionResult> GetProfileByEmail([FromQuery] string userEmail)
+        {
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _clientBusiness.GetProfileAsync(currentlyLoggedInUserId, userEmail);
+
+            return Ok(response);
+        }
+
+        /// <summary>
         /// This method updates the basic information needed for the currently logged in user.
         /// </summary>
         /// <remarks>

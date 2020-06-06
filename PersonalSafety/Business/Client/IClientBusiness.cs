@@ -9,6 +9,7 @@ namespace PersonalSafety.Business
     {
         Task<APIResponse<bool>> RegisterAsync(RegistrationViewModel request);
         Task<APIResponse<ProfileViewModel>> GetProfileAsync(string userId);
+        Task<APIResponse<ProfileViewModel>> GetProfileAsync(string userId, string userEmail);
         APIResponse<bool> EditProfile(string userId, ProfileViewModel request);
         Task<APIResponse<LoginResponseViewModel>> LoginWithFacebookAsync(string accessToken);
         Task<APIResponse<bool>> RegisterWithFacebookAsync(RegistrationWithFacebookViewModel request);
