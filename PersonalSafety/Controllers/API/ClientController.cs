@@ -478,7 +478,7 @@ namespace PersonalSafety.Controllers.API
         }
 
         /// <summary>
-        /// Gets a list of events that can be filtered by a category
+        /// Gets a list of NEARBY events that can be filtered by a category
         /// </summary>
         /// <remarks>
         /// ### Remarks:
