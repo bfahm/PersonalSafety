@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PersonalSafety.Services.PushNotification
@@ -15,6 +16,12 @@ namespace PersonalSafety.Services.PushNotification
         private readonly ILogger<PushNotificationsService> _logger;
         private IWebHostEnvironment _hostingEnvironment;
         private static bool MasterSwitch = false;
+        private Dictionary<string, string> InjectedDict = new Dictionary<string, string>
+        {
+            {"click_action", "FLUTTER_NOTIFICATION_CLICK"},
+            {"title", "TITLE"},
+            {"body", "BODY"}
+        };
 
         public PushNotificationsService(ILogger<PushNotificationsService> logger, IWebHostEnvironment hostingEnvironment)
         {
@@ -57,6 +64,8 @@ namespace PersonalSafety.Services.PushNotification
 
         public async Task SendNotification(string registrationToken, Dictionary<string, string> data)
         {
+            AddRangeToDictionary(ref data, ref InjectedDict);
+
             var message = new Message()
             {
                 Data = data,
@@ -68,6 +77,8 @@ namespace PersonalSafety.Services.PushNotification
 
         public async Task SendNotification(string registrationToken, string title, string body, Dictionary<string, string> data)
         {
+            AddRangeToDictionary(ref data, ref InjectedDict);
+
             var message = new Message()
             {
                 Notification = new Notification()
@@ -82,6 +93,34 @@ namespace PersonalSafety.Services.PushNotification
             await TryPushNotification(message);
         }
 
+        private void AddRangeToDictionary(ref Dictionary<string, string> sourceDict, ref Dictionary<string, string> toBeAdded)
+        {
+            foreach (var item in toBeAdded)
+            {
+                sourceDict.Add(item.Key, item.Value);
+            }
+        }
+
+        private async Task TryPushNotification(Message message)
+        {
+            if (MasterSwitch)
+            {
+                try
+                {
+                    string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                    _logger.LogInformation($"FCM / SUCCESS: {response}.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("FCM / " + ex.Message);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("FCM / MasterSwitch is turned off, activate the service first.");
+            }
+        }
+
         public bool ToggleMasterSwitch()
         {
             MasterSwitch = !MasterSwitch;
@@ -94,26 +133,6 @@ namespace PersonalSafety.Services.PushNotification
         public bool GetMasterSwitch()
         {
             return MasterSwitch;
-        }
-
-        private async Task TryPushNotification(Message payload)
-        {
-            if (MasterSwitch)
-            {
-                try
-                {
-                    string response = await FirebaseMessaging.DefaultInstance.SendAsync(payload);
-                    _logger.LogInformation($"FCM / SUCCESS: {response}.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("FCM / " + ex.Message);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("FCM / MasterSwitch is turned off, activate the service first.");
-            }
         }
     }
 }

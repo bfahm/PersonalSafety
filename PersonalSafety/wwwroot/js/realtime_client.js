@@ -9,8 +9,6 @@ var token;
 var scrollTo = "";
 var dpt = ""
 
-var textarea = document.getElementById('location_result_msg');
-
 $(document).ready(function () {
     $("#btn_connect").click(function () {
         loginAndStartConnection();
@@ -153,15 +151,15 @@ function startConnection(token) {
             });
 
             locationConnection.on("LocationChannel", function (email, lat, long) {
-                appendLocationMsg("location_result_msg", email + " | " + lat + ", " + long)
+                appendLocationMsg("location_result_msg", email + " | " + lat + ", " + long, "location_result_msg")
             });
 
             locationConnection.on("InfoChannel", function (message) {
-                appendLocationMsg("location_result_msg", message)
+                appendLocationMsg("location_result_msg", message, "location_result_msg")
             });
 
             locationConnection.on("AlertsChannel", function (message) {
-                appendLocationMsg("location_result_msg", message)
+                appendLocationMsg("location_result_msg", message, "location_result_msg")
             });
         }
         else if (role.indexOf("Rescuer") !== -1) {
@@ -196,18 +194,18 @@ function startConnection(token) {
             });
 
             locationConnection.on("LocationChannel", function (email, lat, long) {
-                appendLocationMsg("location_result_msg", email + " | " + lat + ", " + long);
+                appendLocationMsg("location_result_msg", email + " | " + lat + ", " + long, "location_result_msg");
             });
 
             
 
             locationConnection.on("InfoChannel", function (message) {
                 dpt = message;
-                appendLocationMsg("location_result_msg", message)
+                appendLocationMsg("location_result_msg", message, "location_result_msg")
             });
 
             locationConnection.on("AlertsChannel", function (message) {
-                appendLocationMsg("location_result_msg", message)
+                appendLocationMsg("location_result_msg", message, "location_result_msg")
             });
 
             $("#btn_send").click(function () {
@@ -256,7 +254,7 @@ function startConnection(token) {
         });
 
         connection.on("ClientEventsChannel", function (userEmail, latitude, longitude) {
-            appendLocationMsg("area_location_log", userEmail + " | " + latitude + ", " + longitude)
+            appendLocationMsg("area_location_log", userEmail + " | " + latitude + ", " + longitude, "area_location_log");
         });
 
 
@@ -277,6 +275,7 @@ function startConnection(token) {
 
                 $("#button_event_join").html("Leave")
             } else {
+                var currentEmail = $("#ip_email").val();
                 connection.invoke("LeaveEventRoom", currentEmail, eventId);
 
                 $("#button_event_join").addClass('btn-secondary');
@@ -287,6 +286,8 @@ function startConnection(token) {
                 $("#button_event_join").html("Join")
 
                 eventId = -1;
+
+                $("#area_location_log").val("");
             }
         });
 
@@ -337,7 +338,6 @@ function startConnection(token) {
         $("#result_msg").val("");
 
         $("#location_result_msg").val("");
-        $("#send_msg").val("");
 
         $("#hidden_div_till_connected").attr("hidden", true);
         $("#btn_connect").removeClass("btn-success");
@@ -357,7 +357,7 @@ function startConnection(token) {
     });
 }
 
-function appendLocationMsg(elementId, message) {
+function appendLocationMsg(elementId, message, textAreaId) {
     var current = $("#" + elementId).val();
     if (current.length != 0) {
         current += "\n";
@@ -365,6 +365,7 @@ function appendLocationMsg(elementId, message) {
     var newMsg = current + new Date().toLocaleTimeString() + " | " + message;
     $("#" + elementId).val(newMsg);
 
+    var textarea = document.getElementById(textAreaId);
     textarea.scrollTop = textarea.scrollHeight;
 }
 

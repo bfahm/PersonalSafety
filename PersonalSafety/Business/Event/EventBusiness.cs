@@ -170,7 +170,7 @@ namespace PersonalSafety.Business
             ApplicationUser userAccount = await _userManager.FindByIdAsync(userId);
 
             if (newEvent.IsPublicHelp)
-                await NotifyNearbyClients(newEvent.NearestCityId);
+                await NotifyNearbyClients(newEvent.NearestCityId, newEvent.Id);
             
             response.Result = new PostEventResponseViewModel
             {
@@ -205,10 +205,9 @@ namespace PersonalSafety.Business
                 {
                     databaseResult = _eventRepository.GetUserEvents(userId);
                 }
-                else if (eventCategory.Title == "Nearby Stories")
+                else if (eventCategory.Title == "All Stories")
                 {
-                    // If user did not have a last known city, he would get all events instead.
-                    databaseResult = _eventRepository.GetEventsByCityId(_clientRepository.GetById(userId).LastKnownCityId ?? 0);
+                    databaseResult = _eventRepository.GetAll().ToList();
                 }
                 else
                 {
@@ -217,8 +216,9 @@ namespace PersonalSafety.Business
             }
             else
             {
-                // Event Category was invalid or not found, so get all events instead
-                databaseResult = _eventRepository.GetAll().ToList();
+                // By default, client will get events in his district
+                // If user did not have a last known city, he would get all events instead.
+                databaseResult = _eventRepository.GetEventsByCityId(_clientRepository.GetById(userId).LastKnownCityId ?? 0);
             }
 
 
@@ -354,8 +354,6 @@ namespace PersonalSafety.Business
 
             ApplicationUser userAccount = await _userManager.FindByIdAsync(userId);
 
-            await NotifyNearbyClients(existingEvent.NearestCityId);
-
             var signalRSignal = (newState == StatesTypesEnum.Canceled) ? -1 : -2;
             await _clientHub.SendToEventRoom(userAccount.Email, eventId, signalRSignal, signalRSignal);
 
@@ -490,10 +488,10 @@ namespace PersonalSafety.Business
 
             var categories = _eventCategoryRepository.GetAll();
             var yourStoriesCategory = categories.First(c => c.Title == "Your Stories");
-            var nearbyStoriesCategory = categories.First(c => c.Title == "Nearby Stories");
+            var allStoriesCategory = categories.First(c => c.Title == "All Stories");
 
             if(requestCategoryId == 0 || requestCategoryId == yourStoriesCategory.Id 
-                || requestCategoryId == nearbyStoriesCategory.Id)
+                || requestCategoryId == allStoriesCategory.Id)
             {
                 request.EventCategoryId = null;
                 return null;
@@ -552,21 +550,21 @@ namespace PersonalSafety.Business
 
         #region Private Helpers
 
-        private async Task NotifyNearbyClients(int nearestCityId)
+        private async Task NotifyNearbyClients(int nearestCityId, int newEventId)
         {
             var nearbyClients = _clientRepository.GetClientsByCityId(nearestCityId);
-
-            var publicEventsInCity = _eventRepository.GetPublicEventsByCityId(nearestCityId);
-
-            //var publicEventsInCityJson = JsonSerializer.Serialize(publicEventsInCity);
-            var publicEventsInCityDictionary = ConvertToDictionary(publicEventsInCity);
 
             foreach (var client in nearbyClients)
             {
                 var registraionKey = client.DeviceRegistrationKey;
+
+                var payload = new Dictionary<string, string>();
+                
+
                 if (registraionKey != null && registraionKey.Length > 0)
                 {
-                    await _pushNotificationsService.SendNotification(registraionKey, publicEventsInCityDictionary);
+                    await _pushNotificationsService.SendNotification(registraionKey, "News Alert", 
+                        "A new event was posted in your neighborhood lately, head on to the news section to help the ones in need.");
                 }
             }
         }

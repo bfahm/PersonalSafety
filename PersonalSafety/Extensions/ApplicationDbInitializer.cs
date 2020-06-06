@@ -376,14 +376,23 @@ namespace PersonalSafety.Extensions
 
                 _categoryRepository.Add(coronaCategory);
 
-                EventCategory nearbyCategory = new EventCategory
+                EventCategory blmCategory = new EventCategory
                 {
-                    Title = "Nearby Stories",
-                    Description = "Events that reside in the neighborhood",
-                    ThumbnailUrl = Path.Combine(_appSettings.AttachmentsLocation, "cat_nearby.jpg")
+                    Title = "Riots",
+                    Description = "Events related to the riots about rasicm",
+                    ThumbnailUrl = Path.Combine(_appSettings.AttachmentsLocation, "cat_blm.jpg")
                 };
 
-                _categoryRepository.Add(nearbyCategory);
+                _categoryRepository.Add(blmCategory);
+
+                EventCategory allCategory = new EventCategory
+                {
+                    Title = "All Stories",
+                    Description = "All events in the country",
+                    ThumbnailUrl = Path.Combine(_appSettings.AttachmentsLocation, "cat_all.jpg")
+                };
+
+                _categoryRepository.Add(allCategory);
 
                 EventCategory userStories = new EventCategory
                 {
