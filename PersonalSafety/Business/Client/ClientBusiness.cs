@@ -136,47 +136,6 @@ namespace PersonalSafety.Business
 
             ApplicationUser userAccount = await _userManager.FindByIdAsync(user.ClientId);
 
-            return GetProfileHelper(userAccount, user);
-        }
-
-        public async Task<APIResponse<ProfileViewModel>> GetProfileAsync(string userId, string userEmail)
-        {
-            APIResponse<ProfileViewModel> response = new APIResponse<ProfileViewModel>();
-
-            ApplicationUser userAccount = await _userManager.FindByEmailAsync(userEmail);
-
-            if (userAccount == null)
-            {
-                response.Messages.Add("User not found.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.NotFound;
-                return response;
-            }
-
-            if (userAccount.Id != userId)
-            {
-                response.Messages.Add("User not authorized to view this account data.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.Unauthorized;
-                return response;
-            }
-
-            Client user = _clientRepository.GetById(userAccount.Id);
-            if (user == null)
-            {
-                response.Messages.Add("User data corrupted.");
-                response.HasErrors = true;
-                response.Status = (int)APIResponseCodesEnum.Unauthorized;
-                return response;
-            }
-
-            return GetProfileHelper(userAccount, user);
-        }
-
-        private APIResponse<ProfileViewModel> GetProfileHelper(ApplicationUser userAccount, Client user)
-        {
-            APIResponse<ProfileViewModel> response = new APIResponse<ProfileViewModel>();
-
             ProfileViewModel viewModel = new ProfileViewModel
             {
                 Birthday = user.Birthday,
@@ -188,7 +147,7 @@ namespace PersonalSafety.Business
                 MedicalHistoryNotes = user.MedicalHistoryNotes
             };
 
-            viewModel.EmergencyContacts = _emergencyContactRepository.GetByUserId(userAccount.Id).ToList();
+            viewModel.EmergencyContacts = _emergencyContactRepository.GetByUserId(userId).ToList();
 
             response.Result = viewModel;
 
