@@ -504,6 +504,8 @@ namespace PersonalSafety.Business
                     RequestId = request.Id,
                     RequestStateId = request.State,
                     RequestStateName = ((StatesTypesEnum)request.State).ToString(),
+                    AuthorityTypeId = request.AuthorityType,
+                    AuthorityTypeName = ((AuthorityTypesEnum)request.AuthorityType).ToString(),
                     RequestCreationDate = request.CreationDate,
                     RequestLastModified = request.LastModified,
                     RequestLocationLatitude = request.Longitude,
