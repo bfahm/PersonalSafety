@@ -55,7 +55,7 @@ namespace PersonalSafety.Business
                 UserName = rescuer.Email,
                 FullName = rescuer.FirstName + " " + rescuer.LastName,
                 EmailConfirmed = true,
-                ForceChangePassword = true
+                ForceChangePassword = false
             };
 
             Personnel personnel = new Personnel
