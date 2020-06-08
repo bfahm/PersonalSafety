@@ -59,25 +59,36 @@ namespace PersonalSafety.Business
                 return response;
             }
 
-            var nearestCity = _locationService.GetNearestCity(new Location(request.Longitude, request.Latitude));
+            var lastSavedLocation = _clientTrackingRepository.GetLastSavedLocation(userId);
+            var distanceBetweenLastLocation = _locationService.CalculateDistance(lastSavedLocation,
+                new Location(request.Longitude, request.Latitude));
 
-            client.LastKnownCityId = nearestCity.Id;
-            _clientRepository.Update(client);
-            _clientRepository.Save();
-
-            response.Result = nearestCity.ToString();
-            response.Messages.Add($"Your assigned city was updated to {nearestCity.Value}.");
-
-            _clientTrackingRepository.Add(new ClientTracking
+            if(distanceBetweenLastLocation > 10)
             {
-                ClientId = client.ClientId,
-                Latitude = request.Latitude,
-                Longitude = request.Longitude,
-                Time = DateTime.Now
-            });
+                _clientTrackingRepository.Add(new ClientTracking
+                {
+                    ClientId = client.ClientId,
+                    Latitude = request.Latitude,
+                    Longitude = request.Longitude,
+                    Time = DateTime.Now
+                });
 
-            _clientTrackingRepository.Save();
-            response.Messages.Add($"Your tracking log was saved.");
+                _clientTrackingRepository.Save();
+                response.Messages.Add($"Your tracking log was saved.");
+
+                var nearestCity = _locationService.GetNearestCity(new Location(request.Longitude, request.Latitude));
+
+                client.LastKnownCityId = nearestCity.Id;
+                _clientRepository.Update(client);
+                _clientRepository.Save();
+
+                response.Result = nearestCity.ToString();
+                response.Messages.Add($"Your assigned city was updated to {nearestCity.Value}.");
+            }
+            else
+            {
+                response.Messages.Add($"Tracking log was not saved because your location has not changed.");
+            }
 
             return response;
         }
