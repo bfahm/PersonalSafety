@@ -227,12 +227,12 @@ namespace PersonalSafety.Business
             foreach (var result in databaseResult)
             {
                 var eventOwner = await _userManager.FindByIdAsync(result.UserId);
+                var eventClientDetails = _clientRepository.GetById(eventOwner.Id);
 
                 viewModelResult.Add(new EventDetailedViewModel
                 {
                     Id = result.Id,
                     Title = result.Title,
-                    UserName = eventOwner?.FullName,
                     IsPublicHelp = result.IsPublicHelp,
                     IsValidated = result.IsValidated,
                     Votes = result.Votes,
@@ -243,7 +243,13 @@ namespace PersonalSafety.Business
                     EventCategoryName = result.EventCategory?.Title,
                     LastModified = result.LastModified,
                     Latitude = result.Latitude,
-                    Longitude = result.Longitude
+                    Longitude = result.Longitude,
+                    UserName = eventOwner?.FullName,
+                    UserAge = DateTime.Now.Year - eventClientDetails?.Birthday.Year,
+                    UserBloodTypeId = eventClientDetails?.BloodType,
+                    UserBloodTypeName = ((BloodTypesEnum)eventClientDetails?.BloodType).ToString(),
+                    UserEmail = eventOwner?.Email,
+                    UserPhoneNumber = eventOwner?.PhoneNumber
                 });
             }
 
@@ -251,10 +257,17 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        public async Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(int eventId)
+        public async Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(string userId, int eventId)
         {
             var response = new APIResponse<EventDetailedViewModel>();
-            
+
+            var nullClientCheckResult = CheckForNullClient(userId, out _);
+            if (nullClientCheckResult != null)
+            {
+                response.WrapResponseData(nullClientCheckResult);
+                return response;
+            }
+
             var databaseResult = _eventRepository.GetById(eventId.ToString());
 
             var nullDbResultCheck = CheckForNullDatabaseResult(ref databaseResult);
@@ -265,12 +278,13 @@ namespace PersonalSafety.Business
             }
 
             var eventOwner = await _userManager.FindByIdAsync(databaseResult.UserId);
+            var eventClientDetails = _clientRepository.GetById(eventOwner.Id);
+
             var viewModelResult = new EventDetailedViewModel 
             {
                 Id = databaseResult.Id,
                 Title = databaseResult.Title,
                 Description = databaseResult.Description,
-                UserName = eventOwner?.FullName,
 
                 IsPublicHelp = databaseResult.IsPublicHelp,
                 IsValidated = databaseResult.IsValidated,
@@ -285,7 +299,14 @@ namespace PersonalSafety.Business
                 EventCategoryName = databaseResult.EventCategory?.Title,
                 
                 Latitude = databaseResult.Latitude,
-                Longitude = databaseResult.Longitude
+                Longitude = databaseResult.Longitude,
+
+                UserName = eventOwner?.FullName,
+                UserAge = DateTime.Now.Year - eventClientDetails?.Birthday.Year,
+                UserBloodTypeId = eventClientDetails?.BloodType,
+                UserBloodTypeName = ((BloodTypesEnum)eventClientDetails?.BloodType).ToString(),
+                UserEmail = eventOwner?.Email,
+                UserPhoneNumber = eventOwner?.PhoneNumber
             };
 
             response.Result = viewModelResult;

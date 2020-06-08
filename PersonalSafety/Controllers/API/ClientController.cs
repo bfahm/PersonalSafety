@@ -502,7 +502,9 @@ namespace PersonalSafety.Controllers.API
         [HttpGet(ApiRoutes.Client.Events)]
         public async Task<IActionResult> GetEventById([FromQuery] int eventId)
         {
-            var response = await _eventsBusiness.GetEventByIdAsync(eventId);
+            string currentlyLoggedInUserId = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+
+            var response = await _eventsBusiness.GetEventByIdAsync(currentlyLoggedInUserId, eventId);
 
             return Ok(response);
         }

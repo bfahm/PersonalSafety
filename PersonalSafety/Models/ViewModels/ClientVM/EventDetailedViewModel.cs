@@ -6,8 +6,6 @@ namespace PersonalSafety.Models.ViewModels.ClientVM
     {
         public int Id { get; set; }
 
-        public string UserName { get; set; }
-
         public string Title { get; set; }
         public string Description { get; set; }
 
@@ -25,5 +23,13 @@ namespace PersonalSafety.Models.ViewModels.ClientVM
 
         public DateTime CreationDate { get; set; } = DateTime.Now;
         public DateTime LastModified { get; set; } = DateTime.Now;
+
+        // User Information
+        public string UserName { get; set; }
+        public string UserEmail { get; set; }
+        public string UserPhoneNumber { get; set; }
+        public int? UserAge { get; set; }
+        public int? UserBloodTypeId { get; set; }
+        public string UserBloodTypeName { get; set; }
     }
 }

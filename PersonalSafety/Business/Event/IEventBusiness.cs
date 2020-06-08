@@ -13,7 +13,7 @@ namespace PersonalSafety.Business
 
         Task<APIResponse<PostEventResponseViewModel>> PostEventAsync(string userId, PostEventRequestViewModel request);
         Task<APIResponse<List<EventDetailedViewModel>>> GetEventsDetailedAsync(string userId, int? filter);
-        Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(int eventId);
+        Task<APIResponse<EventDetailedViewModel>> GetEventByIdAsync(string userId, int eventId);
         
         Task<APIResponse<bool>> CancelEventByIdAsync(string userId, int eventId);
         Task<APIResponse<bool>> SolveEventByIdAsync(string userId, int eventId);
