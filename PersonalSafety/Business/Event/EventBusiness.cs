@@ -60,7 +60,9 @@ namespace PersonalSafety.Business
             }
 
             var lastSavedLocation = _clientTrackingRepository.GetLastSavedLocation(userId);
-            var distanceBetweenLastLocation = _locationService.CalculateDistance(lastSavedLocation,
+
+            // If user had no previous records, set the distance to be a value that allows for new records (enters the IF block)
+            var distanceBetweenLastLocation = (lastSavedLocation == null) ? 100 : _locationService.CalculateDistance(lastSavedLocation,
                 new Location(request.Longitude, request.Latitude));
 
             if(distanceBetweenLastLocation > 10)

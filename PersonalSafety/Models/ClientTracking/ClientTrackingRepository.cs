@@ -77,7 +77,7 @@ namespace PersonalSafety.Models
                             .Where(ct => ct.ClientId == userId)
                             .OrderByDescending(ct => ct.Time)
                             .Select(r => new Location(r.Longitude, r.Latitude))
-                            .First();
+                            .FirstOrDefault();
         }
     }
 }
