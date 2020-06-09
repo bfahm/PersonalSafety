@@ -418,12 +418,12 @@ namespace PersonalSafety.Controllers.API
         ///
         /// </remarks>
         [HttpGet(ApiRoutes.Account.PersonnelBasicInfo)]
-        [Authorize(Roles = Roles.ROLE_PERSONNEL)]
-        public IActionResult GetBasicInfo()
+        [Authorize(Roles = Roles.ROLE_PERSONNEL + "," + Roles.ROLE_NURSE)]
+        public async Task<IActionResult> GetBasicInfo()
         {
             string currentlyLoggedInUserId = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
 
-            var response = _accountBusiness.GetBasicInfo(currentlyLoggedInUserId);
+            var response = await _accountBusiness.GetBasicInfoAsync(currentlyLoggedInUserId);
 
             return Ok(response);
         }

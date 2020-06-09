@@ -20,6 +20,6 @@ namespace PersonalSafety.Business
         Task<APIResponse<bool>> SubmitChangeEmailAsync(ChangeEmailViewModel request);
         Task<APIResponse<bool>> ChangePasswordAsync(string userId, ChangePasswordViewModel request);
         Task<APIResponse<bool>> ValidateTokenAsync(string token);
-        APIResponse<AccountBasicInfoViewModel> GetBasicInfo(string currentlyLoggedInUserId);
+        Task<APIResponse<AccountBasicInfoViewModel>> GetBasicInfoAsync(string userId);
     }
 }

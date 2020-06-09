@@ -418,15 +418,17 @@ namespace PersonalSafety.Business
             return response;
         }
 
-        // Only allowed to be used by personnel..
-        public APIResponse<AccountBasicInfoViewModel> GetBasicInfo(string userId)
+        // Only allowed to be used by personnel and nurses..
+        public async Task<APIResponse<AccountBasicInfoViewModel>> GetBasicInfoAsync(string userId)
         {
             APIResponse<AccountBasicInfoViewModel> response = new APIResponse<AccountBasicInfoViewModel>();
 
+            var account = await _userManager.FindByIdAsync(userId);
             var personnelDepartment = _personnelRepository.GetPersonnelDepartment(userId);
 
             AccountBasicInfoViewModel viewModel = new AccountBasicInfoViewModel
             {
+                FullName = account.FullName,
                 AuthorityTypeName = _personnelRepository.GetPersonnelAuthorityTypeString(userId),
                 DepartmentName = personnelDepartment?.ToString(),
                 DepartmentId = personnelDepartment?.Id
